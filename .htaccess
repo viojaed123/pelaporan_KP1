@@ -1,5 +1,16 @@
 # =============================================================
-# pelaporan — konfigurasi Apache (XAMPP)
+# pelaporan -- konfigurasi Apache (XAMPP)
+#
+# Catatan struktur: proyek kini berisi kerangka Laravel 12 di root yang
+# sama dengan halaman flat-PHP lama. Karena itu blok larangan di bawah
+# tidak hanya menutup folder lama (includes/, database/) tetapi juga
+# seluruh direktori bawaan Laravel yang TIDAK boleh tersaji via HTTP:
+# app/, config/, bootstrap/, routes/, resources/, storage/, tests/,
+# dan terutama .git/ (riwayat versi + isi .env di dalam commit lama).
+#
+# .htaccess ini berlaku untuk aplikasi LAMA yang disajikan dari root
+# (http://localhost/pelaporan/). Aplikasi Laravel disajikan dari public/
+# dan memakai .htaccess-nya sendiri (lihat public/.htaccess).
 # =============================================================
 
 # Larang daftar isi direktori (mencegah pemetaan file)
@@ -11,14 +22,21 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Direktori non-publik: isi proyek (bukan halaman yang dilayani ke browser)
+    # --- Direktori proyek (bukan halaman yang dilayankan ke browser) ---
+    # Baris lama dipertahankan, ditambah direktori bawaan Laravel.
     RewriteRule ^(vendor|database|ai-service|scripts|backups|docs|includes|powerbi)(/|$) - [F,L,NC]
 
-    # Blokir akses langsung ke file konfigurasi / sumber daya sensitif
-    RewriteRule ^(composer\.(json|lock)|phpunit\.xml|\.env.*|.*\.sql|.*\.ps1|.*\.md)$ - [F,L,NC]
+    # --- Direktori bawaan Laravel: hanya public/ yang boleh tersaji ---
+    RewriteRule ^(app|bootstrap|config|routes|resources|storage|tests)(/|$) - [F,L,NC]
+
+    # --- Repositori Git: JANGAN PERNAH tersaji (berisi riwayat versi) ---
+    RewriteRule ^\.git(/|$) - [F,L,NC]
+
+    # --- Berkas konfigurasi / sumber daya sensitif ---
+    RewriteRule ^(composer\.(json|lock)|phpunit\.xml|phpunit-legacy\.xml|package\.json|vite\.config\.js|artisan|\.env.*|\.editorconfig|\.gitattributes|\.gitignore|.*\.sql|.*\.ps1|.*\.md|.*\.key)$ - [F,L,NC]
 </IfModule>
 
-<FilesMatch "^(composer\.(json|lock)|\.env.*|.*\.(sql|ps1|md|log))$">
+<FilesMatch "^(composer\.(json|lock)|phpunit.*\.xml|package\.json|vite\.config\.js|artisan|\.env.*|\.gitignore|.*\.(sql|ps1|md|log|key))$">
     Require all denied
 </FilesMatch>
 
@@ -42,12 +60,13 @@ php_value post_max_size 12M
 php_value max_file_uploads 6
 
 # -------------------------------------------------------------
-# 4. Larang akses langsung ke file eksekusi TANPA di dalam folder
-#    yang memang publik. Proteksi `uploads/` ada di uploads/.htaccess.
-#    (Blok ini TIDAK boleh memuat ekstensi .php di root —
+# 4. Larang akses langsung ke berkas eksekusi/berkas cadangan.
+#    Proteksi `uploads/` ada di uploads/.htaccess,
+#    proteksi `backups/` ada di backups/.htaccess.
+#    (Blok ini TIDAK memuat ekstensi .php di root --
 #     seluruh halaman aplikasi berakhiran .php)
 # -------------------------------------------------------------
-<FilesMatch "\.(phps|phtml\.bak|ini|conf|bak|swp|sql\.gz)$">
+<FilesMatch "\.(phps|phtml\.bak|ini|conf|bak|swp|sql\.gz|old)$">
     Require all denied
 </FilesMatch>
 
