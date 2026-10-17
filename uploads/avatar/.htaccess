@@ -1,0 +1,13 @@
+# Folder foto profil — hanya berkas gambar statis.
+# Selain mewarisi aturan uploads/.htaccess, lapisan ini menegaskan kembali
+# bahwa jenis berkas skrip apa pun tidak boleh dilayani dari sini.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule \.(php|phtml|phar|cgi|pl|py|sh|shtml)$ - [F,L,NC]
+</IfModule>
+
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|shtml|htaccess)$">
+    Require all denied
+</FilesMatch>

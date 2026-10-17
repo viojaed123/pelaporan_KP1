@@ -1,0 +1,33 @@
+# ============================================================
+# ai-service/requirements.txt
+# Ketergantungan Python untuk layanan AI (FastAPI + Ollama).
+# Target: Windows, Python 3.11 - 3.13, CPU-only, 8-16 GB RAM.
+#
+# Pasang:
+#   py -m venv .venv
+#   .venv\Scripts\python -m pip install -r requirements.txt
+# ============================================================
+
+# --- Web framework ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# --- Konfigurasi & skema (validasi env + body) ---
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# --- Klien HTTP (Ollama) ---
+httpx==0.28.1
+
+# --- Basis data (MariaDB/MySQL, murni Python tanpa kompilasi) ---
+PyMySQL==1.1.1
+
+# --- Ekspor dokumen ---
+openpyxl==3.1.5
+python-docx==1.1.2
+
+# --- YAML (memvalidasi konfigurasi Hermes & frontmatter skill) ---
+PyYAML==6.0.2
+
+# --- Pengujian (tanpa Ollama hidup) ---
+pytest==8.3.4

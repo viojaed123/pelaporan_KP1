@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Rahasia & konfigurasi lokal
+.env
+.env.local
+
+# Keluaran runtime
+exports/
+logs/
+*.log
+
+# Ilustratif: berkas cadangan tidak disimpan di sini
+# (berkas .sql berada di ../backups/db agar konsisten dengan PHP).

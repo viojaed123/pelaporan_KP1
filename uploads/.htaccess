@@ -1,0 +1,9 @@
+# Folder ini tidak boleh diakses langsung dari web.
+Options -Indexes
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule \.(php|phtml|phar|cgi|pl|py|sh|shtml)$ - [F,L,NC]
+</IfModule>
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|shtml|htaccess)$">
+    Require all denied
+</FilesMatch>

@@ -1,0 +1,14 @@
+{
+  "version": "0.1",
+  "connections": [
+    {
+      "details": {
+        "protocol": "odbc",
+        "address": {
+          "dsn": "PelaporanBI"
+        }
+      },
+      "mode": "Import"
+    }
+  ]
+}

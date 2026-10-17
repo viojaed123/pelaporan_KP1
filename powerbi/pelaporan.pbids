@@ -1,0 +1,15 @@
+{
+  "version": "0.1",
+  "connections": [
+    {
+      "details": {
+        "protocol": "mysql",
+        "address": {
+          "server": "localhost",
+          "database": "pelaporan"
+        }
+      },
+      "mode": "Import"
+    }
+  ]
+}

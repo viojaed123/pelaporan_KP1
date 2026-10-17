@@ -1,0 +1,56 @@
+# === Laravel ===
+/vendor/
+/node_modules/
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+/.fleet
+
+# === Rahasia & lokal (proyek lama -> tetap dijaga) ===
+includes/config_lokal.php
+ai-service/.env
+!.env.example
+!ai-service/.env.example
+
+# === Vendor & lingkungan Python ===
+ai-service/.venv/
+ai-service/__pycache__/
+.pytest_cache/
+**/__pycache__/
+*.py[cod]
+
+# === Hasil & unggahan ===
+backups/
+!backups/.htaccess
+uploads/**
+!uploads/.htaccess
+!uploads/avatar/
+!uploads/avatar/.htaccess
+!uploads/avatar/index.html
+ai-service/exports/
+ai-service/hermes/
+
+# === Berkas sistem ===
+*.log
+*.sql.gz
+.DS_Store
+Thumbs.db
+
+# === Cadangan sementara migrasi (dihapus setelah fase selesai) ===
+legacy-backup/

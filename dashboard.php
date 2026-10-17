@@ -1,0 +1,457 @@
+<?php
+/**
+ * dashboard.php - ruang kerja karyawan (halaman rujukan tampilan baru).
+ *
+ * Ringkasan:
+ *   - bootstrap + penjaga peran (karyawan)
+ *   - layout terpusat: memakai kelas app.css
+ *   - grafik status, progres, revisi, aktivitas
+ *   - statistik absensi & kelengkapan laporan
+ *   - kartu asisten AI
+ */
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/includes/bootstrap.php';
+
+wajib_login();
+if (sesi_role() !== 'karyawan') {
+    header('Location: ' . halaman_default_peran(sesi_role()));
+    exit;
+}
+
+$user_id = (int) sesi_user_id();
+
+/* ---------------------------------------------------------------
+ * Ringkasan
+ * ------------------------------------------------------------- */
+
+function hitungLaporan(mysqli $conn, int $user_id, ?string $status = null): int
+{
+    if ($status === null) {
+        $stmt = $conn->prepare('SELECT COUNT(*) FROM laporan_harian WHERE user_id = ?');
+        $stmt->bind_param('i', $user_id);
+    } else {
+        $stmt = $conn->prepare(
+            'SELECT COUNT(*) FROM laporan_harian WHERE user_id = ? AND status = ?'
+        );
+        $stmt->bind_param('is', $user_id, $status);
+    }
+    if (!$stmt) {
+        return 0;
+    }
+    $stmt->execute();
+    $stmt->bind_result($jumlah);
+    $stmt->fetch();
+    $stmt->close();
+    return (int) $jumlah;
+}
+
+$total_laporan = hitungLaporan($conn, $user_id);
+$menunggu      = hitungLaporan($conn, $user_id, 'dikirim');
+$diperiksa     = hitungLaporan($conn, $user_id, 'diperiksa');
+$perlu_revisi  = hitungLaporan($conn, $user_id, 'perlu_revisi');
+$draft         = hitungLaporan($conn, $user_id, 'draft');
+
+$persentase_progres = $total_laporan > 0
+    ? (int) round(($diperiksa / $total_laporan) * 100)
+    : 0;
+$persentase_progres = max(0, min(100, $persentase_progres));
+
+$jumlah_notifikasi = jumlah_notifikasi($conn, $user_id);
+
+/* Absensi bulan berjalan */
+$absensi_bulan = ['hadir' => 0, 'izin' => 0, 'sakit' => 0, 'alpa' => 0];
+$absensi_ada   = false;
+$awal_bulan    = date('Y-m-01');
+try {
+    $stmt = $conn->prepare(
+        'SELECT status, COUNT(*) AS jumlah FROM absensi
+         WHERE user_id = ? AND tanggal >= ? GROUP BY status'
+    );
+    if ($stmt) {
+        $stmt->bind_param('is', $user_id, $awal_bulan);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($b = $res->fetch_assoc()) {
+            $k = strtolower((string) $b['status']);
+            if (array_key_exists($k, $absensi_bulan)) {
+                $absensi_bulan[$k] = (int) $b['jumlah'];
+            }
+            $absensi_ada = true;
+        }
+        $stmt->close();
+    }
+} catch (Throwable $t) {
+    error_log('Dashboard absensi: ' . $t->getMessage());
+}
+
+/* Laporan terakhir */
+$aktivitas = [];
+$pesan_aktivitas = '';
+try {
+    $stmt = $conn->prepare(
+        'SELECT id, tanggal, kegiatan, status, updated_at
+         FROM laporan_harian WHERE user_id = ?
+         ORDER BY tanggal DESC, id DESC LIMIT 5'
+    );
+    if ($stmt) {
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            $aktivitas[] = $row;
+        }
+        $stmt->close();
+    }
+} catch (Throwable $e) {
+    error_log('Dashboard aktivitas: ' . $e->getMessage());
+    $pesan_aktivitas = 'Aktivitas belum dapat ditampilkan.';
+}
+
+$dataGrafik = [
+    'Draft'        => $draft,
+    'Menunggu'     => $menunggu,
+    'Diperiksa'    => $diperiksa,
+    'Perlu Revisi' => $perlu_revisi,
+];
+$labelsGrafik = array_keys($dataGrafik);
+$angkaGrafik  = array_values($dataGrafik);
+
+/* Cek ketersediaan layanan AI */
+$aiHidup = false;
+if (AI_AKTIF) {
+    $aiHidup = ai_hidup();
+}
+
+$opsi = [
+    'judul' => 'Dashboard',
+    'crumb' => 'Karyawan',
+    'aksi'  => '<a class="tombol tombol-utama tombol-kecil" href="buat_laporan.php">+ Buat Laporan</a>',
+    'head'  => '<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>',
+];
+
+mulai_halaman($opsi);
+?>
+
+<!-- ================= SAMBUTAN ================= -->
+<section class="kartu" style="background:linear-gradient(135deg, var(--navy-600), var(--navy-700) 55%, var(--phr-biru) 165%);border:0;color:#fff;">
+    <div class="kartu-tubuh" style="padding:26px 26px 24px">
+        <span class="badge badge-tanpa-titik" style="background:rgba(255,255,255,.16);color:#cfe6f7">
+            PORTAL KEGIATAN <?= e(APP_ORGANISASI) ?>
+        </span>
+        <h2 style="color:#fff;font-size:23px;margin:12px 0 6px">
+            Halo, <?= e(sesi_nama()) ?>!
+        </h2>
+        <p style="color:#c2d7ea;max-width:640px;margin-bottom:18px">
+            Catat kegiatan harianmu, pantau perkembangan laporan, dan periksa arahan
+            mentor melalui halaman ini.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="tombol" style="background:#fff;border-color:#fff;color:var(--navy-600)" href="buat_laporan.php">Buat Laporan</a>
+            <a class="tombol tombol-garis" style="border-color:rgba(255,255,255,.5);color:#fff" href="riwayat.php">Lihat Riwayat</a>
+            <a class="tombol tombol-garis" style="border-color:rgba(255,255,255,.5);color:#fff" href="absensi.php">Absensi</a>
+        </div>
+    </div>
+</section>
+
+<?php if ($perlu_revisi > 0): ?>
+    <div class="alert alert-peringatan" role="alert">
+        <span class="ikon">!</span>
+        <span>
+            <strong>Perlu Tindak Lanjut Revisi</strong>
+            Ada <?= (int) $perlu_revisi ?> laporan yang perlu diperbaiki berdasarkan
+            arahan mentor.
+            <a href="riwayat.php?status=perlu_revisi" style="font-weight:700">Buka daftar revisi</a>
+        </span>
+    </div>
+<?php endif; ?>
+
+<?php if ($draft > 0): ?>
+    <div class="alert alert-info" role="status">
+        <span class="ikon">i</span>
+        <span>
+            <strong><?= (int) $draft ?> laporan masih berupa draf</strong>
+            Draf belum terkirim ke mentor. Selesaikan lalu tekan <em>Kirim ke Mentor</em>.
+            <a href="riwayat.php?status=draft">Lihat draf</a>
+        </span>
+    </div>
+<?php endif; ?>
+
+<!-- ================= STATISTIK ================= -->
+<h2 class="bagian-judul">Ringkasan Laporan</h2>
+
+<section class="grid grid-4">
+    <div class="stat navy">
+        <span class="ikon"><?= ikon_sp('dokumen') ?></span>
+        <div class="flex-1">
+            <div class="nilai"><?= (int) $total_laporan ?></div>
+            <div class="keterangan">Total Laporan</div>
+            <div class="tambahan">Seluruh laporan yang tercatat</div>
+        </div>
+    </div>
+
+    <div class="stat kuning">
+        <span class="ikon"><?= ikon_sp('jam') ?></span>
+        <div class="flex-1">
+            <div class="nilai"><?= (int) $menunggu ?></div>
+            <div class="keterangan">Menunggu Pemeriksaan</div>
+            <div class="tambahan">Status dikirim ke mentor</div>
+        </div>
+    </div>
+
+    <div class="stat hijau">
+        <span class="ikon"><?= ikon_sp('centang') ?></span>
+        <div class="flex-1">
+            <div class="nilai"><?= (int) $diperiksa ?></div>
+            <div class="keterangan">Selesai Diperiksa</div>
+            <div class="tambahan">Tidak perlu revisi lagi</div>
+        </div>
+    </div>
+
+    <div class="stat biru">
+        <span class="ikon"><?= ikon_sp('lonceng') ?></span>
+        <div class="flex-1">
+            <div class="nilai"><?= (int) $jumlah_notifikasi ?></div>
+            <div class="keterangan">Notifikasi Baru</div>
+            <div class="tambahan">Pesan yang belum dibaca</div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= AKSI CEPAT ================= -->
+<h2 class="bagian-judul">Aksi Cepat</h2>
+<section class="aksi-cepat">
+    <a href="buat_laporan.php">
+        <span class="ikon"><?= ikon_sp('tulis') ?></span>
+        <span>Buat Laporan Baru</span>
+    </a>
+    <a href="riwayat.php">
+        <span class="ikon"><?= ikon_sp('buku') ?></span>
+        <span>Riwayat Laporan</span>
+    </a>
+    <a href="absensi.php">
+        <span class="ikon"><?= ikon_sp('kalender') ?></span>
+        <span>Isi Absensi</span>
+    </a>
+    <a href="asisten.php">
+        <span class="ikon"><?= ikon_sp('robot') ?></span>
+        <span>Asisten AI</span>
+    </a>
+</section>
+
+<!-- ================= PROGRES ================= -->
+<section class="kartu" style="margin-top:20px">
+    <div class="kartu-header">
+        <div class="flex-1">
+            <h3>Progres Penyelesaian Laporan</h3>
+            <span class="text-redup text-kecil">Hanya laporan berstatus diperiksa yang dihitung selesai.</span>
+        </div>
+        <strong style="font-size:26px;color:var(--phr-biru)"><?= (int) $persentase_progres ?>%</strong>
+    </div>
+    <div class="kartu-tubuh">
+        <div class="progres" role="progressbar"
+             aria-label="Progres penyelesaian laporan"
+             aria-valuenow="<?= (int) $persentase_progres ?>"
+             aria-valuemin="0" aria-valuemax="100">
+            <span style="width:<?= (int) $persentase_progres ?>%"></span>
+        </div>
+        <div class="d-flex justify-between text-kecil text-redup mt-2 flex-wrap gap-2">
+            <span><?= (int) $diperiksa ?> dari <?= (int) $total_laporan ?> laporan selesai</span>
+            <span><?= (int) $perlu_revisi ?> perlu revisi &middot; <?= (int) $draft ?> draf</span>
+        </div>
+    </div>
+</section>
+
+<!-- ================= GRAFIK + AKTIVITAS ================= -->
+<section class="grid grid-2">
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div>
+                <h3>Grafik Status Laporan</h3>
+                <span class="text-redup text-kecil">Perbandingan laporan berdasarkan status saat ini.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:250px">
+                <canvas id="grafikStatus" aria-label="Grafik status laporan" role="img"></canvas>
+            </div>
+            <div class="d-flex gap-2 flex-wrap mt-3 text-kecil">
+                <span class="badge badge-navy badge-tanpa-titik">Total: <?= (int) $total_laporan ?></span>
+                <span class="badge badge-hijau badge-tanpa-titik">Diperiksa: <?= (int) $diperiksa ?></span>
+                <span class="badge badge-merah badge-tanpa-titik">Revisi: <?= (int) $perlu_revisi ?></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Aktivitas Terbaru</h3>
+                <span class="text-redup text-kecil">Lima laporan terakhir yang Anda buat.</span>
+            </div>
+            <a class="tombol tombol-kecil" href="riwayat.php">Semua</a>
+        </div>
+        <div class="kartu-tubuh padat">
+            <?php if ($pesan_aktivitas !== ''): ?>
+                <div class="empty"><p class="empty-teks"><?= e($pesan_aktivitas) ?></p></div>
+            <?php elseif (count($aktivitas) === 0): ?>
+                <div class="empty">
+                    <div class="empty-ikon"><?= ikon_sp('dokumen') ?></div>
+                    <div class="empty-judul">Belum ada laporan</div>
+                    <p class="empty-teks">Mulai catat kegiatan harianmu sekarang.</p>
+                    <a class="tombol tombol-utama tombol-kecil" style="margin-top:12px" href="buat_laporan.php">Buat Laporan</a>
+                </div>
+            <?php else: ?>
+                <div class="bungkus-tabel">
+                    <table class="tabel tabel-padat">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Kegiatan</th>
+                                <th>Status</th>
+                                <th class="text-kanan">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($aktivitas as $item): ?>
+                            <tr>
+                                <td class="text-kecil text-redup"><?= e(tanggal_id((string) $item['tanggal'])) ?></td>
+                                <td>
+                                    <span class="potong-2"><?= e(potong((string) $item['kegiatan'], 70)) ?></span>
+                                </td>
+                                <td><?= badge_status((string) $item['status']) ?></td>
+                                <td class="text-kanan">
+                                    <a class="tombol tombol-kecil" href="detail_laporan.php?id=<?= (int) $item['id'] ?>">
+                                        Lihat
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
+
+<!-- ================= ABSENSI ================= -->
+<?php if ($absensi_ada): ?>
+<section class="kartu" style="margin-top:20px">
+    <div class="kartu-header">
+        <div class="flex-1">
+            <h3>Absensi Bulan Ini</h3>
+            <span class="text-redup text-kecil">Ringkasan kehadiran bulan berjalan.</span>
+        </div>
+        <a class="tombol tombol-kecil" href="absensi.php">Kelola Absensi</a>
+    </div>
+    <div class="kartu-tubuh">
+        <div class="grid grid-3">
+            <div class="stat biru">
+                <span class="ikon"><?= ikon_sp('kesehatan') ?></span>
+                <div class="flex-1">
+                    <div class="nilai"><?= (int) $absensi_bulan['sakit'] ?></div>
+                    <div class="keterangan">Sakit</div>
+                </div>
+            </div>
+            <div class="stat kuning">
+                <span class="ikon"><?= ikon_sp('tulis') ?></span>
+                <div class="flex-1">
+                    <div class="nilai"><?= (int) $absensi_bulan['izin'] ?></div>
+                    <div class="keterangan">Izin</div>
+                </div>
+            </div>
+            <div class="stat merah">
+                <span class="ikon"><?= ikon_sp('silang') ?></span>
+                <div class="flex-1">
+                    <div class="nilai"><?= (int) $absensi_bulan['alpa'] ?></div>
+                    <div class="keterangan">Alpha</div>
+                </div>
+            </div>
+        </div>
+        <p class="text-redup text-kecil mt-3 mb-0">
+            Rekap tanggal <?= e(tanggal_id($awal_bulan)) ?> sampai hari ini
+            &middot; hadir <?= (int) $absensi_bulan['hadir'] ?> kali.
+        </p>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- ================= INFO + AI ================= -->
+<section class="grid grid-2" style="margin-top:20px">
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header"><h3>Tips Pelaporan</h3></div>
+        <div class="kartu-tubuh">
+            <p class="text-redup" style="margin-bottom:10px">
+                Pastikan laporan kegiatan selalu lengkap sebelum dikirim kepada mentor:
+            </p>
+            <ul style="margin:0;padding-left:20px;line-height:1.9;font-size:14.5px">
+                <li>Tuliskan kegiatan dengan jelas dan tanggal yang sesuai.</li>
+                <li>Lampirkan bukti gambar yang relevan (maksimal 5 foto).</li>
+                <li>Isi hasil, kendala, dan rencana berikutnya bila ada.</li>
+                <li>Periksa notifikasi untuk catatan mentor.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <span class="avatar avatar-kecil" style="background:linear-gradient(135deg,var(--navy-600),var(--phr-biru))">AI</span>
+            <h3>Asisten AI</h3>
+            <span class="badge <?= $aiHidup ? 'badge-hijau' : 'badge-merah' ?>" style="margin-left:auto">
+                <?= $aiHidup ? 'Terhubung' : 'Tidak terhubung' ?>
+            </span>
+        </div>
+        <div class="kartu-tubuh">
+            <p class="text-redup" style="margin-bottom:12px">
+                Minta bantuan untuk merangkum laporan, memeriksa kelengkapan,
+                membuat narasi, atau melihat statistik kegiatan Anda.
+            </p>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="tombol tombol-garis tombol-kecil" href="asisten.php">Buka Asisten Penuh</a>
+                <button class="tombol tombol-kecil" type="button"
+                        onclick="document.getElementById('tombolChat').click()">
+                    Chat Cepat
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<?php
+$labelsJson = json_encode(
+    $labelsGrafik,
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+);
+$angkaJson = json_encode($angkaGrafik);
+?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var canvas = document.getElementById('grafikStatus');
+    if (!canvas || typeof Chart === 'undefined') return;
+
+    new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: <?= $labelsJson ?>,
+            datasets: [{
+                data: <?= $angkaJson ?>,
+                backgroundColor: ['#94a3b8', '#d69e2e', '#159447', '#EB1C24'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+            }
+        }
+    });
+});
+</script>
+
+<?php akhiri_halaman(); ?>

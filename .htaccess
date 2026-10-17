@@ -1,0 +1,54 @@
+# =============================================================
+# pelaporan — konfigurasi Apache (XAMPP)
+# =============================================================
+
+# Larang daftar isi direktori (mencegah pemetaan file)
+Options -Indexes
+
+# -------------------------------------------------------------
+# 1. Blokir akses HTTP ke direktori non-publik
+# -------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Direktori non-publik: isi proyek (bukan halaman yang dilayani ke browser)
+    RewriteRule ^(vendor|database|ai-service|scripts|backups|docs|includes|powerbi)(/|$) - [F,L,NC]
+
+    # Blokir akses langsung ke file konfigurasi / sumber daya sensitif
+    RewriteRule ^(composer\.(json|lock)|phpunit\.xml|\.env.*|.*\.sql|.*\.ps1|.*\.md)$ - [F,L,NC]
+</IfModule>
+
+<FilesMatch "^(composer\.(json|lock)|\.env.*|.*\.(sql|ps1|md|log))$">
+    Require all denied
+</FilesMatch>
+
+# -------------------------------------------------------------
+# 2. Header keamanan
+# -------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(self), microphone=(), camera=()"
+    # Aktifkan HSTS hanya setelah domain memakai HTTPS penuh:
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# -------------------------------------------------------------
+# 3. Batasi ukuran upload (selaras dengan aturan aplikasi: 5 MB/foto)
+# -------------------------------------------------------------
+php_value upload_max_filesize 8M
+php_value post_max_size 12M
+php_value max_file_uploads 6
+
+# -------------------------------------------------------------
+# 4. Larang akses langsung ke file eksekusi TANPA di dalam folder
+#    yang memang publik. Proteksi `uploads/` ada di uploads/.htaccess.
+#    (Blok ini TIDAK boleh memuat ekstensi .php di root —
+#     seluruh halaman aplikasi berakhiran .php)
+# -------------------------------------------------------------
+<FilesMatch "\.(phps|phtml\.bak|ini|conf|bak|swp|sql\.gz)$">
+    Require all denied
+</FilesMatch>
+
+ErrorDocument 403 "Akses ditolak."
