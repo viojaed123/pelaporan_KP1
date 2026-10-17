@@ -13,7 +13,8 @@ final class StrukturTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->root = dirname(__DIR__);
+        // Berkas ini kini di tests/legacy/ -> naik DUA tingkat ke root proyek.
+        $this->root = dirname(__DIR__, 2);
     }
 
     public function testHalamanAkunAda(): void
@@ -52,19 +53,21 @@ final class StrukturTest extends TestCase
             'powerbi_ekspor.php',
             'scripts/pengingat_jadwal.php',
             'includes/config_lokal.example.php',
-            'database/migrations/013_peningkatan_akun.sql',
-            'database/migrations/014_komentar_laporan.sql',
-            'database/migrations/015_absensi_kegiatan_kesehatan.sql',
-            'database/migrations/016_foto_profil.sql',
-            'database/migrations/017_impor_laporan.sql',
-            'database/migrations/018_jadwal.sql',
-            'database/migrations/019_akses_baca_ai.sql',
-            'database/migrations/020_otp_jenis.sql',
-            'database/migrations/021_srm_cid.sql',
-            'database/migrations/022_cid_bigint.sql',
-            'database/migrations/023_wilayah_lokasi.sql',
-            'database/migrations/024_geokode_cache.sql',
-            'database/migrations/025_kasus_multipengguna.sql',
+            // Skema SQL lama dipindah ke database/schema/legacy/ (struktur Laravel:
+            // database/migrations/ kini dipakai migrasi .php bawaan framework).
+            'database/schema/legacy/013_peningkatan_akun.sql',
+            'database/schema/legacy/014_komentar_laporan.sql',
+            'database/schema/legacy/015_absensi_kegiatan_kesehatan.sql',
+            'database/schema/legacy/016_foto_profil.sql',
+            'database/schema/legacy/017_impor_laporan.sql',
+            'database/schema/legacy/018_jadwal.sql',
+            'database/schema/legacy/019_akses_baca_ai.sql',
+            'database/schema/legacy/020_otp_jenis.sql',
+            'database/schema/legacy/021_srm_cid.sql',
+            'database/schema/legacy/022_cid_bigint.sql',
+            'database/schema/legacy/023_wilayah_lokasi.sql',
+            'database/schema/legacy/024_geokode_cache.sql',
+            'database/schema/legacy/025_kasus_multipengguna.sql',
             'ai-service/app/tools/jadwal.py',
             'ai-service/app/tools/search.py',
             'ai-service/skills/pencarian/SKILL.md',
@@ -73,7 +76,17 @@ final class StrukturTest extends TestCase
             'tools/backup_db.php',
             'composer.json',
             'phpunit.xml',
+            'phpunit-legacy.xml',
             '.gitignore',
+            // Kerangka Laravel 12
+            'artisan',
+            'bootstrap/app.php',
+            'bootstrap/providers.php',
+            'config/app.php',
+            'config/database.php',
+            'routes/web.php',
+            'app/Http/Controllers/Controller.php',
+            'app/Models/User.php',
         ] as $berkas) {
             $this->assertFileExists(
                 $this->root . '/' . $berkas,

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/legacy/bootstrap.php"
+         colors="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+>
+    <!--
+      Suite LEGACY: menguji modul includes/ yang belum dimigrasi ke Laravel.
+      Dijalankan dengan:  composer test:legacy
+      Tiap modul yang pindah ke Laravel mengganti tes legacy-nya dengan tes
+      Feature/Unit, lalu berkasnya dihapus dari folder ini.
+    -->
+    <testsuites>
+        <testsuite name="Legacy">
+            <directory>tests/legacy</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_DEBUG" value="true"/>
+        <ini name="error_reporting" value="E_ALL"/>
+    </php>
+</phpunit>

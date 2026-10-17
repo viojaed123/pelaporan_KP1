@@ -10,7 +10,7 @@ final class WilayahTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
-        $autoload = __DIR__ . '/../vendor/autoload.php';
+        $autoload = __DIR__ . '/../../vendor/autoload.php';
         if (is_file($autoload)) {
             require_once $autoload;
         }
