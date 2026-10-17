@@ -1,0 +1,4626 @@
+{
+    "database": "pelaporan",
+    "dibuat": "2026-10-17T23:03:19+02:00",
+    "catatan": "View Power BI (vw_*) sengaja TIDAK disertakan. Jangan pernah mengubahnya: 22 view dipakai laporan eksternal.",
+    "tabel": {
+        "absensi": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "tanggal",
+                    "tipe": "date",
+                    "tipe_dasar": "date",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jam_masuk",
+                    "tipe": "time",
+                    "tipe_dasar": "time",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jam_pulang",
+                    "tipe": "time",
+                    "tipe_dasar": "time",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "status",
+                    "tipe": "enum('hadir','izin','sakit','alpa')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'hadir'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 5
+                },
+                {
+                    "nama": "keterangan",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "kegiatan_hari_ini",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "lokasi_teks",
+                    "tipe": "varchar(191)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 191
+                },
+                {
+                    "nama": "garis_lintang",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_bujur",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "wilayah_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kondisi_kesehatan",
+                    "tipe": "enum('sehat','kurang_sehat','sakit','pemulihan')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'sehat'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 12
+                },
+                {
+                    "nama": "created_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "updated_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "ai_jobs": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "char(36)",
+                    "tipe_dasar": "char",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "PRI",
+                    "panjang_maks": 36
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jenis",
+                    "tipe": "varchar(40)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 40
+                },
+                {
+                    "nama": "status",
+                    "tipe": "enum('antre','proses','selesai','gagal')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'antre'",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 7
+                },
+                {
+                    "nama": "parameter",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "hasil",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "pesan_error",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "mulai_pada",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "selesai_pada",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "audit_log": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "aksi",
+                    "tipe": "varchar(60)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 60
+                },
+                {
+                    "nama": "tabel_ref",
+                    "tipe": "varchar(64)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 64
+                },
+                {
+                    "nama": "baris_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "ringkasan",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "data_lama",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "data_baru",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "ip_address",
+                    "tipe": "varchar(45)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 45
+                },
+                {
+                    "nama": "user_agent",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "backup_codes": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kode_hash",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "dipakai",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dipakai_pada",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "backup_riwayat": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "nama_file",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "ukuran_bytes",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "checksum",
+                    "tipe": "varchar(64)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 64
+                },
+                {
+                    "nama": "tipe",
+                    "tipe": "enum('otomatis','manual')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'manual'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 8
+                },
+                {
+                    "nama": "dibuat_oleh",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "bukti_gambar": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "laporan_id",
+                    "rujukan": "laporan_harian",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "laporan_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "nama_file",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "nama_asli",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "tipe_mime",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 100
+                },
+                {
+                    "nama": "ukuran_bytes",
+                    "tipe": "int(10) unsigned",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "uploaded_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "cache": {
+            "kunci_utama": [
+                "key"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "key",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "PRI",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "value",
+                    "tipe": "mediumtext",
+                    "tipe_dasar": "mediumtext",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 16777215
+                },
+                {
+                    "nama": "expiration",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "cache_locks": {
+            "kunci_utama": [
+                "key"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "key",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "PRI",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "owner",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "expiration",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "chat_messages": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "session_id",
+                    "rujukan": "chat_sessions",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "session_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "peran",
+                    "tipe": "enum('user','assistant')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 9
+                },
+                {
+                    "nama": "isi",
+                    "tipe": "mediumtext",
+                    "tipe_dasar": "mediumtext",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 16777215
+                },
+                {
+                    "nama": "tool_calls",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "chat_sessions": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "judul",
+                    "tipe": "varchar(120)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "'Percakapan baru'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 120
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "diperbarui_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "cid_program": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "tahun_intervensi",
+                    "tipe": "smallint(5)",
+                    "tipe_dasar": "smallint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "judul_program",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "pilar_program",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 100
+                },
+                {
+                    "nama": "desa",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "desa_aset_operasi",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "desa_rk_bor",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "desa_konflik_sosial",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "kode_desa",
+                    "tipe": "varchar(30)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 30
+                },
+                {
+                    "nama": "kecamatan",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "kode_kecamatan",
+                    "tipe": "varchar(30)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 30
+                },
+                {
+                    "nama": "kabupaten_kota",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "kode_kabupaten_kota",
+                    "tipe": "varchar(30)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 30
+                },
+                {
+                    "nama": "kelompok_diberdayakan",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "total_penerima_manfaat",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "perempuan",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "laki_laki",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "ibu_hamil",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "balita",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "disabilitas",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "potensi_peningkatan_ekonomi",
+                    "tipe": "decimal(18,2)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "potensi_penghematan_operasional",
+                    "tipe": "decimal(18,2)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "penanaman_pohon",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "luas_penanaman_ha",
+                    "tipe": "decimal(12,2)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "sampah_terkelola_kg",
+                    "tipe": "decimal(12,2)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "peningkatan_kualitas_kesehatan",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "penyerapan_lapangan_kerja",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "peningkatan_kapasitas",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "pembentukan_kelompok_baru",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kerjasama_stakeholder",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "bulan",
+                    "tipe": "varchar(15)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 15
+                },
+                {
+                    "nama": "bulan_angka",
+                    "tipe": "tinyint(2)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "program",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "anggaran",
+                    "tipe": "decimal(18,2)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "wilayah_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_lintang",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_bujur",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "baris_sumber",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "failed_jobs": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "bigint(20) unsigned",
+                    "tipe_dasar": "bigint",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "uuid",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "UNI",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "connection",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "queue",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "payload",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "exception",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "failed_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "geokode_cache": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kueri",
+                    "tipe": "varchar(191)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 191
+                },
+                {
+                    "nama": "kueri_norm",
+                    "tipe": "varchar(191)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "UNI",
+                    "panjang_maks": 191
+                },
+                {
+                    "nama": "garis_lintang",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_bujur",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "tampilan",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "sumber",
+                    "tipe": "varchar(20)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 20
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "impor_profil": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "nama",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 100
+                },
+                {
+                    "nama": "jenis",
+                    "tipe": "varchar(40)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": "'laporan_harian'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 40
+                },
+                {
+                    "nama": "pemetaan",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "diperbarui_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "impor_sejarah": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jenis",
+                    "tipe": "varchar(40)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": "'laporan_harian'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 40
+                },
+                {
+                    "nama": "nama_berkas",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "jumlah_baris",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jumlah_masuk",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jumlah_dilewati",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jumlah_gagal",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "ringkasan",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "id_semua",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "sumber",
+                    "tipe": "varchar(40)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 40
+                }
+            ]
+        },
+        "jadwal": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "judul",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "deskripsi",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "mulai",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "selesai",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "lokasi",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "garis_lintang",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_bujur",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "wilayah_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "pengingat_menit",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": "30",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "status",
+                    "tipe": "enum('rencana','selesai','batal')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'rencana'",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 7
+                },
+                {
+                    "nama": "pengingat_terkirim",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "diperbarui_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "jobs": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "bigint(20) unsigned",
+                    "tipe_dasar": "bigint",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "queue",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "payload",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "attempts",
+                    "tipe": "tinyint(3) unsigned",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "reserved_at",
+                    "tipe": "int(10) unsigned",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "available_at",
+                    "tipe": "int(10) unsigned",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "created_at",
+                    "tipe": "int(10) unsigned",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "job_batches": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "PRI",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "name",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "total_jobs",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "pending_jobs",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "failed_jobs",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "failed_job_ids",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "options",
+                    "tipe": "mediumtext",
+                    "tipe_dasar": "mediumtext",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 16777215
+                },
+                {
+                    "nama": "cancelled_at",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "created_at",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "finished_at",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "kasus": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kode_kasus",
+                    "tipe": "varchar(30)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "UNI",
+                    "panjang_maks": 30
+                },
+                {
+                    "nama": "judul",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "deskripsi",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "nama_lokasi",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "garis_lintang",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_bujur",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "tingkat_urgensi",
+                    "tipe": "enum('Rendah','Sedang','Tinggi','Kritis')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'Sedang'",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 6
+                },
+                {
+                    "nama": "status_kasus",
+                    "tipe": "enum('Terbuka','Dalam Proses','Selesai')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'Terbuka'",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 12
+                },
+                {
+                    "nama": "progres",
+                    "tipe": "tinyint(3) unsigned",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "diperbarui_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_oleh",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "penanggung_jawab_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kategori",
+                    "tipe": "varchar(80)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 80
+                },
+                {
+                    "nama": "sumber",
+                    "tipe": "varchar(20)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": "'Manual'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 20
+                },
+                {
+                    "nama": "target_selesai",
+                    "tipe": "date",
+                    "tipe_dasar": "date",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "lampiran",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                }
+            ]
+        },
+        "kasus_penugasan": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kasus_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "peran",
+                    "tipe": "varchar(60)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": "'Anggota Tim'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 60
+                },
+                {
+                    "nama": "ditugaskan_oleh",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "kasus_pihak": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "kasus_id",
+                    "rujukan": "kasus",
+                    "kolom_rujukan": "id"
+                },
+                {
+                    "kolom": "pihak_id",
+                    "rujukan": "pihak_terlibat",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kasus_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "pihak_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "peran_partisipasi",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "'Peserta'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 100
+                },
+                {
+                    "nama": "status_partisipasi",
+                    "tipe": "varchar(50)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "'Aktif'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 50
+                },
+                {
+                    "nama": "ditugaskan_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "kasus_status_log": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kasus_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "status_lama",
+                    "tipe": "varchar(30)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 30
+                },
+                {
+                    "nama": "status_baru",
+                    "tipe": "varchar(30)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 30
+                },
+                {
+                    "nama": "progres",
+                    "tipe": "tinyint(3) unsigned",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "catatan",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "komentar_laporan": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "laporan_id",
+                    "rujukan": "laporan_harian",
+                    "kolom_rujukan": "id"
+                },
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "bigint(20)",
+                    "tipe_dasar": "bigint",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "laporan_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "isi",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "laporan_harian": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "tanggal",
+                    "tipe": "date",
+                    "tipe_dasar": "date",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jam_mulai",
+                    "tipe": "time",
+                    "tipe_dasar": "time",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jam_selesai",
+                    "tipe": "time",
+                    "tipe_dasar": "time",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kegiatan",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "lokasi_teks",
+                    "tipe": "varchar(191)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 191
+                },
+                {
+                    "nama": "garis_lintang",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_bujur",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "wilayah_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "deskripsi",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "hasil",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "kendala",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "rencana_berikutnya",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "status",
+                    "tipe": "enum('draft','dikirim','diperiksa','perlu_revisi')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'draft'",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 12
+                },
+                {
+                    "nama": "catatan_mentor",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "created_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "updated_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "laporan_terkirim": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "laporan_id",
+                    "rujukan": "laporan_harian",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "laporan_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kanal",
+                    "tipe": "enum('email','whatsapp')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 8
+                },
+                {
+                    "nama": "penerima",
+                    "tipe": "varchar(190)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 190
+                },
+                {
+                    "nama": "subjek",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "lampiran",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "status",
+                    "tipe": "enum('antre','terkirim','gagal')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'antre'",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 8
+                },
+                {
+                    "nama": "pesan_error",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "disetujui_oleh",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "terkirim_pada",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "login_attempts": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "email",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "ip_address",
+                    "tipe": "varchar(45)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 45
+                },
+                {
+                    "nama": "user_agent",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "berhasil",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "alasan",
+                    "tipe": "varchar(60)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 60
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "login_locks": {
+            "kunci_utama": [
+                "kunci"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "kunci",
+                    "tipe": "varchar(190)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "PRI",
+                    "panjang_maks": 190
+                },
+                {
+                    "nama": "gagal",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "terkunci_sampai",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "percobaan_pertama",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "diperbarui",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "migrations": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(10) unsigned",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "migration",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "batch",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "notifikasi": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "laporan_id",
+                    "rujukan": "laporan_harian",
+                    "kolom_rujukan": "id"
+                },
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "laporan_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "pesan",
+                    "tipe": "varchar(500)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 500
+                },
+                {
+                    "nama": "link",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "'riwayat_laporan.php'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "sudah_dibaca",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "created_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "password_history": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "password_hash",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "password_reset_tokens": {
+            "kunci_utama": [
+                "email"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "email",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "PRI",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "token",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "created_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "pengingat": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jenis",
+                    "tipe": "varchar(40)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": "'laporan_harian'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 40
+                },
+                {
+                    "nama": "tanggal_ref",
+                    "tipe": "date",
+                    "tipe_dasar": "date",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "waktu_kirim",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "status",
+                    "tipe": "enum('antre','terkirim','dilewati')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'antre'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 8
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "pengiriman_laporan": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "laporan_id",
+                    "rujukan": "laporan_harian",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "laporan_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "penerima",
+                    "tipe": "varchar(190)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 190
+                },
+                {
+                    "nama": "nama_penerima",
+                    "tipe": "varchar(190)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 190
+                },
+                {
+                    "nama": "kanal",
+                    "tipe": "enum('email','whatsapp')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 8
+                },
+                {
+                    "nama": "subjek",
+                    "tipe": "varchar(190)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 190
+                },
+                {
+                    "nama": "pesan",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "status",
+                    "tipe": "enum('menunggu','disetujui','terkirim','gagal','dibatalkan')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'menunggu'",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 10
+                },
+                {
+                    "nama": "diajukan_oleh",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "disetujui_oleh",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "disetujui_pada",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dikirim_pada",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "galat",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "pihak_terlibat": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "nama_lengkap",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "organisasi",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "email",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "telepon",
+                    "tipe": "varchar(50)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 50
+                },
+                {
+                    "nama": "jenis_pihak",
+                    "tipe": "enum('Internal','Eksternal')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 9
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "riwayat_tindak_lanjut": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "kasus_id",
+                    "rujukan": "kasus",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kasus_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "tindakan",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "hasil",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "kendala",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "rencana_selanjutnya",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "tanggal_tindak_lanjut",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "sesi_aktif": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "sesi_hash",
+                    "tipe": "varchar(64)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "UNI",
+                    "panjang_maks": 64
+                },
+                {
+                    "nama": "ip_address",
+                    "tipe": "varchar(45)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 45
+                },
+                {
+                    "nama": "user_agent",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "dicabut",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "terakhir_aktif",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "sessions": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "PRI",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "bigint(20) unsigned",
+                    "tipe_dasar": "bigint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "ip_address",
+                    "tipe": "varchar(45)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 45
+                },
+                {
+                    "nama": "user_agent",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "payload",
+                    "tipe": "longtext",
+                    "tipe_dasar": "longtext",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 4294967295
+                },
+                {
+                    "nama": "last_activity",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "srm_kegiatan": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "tahun_intervensi",
+                    "tipe": "smallint(5)",
+                    "tipe_dasar": "smallint",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "area_field",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 100
+                },
+                {
+                    "nama": "tanggal",
+                    "tipe": "date",
+                    "tipe_dasar": "date",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "waktu",
+                    "tipe": "varchar(20)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 20
+                },
+                {
+                    "nama": "pic",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "kategori_kegiatan",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 100
+                },
+                {
+                    "nama": "klasifikasi_issue",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "judul_issue",
+                    "tipe": "varchar(300)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 300
+                },
+                {
+                    "nama": "detail_issue",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "kelurahan",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "kecamatan",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "kabupaten_kota",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "jenis_stakeholder",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "stakeholder_hadir",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "action_plan",
+                    "tipe": "text",
+                    "tipe_dasar": "text",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 65535
+                },
+                {
+                    "nama": "tim_phr",
+                    "tipe": "varchar(200)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 200
+                },
+                {
+                    "nama": "value_creation",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "status",
+                    "tipe": "varchar(20)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 20
+                },
+                {
+                    "nama": "persen_status",
+                    "tipe": "decimal(6,2)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dokumentasi",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "wilayah_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_lintang",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_bujur",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "baris_sumber",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "users": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "nama",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 100
+                },
+                {
+                    "nama": "email",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "UNI",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "password",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "role",
+                    "tipe": "enum('admin','karyawan','mentor')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'karyawan'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 8
+                },
+                {
+                    "nama": "status",
+                    "tipe": "enum('aktif','menunggu','nonaktif')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'aktif'",
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 8
+                },
+                {
+                    "nama": "email_verified_at",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "divisi",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 100
+                },
+                {
+                    "nama": "telepon",
+                    "tipe": "varchar(30)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 30
+                },
+                {
+                    "nama": "foto_profil",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "created_at",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "remember_token",
+                    "tipe": "varchar(100)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 100
+                }
+            ]
+        },
+        "user_otp": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jenis",
+                    "tipe": "enum('login','reset_sandi')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": "'login'",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 11
+                },
+                {
+                    "nama": "kode_hash",
+                    "tipe": "varchar(255)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 255
+                },
+                {
+                    "nama": "tujuan",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "percobaan",
+                    "tipe": "tinyint(4)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dipakai",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "kedaluwarsa",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "user_security": {
+            "kunci_utama": [
+                "user_id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dua_faktor_aktif",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "password_diubah_pada",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "ingat_token_hash",
+                    "tipe": "varchar(64)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 64
+                },
+                {
+                    "nama": "ingat_kedaluwarsa",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "ingat_ip",
+                    "tipe": "varchar(45)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 45
+                },
+                {
+                    "nama": "gagal_login_berturut",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "terakhir_kunci",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "diperbarui_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "user_tokens": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [
+                {
+                    "kolom": "user_id",
+                    "rujukan": "users",
+                    "kolom_rujukan": "id"
+                }
+            ],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "user_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "jenis",
+                    "tipe": "enum('verifikasi_email','reset_sandi')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 16
+                },
+                {
+                    "nama": "token_hash",
+                    "tipe": "char(64)",
+                    "tipe_dasar": "char",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "UNI",
+                    "panjang_maks": 64
+                },
+                {
+                    "nama": "kedaluwarsa",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dipakai",
+                    "tipe": "tinyint(1)",
+                    "tipe_dasar": "tinyint",
+                    "nullable": false,
+                    "default": "0",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "dipakai_pada",
+                    "tipe": "datetime",
+                    "tipe_dasar": "datetime",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "ip_address",
+                    "tipe": "varchar(45)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 45
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "wilayah": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "level",
+                    "tipe": "enum('kabupaten','kecamatan','desa')",
+                    "tipe_dasar": "enum",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 9
+                },
+                {
+                    "nama": "nama",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "nama_norm",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "kabupaten",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "kecamatan",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "garis_lintang",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "garis_bujur",
+                    "tipe": "decimal(10,7)",
+                    "tipe_dasar": "decimal",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "sumber",
+                    "tipe": "varchar(30)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 30
+                },
+                {
+                    "nama": "akurasi",
+                    "tipe": "varchar(20)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 20
+                },
+                {
+                    "nama": "diperbarui_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "on update current_timestamp()",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        },
+        "wilayah_alias": {
+            "kunci_utama": [
+                "id"
+            ],
+            "kunci_asing": [],
+            "kolom": [
+                {
+                    "nama": "id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "auto_increment",
+                    "kunci": "PRI",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "varian_norm",
+                    "tipe": "varchar(190)",
+                    "tipe_dasar": "varchar",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "UNI",
+                    "panjang_maks": 190
+                },
+                {
+                    "nama": "wilayah_id",
+                    "tipe": "int(11)",
+                    "tipe_dasar": "int",
+                    "nullable": false,
+                    "default": null,
+                    "extra": "",
+                    "kunci": "MUL",
+                    "panjang_maks": null
+                },
+                {
+                    "nama": "catatan",
+                    "tipe": "varchar(150)",
+                    "tipe_dasar": "varchar",
+                    "nullable": true,
+                    "default": "NULL",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": 150
+                },
+                {
+                    "nama": "dibuat_pada",
+                    "tipe": "timestamp",
+                    "tipe_dasar": "timestamp",
+                    "nullable": false,
+                    "default": "current_timestamp()",
+                    "extra": "",
+                    "kunci": "",
+                    "panjang_maks": null
+                }
+            ]
+        }
+    }
+}

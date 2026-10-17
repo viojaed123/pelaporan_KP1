@@ -5,7 +5,7 @@
  *   php scripts/buat_env_laravel.php
  *
  * Nilai rahasia dibaca langsung dari includes/config_lokal.php dan tidak
- * pernah dicetak ke layar — hanya jumlah berkas yang dilaporkan.
+ * pernah dicetak ke layar -- hanya jumlah berkas yang dilaporkan.
  * Aman dijalankan ulang (file .env ditimpa).
  */
 
@@ -82,7 +82,7 @@ function esc(string $v): string
 }
 
 $lines = ['# =============================================================',
-          '# .env — dibuat otomatis oleh scripts/buat_env_laravel.php',
+          '# .env -- dibuat otomatis oleh scripts/buat_env_laravel.php',
           '# JANGAN di-commit ke Git (lihat .gitignore).',
           '# =============================================================', ''];
 
