@@ -256,4 +256,57 @@ class User extends Authenticatable
     {
         return in_array($this->role, $peran, true);
     }
+
+    /**
+     * Nama rute halaman utama sesuai peran.
+     *
+     * Padanan halaman_default_peran() sistem lama
+     * (dashboard.php / mentor_dashboard.php / admin_dashboard.php).
+     * Dipakai setelah login berhasil untuk mengarahkan pengguna ke
+     * halaman yang tepat, tanpa pengalihan perantara.
+     *
+     * @return string Nama rute (bukan URL) agar tetap sah bila URL berubah.
+     */
+    public function halamanDefault(): string
+    {
+        return match ($this->role) {
+            'admin'  => 'admin.dashboard',
+            'mentor' => 'mentor.dashboard',
+            default  => 'dashboard',
+        };
+    }
+
+    /**
+     * Benar bila verifikasi dua faktor aktif untuk pengguna ini.
+     *
+     * Padanan user_2fa_aktif() sistem lama. Mengembalikan false bila baris
+     * user_security belum ada -- artinya pengguna belum pernah mengaktifkan
+     * 2FA, bukan error. Karena itu relasi `security` dipakai apa adanya
+     * (null dianggap false), bukan dengan asumsi barisnya selalu ada.
+     */
+    public function duaFaktorAktif(): bool
+    {
+        return (bool) ($this->security?->dua_faktor_aktif ?? false);
+    }
+
+    /**
+     * URL relatif foto profil bila berkasnya benar-benar ada, atau null.
+     *
+     * Padanan foto_profil_url() sistem lama. Hanya NAMA BERKAS yang diterima:
+     * nilai yang memuat pemisah path atau '..' ditolak, sehingga isi kolom
+     * foto_profil (yang berasal dari unggahan) tidak bisa dipakai untuk
+     * membaca berkas di luar folder avatar (path traversal).
+     */
+    public function fotoProfilUrl(): ?string
+    {
+        $foto = trim((string) ($this->foto_profil ?? ''));
+
+        if ($foto === '' || basename($foto) !== $foto || str_contains($foto, '..')) {
+            return null;
+        }
+
+        $berkas = public_path('uploads/avatar/' . $foto);
+
+        return is_file($berkas) ? 'uploads/avatar/' . rawurlencode($foto) : null;
+    }
 }

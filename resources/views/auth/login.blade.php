@@ -1,152 +1,87 @@
-{{-- Kerangka halaman login --}}
-{{--
-    STATUS: kerangka. Proses login penuh (verifikasi sandi, pembatas laju,
-    penguncian akun, 2FA OTP) dipindahkan pada fase modul autentikasi.
-    Tata letak dan skema warna mengikuti identitas korporat PHR.
---}}
+@extends('layouts.auth')
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="noindex, nofollow">
-    <title>Masuk — {{ config('app.name') }}</title>
-    <style>
-        :root {
-            --biru-tua: {{ config('keamanan.warna_biru_tua', '#003D7D') }};
-            --biru:     {{ config('keamanan.warna_biru', '#005EB8') }};
-            --merah:    {{ config('keamanan.warna_merah', '#EB1C24') }};
-            --hijau:    {{ config('keamanan.warna_hijau', '#159447') }};
-            --bg:       {{ config('keamanan.warna_bg', '#F5F5F5') }};
-        }
+@section('judul', 'Masuk')
 
-        * { box-sizing: border-box; }
+@section('isi')
+    @php
+        /*
+         * Pesan dari pengalihan (alasan) dipetakan PERSIS seperti sistem lama,
+         * sehingga pengguna yang tiba di sini karena sesi habis / baru keluar /
+         * belum masuk mendapat penjelasan yang tepat -- bukan halaman kosong.
+         */
+        $pesanAlasan = match ($alasan) {
+            'sesi_habis' => ['info', 'Sesi Anda berakhir demi keamanan. Silakan masuk kembali.'],
+            'keluar'     => ['info', 'Anda telah keluar dengan aman.'],
+            'akses'      => ['info', 'Anda harus masuk terlebih dahulu untuk mengakses halaman tersebut.'],
+            'kadaluarsa' => ['info', 'Tautan sudah tidak berlaku. Silakan masuk kembali.'],
+            default      => null,
+        };
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background:
-                linear-gradient(160deg, var(--biru-tua) 0%, var(--biru) 100%);
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto,
-                         "Helvetica Neue", Arial, sans-serif;
-            padding: 24px;
-        }
+        $pesanGalat = $errors->first();
+    @endphp
 
-        .kartu {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-            width: 100%;
-            max-width: 400px;
-            padding: 40px 36px;
-        }
+    <h1>Selamat Datang</h1>
+    <p class="pengantar">Masuk untuk mengelola laporan kegiatan harian Anda.</p>
 
-        .merek { text-align: center; margin-bottom: 28px; }
-        .merek .logo {
-            width: 56px; height: 56px; margin: 0 auto 12px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--biru-tua), var(--biru));
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-weight: 800; font-size: 22px;
-        }
-        .merek h1 { font-size: 17px; margin: 0 0 4px; color: var(--biru-tua); }
-        .merek p  { font-size: 13px; margin: 0; color: #64748b; }
+    {{-- Pesan informasi dari pengalihan --}}
+    @if ($pesanAlasan !== null)
+        <div class="alert alert-{{ $pesanAlasan[0] }}" role="alert">
+            <span class="ikon">ℹ</span>
+            <span>{{ $pesanAlasan[1] }}</span>
+        </div>
+    @endif
 
-        .peringatan {
-            background: #fef2f2;
-            border: 1px solid rgba(235, 28, 36, 0.30);
-            color: #991b1b;
-            border-radius: 10px;
-            padding: 12px 14px;
-            font-size: 13.5px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
+    {{-- Pesan informasi dari aksi sebelumnya (mis. kode dikirim ulang) --}}
+    @if (session('info'))
+        <div class="alert alert-info" role="alert">
+            <span class="ikon">ℹ</span>
+            <span>{{ session('info') }}</span>
+        </div>
+    @endif
 
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 6px;
-        }
+    {{-- Pesan kesalahan otentikasi / validasi. Sengaja TIDAK membedakan
+         "surel tidak terdaftar" dari "sandi salah". --}}
+    @if ($pesanGalat)
+        <div class="alert alert-gagal" role="alert">
+            <span class="ikon">✕</span>
+            <span>{{ $pesanGalat }}</span>
+        </div>
+    @endif
 
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 9px;
-            font-size: 15px;
-            margin-bottom: 18px;
-            transition: border-color .15s, box-shadow .15s;
-        }
-        input:focus {
-            outline: none;
-            border-color: var(--biru);
-            box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.15);
-        }
+    <form method="POST" action="{{ route('login.masuk') }}" autocomplete="on" novalidate>
+        @csrf
 
-        button {
-            width: 100%;
-            padding: 13px;
-            border: 0;
-            border-radius: 9px;
-            background: var(--biru);
-            color: #fff;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background .15s, box-shadow .15s;
-        }
-        button:hover { background: var(--biru-tua); box-shadow: 0 6px 18px rgba(0, 94, 184, .30); }
-
-        .bawah {
-            text-align: center;
-            margin-top: 18px;
-            font-size: 13px;
-            color: #64748b;
-        }
-        .bawah a { color: var(--biru); text-decoration: none; font-weight: 600; }
-        .bawah a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-    <main class="kartu" role="main">
-        <div class="merek">
-            <div class="logo" aria-hidden="true">PH</div>
-            <h1>Sistem Pelaporan Kegiatan Harian</h1>
-            <p>Pertamina Hulu Rokan</p>
+        <div class="grup-form">
+            <label for="email">Alamat surel</label>
+            <input id="email" name="email" type="email"
+                   class="@error('email') input-galat @enderror"
+                   value="{{ $email }}"
+                   autocomplete="username"
+                   maxlength="150"
+                   placeholder="nama@perusahaan.co.id"
+                   required autofocus>
         </div>
 
-        @if ($alasan === 'sesi_habis')
-            <div class="peringatan" role="alert">
-                Sesi Anda telah berakhir karena terlalu lama tanpa aktivitas
-                atau telah melewati batas waktu. Silakan masuk kembali.
-            </div>
-        @endif
-
-        {{-- Formulir akan dihubungkan ke proses login pada fase modul autentikasi. --}}
-        <form method="post" action="{{ route('login') }}" autocomplete="on">
-            @csrf
-            <label for="email">Surel</label>
-            <input type="email" id="email" name="email" required autofocus
-                   placeholder="nama@perusahaan.com">
-
+        <div class="grup-form">
             <label for="password">Kata sandi</label>
-            <input type="password" id="password" name="password" required
-                   placeholder="Masukkan kata sandi">
+            <div class="field-input">
+                <input id="password" name="password" type="password"
+                       autocomplete="current-password"
+                       placeholder="••••••••"
+                       required>
+            </div>
+        </div>
 
-            <button type="submit">Masuk</button>
-        </form>
+        <button class="tombol tombol-utama" type="submit">Masuk</button>
+    </form>
 
-        <p class="bawah">
-            Lupa kata sandi? <a href="#">Atur ulang</a>
-        </p>
-    </main>
-</body>
-</html>
+    <p class="tautan-bawah">
+        Belum punya akun? <a href="#">Daftar di sini</a>
+    </p>
+    <p class="tautan-bawah">
+        <a href="#">Lupa kata sandi? Gunakan kode OTP</a>
+    </p>
+    <p class="tautan-bawah">
+        <a href="{{ route('beranda') }}">← Kembali ke halaman utama</a>
+    </p>
+@endsection

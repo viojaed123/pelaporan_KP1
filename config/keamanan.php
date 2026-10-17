@@ -92,6 +92,10 @@ return [
     | templat surel, dan pesan OTP. Nilai diambil dari .env agar satu
     | sumber, tetapi nilai bawaan di sini adalah warna korporat yang benar.
     |
+    | CATATAN: nilai di .env WAJIB dikutip (WARNA_BIRU_TUA="#003D7D").
+    | Tanpa tanda kutip, karakter '#' dianggap komentar dan warna terbaca
+    | kosong -- identitas visual hilang tanpa satu pun error.
+    |
     */
 
     'warna_biru'     => env('WARNA_BIRU') ?: '#005EB8',
@@ -99,5 +103,11 @@ return [
     'warna_merah'    => env('WARNA_MERAH') ?: '#EB1C24',
     'warna_hijau'    => env('WARNA_HIJAU') ?: '#159447',
     'warna_bg'       => env('WARNA_BG') ?: '#F5F5F5',
+
+    /* Nama organisasi & sebutan singkat aplikasi, dipakai pada kop surel
+     * dan antarmuka. Disalin dari constants APP_ORGANISASI/APP_SINGKAT
+     * sistem lama agar surel OTP tetap dikenali pengguna. */
+    'organisasi'        => env('APP_ORGANISASI') ?: 'Pertamina Hulu Rokan',
+    'aplikasi_singkat'  => env('APP_SINGKAT') ?: 'Pelaporan Harian',
 
 ];
