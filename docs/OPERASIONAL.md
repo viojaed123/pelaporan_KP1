@@ -120,12 +120,40 @@ schtasks /Create /SC DAILY /ST 23:30 /TN "PHR Backup DB" ^
   /TR "powershell -NoProfile -ExecutionPolicy Bypass -File C:\xampp\htdocs\pelaporan\scripts\backup_db.ps1"
 ```
 
-Uji pemulihan ke basis data sementara:
+Uji pemulihan ke basis data sementara — wajib minimal sekali (lihat
+checklist `GO_LIVE.md` §2):
 
-```bat
-C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE pelaporan_uji"
-C:\xampp\mysql\bin\mysql.exe -u root pelaporan_uji < D:\backups\pelaporan-20261019-021627.sql
+> **AWAS.** Dump dibuat dengan `--databases`, sehingga berkasnya memuat
+> `CREATE DATABASE` **dan dua baris** `USE \`pelaporan\``. Bila dimasukkan
+> apa adanya, isi dump akan mengalir ke basis data **ASLI** `pelaporan`
+> (menimpa data), bukan ke basis data sementara. Saring dulu baris itu:
+
+```powershell
+$mysql  = 'C:\xampp\mysql\bin\mysql.exe'
+$src    = 'C:\xampp\htdocs\pelaporan\backups\pelaporan-20261019-062821.sql'
+$saring = "$env:TEMP\pelaporan_uji.sql"
+
+& $mysql -u root -e "CREATE DATABASE `pelaporan_uji` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+$baris = [System.IO.File]::ReadAllLines($src, [System.Text.Encoding]::UTF8)
+$pilih = $baris | Where-Object { -not $_.StartsWith('CREATE DATABASE ') -and $_ -ne 'USE `pelaporan`;' }
+[System.IO.File]::WriteAllLines($saring, [string[]]$pilih, (New-Object System.Text.UTF8Encoding $false))
+cmd /c "$mysql -u root pelaporan_uji < `"$saring`""
 ```
+
+Lalu bandingkan isi hasil pulih dengan aslinya, dan hapus basis data
+sementara:
+
+```powershell
+$tabel = & $mysql -u root -N -B -e "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA='pelaporan' AND TABLE_TYPE='BASE TABLE' ORDER BY TABLE_NAME"
+$sql   = ($tabel | ForEach-Object { "SELECT '$_' AS t, COUNT(*) AS n FROM ``$_``" }) -join ' UNION ALL '
+Compare-Object (& $mysql -u root -N -B -e $sql pelaporan) (& $mysql -u root -N -B -e $sql pelaporan_uji)
+& $mysql -u root -e "DROP DATABASE IF EXISTS `pelaporan_uji`"
+```
+
+Baris keluaran `Compare-Object` = selisih. Selisih wajar bila memang ada
+aktivitas setelah jam cadangan (mis. akun baru/terhapus). Uji terakhir
+19 Okt 2026:46 tabel — selisih hanya pada7 tabel yang berubah *setelah*
+jam dump;22 view identik.
 
 ---
 
@@ -136,6 +164,7 @@ C:\xampp\mysql\bin\mysql.exe -u root pelaporan_uji < D:\backups\pelaporan-202610
 | Audit aplikasi | tabel `audit_log` (menu **Riwayat Perubahan**) |
 | Email mode pengembangan | `backups/mail-log/YYYY-MM-DD.log` |
 | Galat PHP | log Apache/PHP (`xampp\apache\logs\error.log`) |
+| Log Laravel (API/SPA/APK) | `storage/logs/laravel-YYYY-MM-DD.log` (kanal `daily`, retensi 14 hari; `LOG_CHANNEL=daily` di `.env`) |
 
 Email mode pengembangan aktif saat `SMTP_HOST` kosong. Isi `SMTP_*` di
 `includes/config.php` untuk pengiriman sungguhan.
@@ -160,3 +189,48 @@ Email mode pengembangan aktif saat `SMTP_HOST` kosong. Isi `SMTP_*` di
   `includes/config.php` dan `ai-service/.env`.
 - `APP_DEBUG` tetap `false` di produksi.
 - Akun uji `tes_*@uji.local` **tidak boleh** ada di produksi.
+
+---
+
+## 7. Mengelola pengguna (tambah, ubah peran, hapus)
+
+| Kebutuhan | Cara |
+|---|---|
+| Karyawan mendaftar sendiri | `register.php` — langsung `status=aktif`, peran `karyawan` |
+| Buat / setel ulang akun admin | `C:\xampp\php\php.exe scripts\buat_admin.php --email=... --nama=... --sandi='...'` (ada `--paksa` bila sandi tidak lolos kebijakan) |
+| Ubah peran jadi `mentor`/`admin` | Tidak ada menu webnya; lewat SQL: `UPDATE users SET role='mentor' WHERE id=<N>;` lalu pengguna keluar-masuk agar sesi memakai peran baru |
+| Nonaktifkan / aktifkan akun | menu **Profil** (admin) — menyetel `status`; akun `menunggu`/`nonaktif` tidak dapat masuk, sesi lama dicabut. Admin tidak dapat mengubah status akunnya sendiri |
+| Verifikasi akun manual | menu **Profil** (admin) → "verifikasi pengguna" untuk akun yang tersangkut `menunggu` (menyetel `status=aktif` + `email_verified_at`) |
+| Setel ulang sandi pengguna lain | menu **Profil** (admin); sesi lama pengguna dicabut |
+| Lihat / ekspor daftar pengguna | menu **Profil** (admin) → ekspor CSV |
+| Audit akun & peran | `C:\xampp\php\php.exe artisan pengguna:audit` (read-only) |
+| Hapus akun permanen | `C:\xampp\php\php.exe artisan pengguna:hapus <id>` (laporan) lalu `... --yakin` |
+
+Catatan penting:
+
+- Jalankan `pengguna:audit` sebelum **dan** sesudah mengubah akun. Nama
+  karyawan ganda membuat pencocokan PIC/anggota kasus (diketik bebas) ambigu.
+- `pengguna:hapus` menolak akun yang masih memiliki data bisnis (perlu
+  `--paksakan`), **tidak** menghapus kasus orang lain di mana akun itu hanya
+  PIC (hanya `penanggung_jawab_id` dikosongkan, nama ketikan tetap), dan
+  mencatat penghapusan pada `audit_log`. Lakukan cadangan (§3) sebelum eksekusi.
+- `login_locks`, token API (`personal_access_tokens`), dan sesi ikut dibersihkan
+  otomatis oleh `pengguna:hapus`.
+
+---
+
+## 8. Verifikasi dua faktor (2FA)
+
+| Kebutuhan | Cara |
+|---|---|
+| Aktifkan | **Profil** → "Aktifkan 2FA" → masukkan kode OTP6 digit yang dikirim ke surel |
+| Kode cadangan |10 kode (format `XXXXXX-XXXX`) ditampilkan **sekali** saat aktivasi — minta pengguna menyimpannya |
+| Masuk dengan kode cadangan | di halaman `dua_faktor.php`, masukkan kode cadangan alih-alih OTP |
+| Buat ulang / nonaktifkan | **Profil**; menonaktifkan sekaligus menghapus kode cadangan lama |
+
+- Kode cadangan disimpan sebagai **hash** (tabel `backup_codes`) — operator
+  tidak dapat membaca ulangnya. Bila semuanya hilang: buat ulang lewat Profil
+  (perlu masuk) atau setel ulang 2FA.
+- **2FA membutuhkan SMTP nyata** (`SMTP_*` di `includes/config.php`); tanpa
+  itu kode OTP hanya masuk log mode pengembangan `backups/mail-log/`.
+- Aktivasi/nonaktif tercatat pada `audit_log` dan tabel `user_security`.

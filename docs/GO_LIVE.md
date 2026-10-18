@@ -131,8 +131,13 @@ mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\p
 - [x] `docs/PANDUAN_PENGGUNA.md` diperbarui (ada bagian SPA & APK).
 - [x] `mobile/README.md` menjadi rujukan pemasangan APK (menyiapkan alamat
       server, membangun, tanda tangan rilis, peta endpoint).
-- [ ] SOP operasional: cara cadangkan, pulihkan, tambah pengguna, atur 2FA.
-- [ ] Kontak dukungan/escalation jelas.
+- [x] SOP operasional: cara cadangkan, pulihkan, tambah pengguna, atur 2FA —
+      `docs/OPERASIONAL.md` §3 (cadangan & pemulihan, termasuk peringatan
+      `USE \`pelaporan\`` pada dump & uji pulihkan yang benar), §7 (mengelola
+      pengguna: daftar, ubah peran, nonaktifkan, verifikasi manual,
+      `pengguna:audit`/`pengguna:hapus`), §8 (2FA & kode cadangan), §4 (log).
+- [ ] Kontak dukungan/escalation jelas. *(Butuh informasi organisasi: nama &
+      kontak PIC sistem, jalur eskalasi layanan hosting/surel.)*
 
 ## 8. Pemantauan galat & kesehatan
 
