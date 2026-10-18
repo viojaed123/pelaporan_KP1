@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Warna korporat PHR (satu sumber kebenaran; samakan dengan web). -->
+    <color name="biru_tua">#003D7D</color>
+    <color name="biru">#005EB8</color>
+    <color name="merah">#EB1C24</color>
+    <color name="hijau">#159447</color>
+    <color name="latar">#F5F5F5</color>
+    <color name="putih">#FFFFFF</color>
+</resources>

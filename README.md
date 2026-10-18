@@ -168,6 +168,37 @@ kini membuat akun yang **langsung aktif** (tanpa verifikasi surel), dan **lupa
 kata sandi memakai kode OTP** ke surel (bukan tautan). Akun admin dibuat/disetel
 ulang lewat `scripts\buat_admin.php` (lihat 2.4).
 
+### 3.1. Aplikasi baru (Laravel 12): SPA & API
+
+Migrasi berjalan bertahap (*strangler-fig*): aplikasi lama tetap di
+`localhost/pelaporan/`, sedangkan versi **Laravel 12** disajikan dari
+`public/` (mis. `http://192.168.56.1/`). Dua permukaan baru:
+
+- **SPA React** — `http://192.168.56.1/app` (shell Blade + bundel Vite;
+  sumber di `resources/js/react/`). Semua panggilan memakai API di bawah.
+- **API `/api/v1/*`** — fondasi bersama untuk SPA dan APK. Autentikasi
+  **Laravel Sanctum** (token Bearer dari `personal_access_tokens`); masuk lewat
+  `POST /api/v1/auth/login` (mendukung alur 2FA ticket → OTP). Sebagian endpoint
+  ringkas untuk Power BI memakai token statis (`POWERBI_API_TOKEN`).
+
+Bangun ulang aset SPA setelah mengubah kode React:
+
+```bat
+npm.cmd run build
+```
+
+### 3.2. APK Android (native, Kotlin)
+
+Aplikasi mobile native ada di `mobile/` (Kotlin + Jetpack Compose, klien tipis
+ke `/api/v1/*`). Lihat `mobile/README.md`. Dasar singkat:
+
+```powershell
+cd mobile
+.\gradlew.bat assembleDebug   # hasil: mobile\app\build\outputs\apk\debug\app-debug.apk
+```
+
+Alamat server dapat diubah langsung di layar masuk APK.
+
 ---
 
 ## 4. Struktur & keamanan

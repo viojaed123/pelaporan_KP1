@@ -54,3 +54,15 @@ Thumbs.db
 
 # === Cadangan sementara migrasi (dihapus setelah fase selesai) ===
 legacy-backup/
+
+# === Android (proyek mobile/) ===
+mobile/.gradle/
+mobile/build/
+mobile/app/build/
+mobile/local.properties
+mobile/.kotlin/
+mobile/captures/
+*.apk
+*.aab
+*.keystore
+*.jks

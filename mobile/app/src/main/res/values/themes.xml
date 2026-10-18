@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Tema XML minimal untuk kerangka Activity. Seluruh tampilan dirender
+      Jetpack Compose (lihat ui/Tema.kt) yang memakai warna korporat PHR.
+    -->
+    <style name="Theme.PelaporanPHR" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/biru_tua</item>
+        <item name="android:windowBackground">@color/latar</item>
+    </style>
+</resources>
