@@ -251,6 +251,19 @@ Padanan cron (Linux):
 */5 * * * * php /var/www/pelaporan/scripts/pengingat_jadwal.php
 ```
 
+Setelah aplikasi berjalan di atas **Laravel**, gunakan Laravel Scheduler:
+satu tugas sistem menjalankan `scripts\jalankan_penjadwal.cmd` tiap menit
+(`php artisan schedule:run`). Perintah `pengingat:harian` (porting
+`scripts\pengingat_harian.php`) terdaftar harian 08:00 di `routes/console.php`:
+
+```bat
+C:\xampp\php\php.exe artisan pengingat:harian --kering   REM uji tanpa mengirim
+C:\xampp\php\php.exe artisan schedule:list              REM lihat jadwal
+
+schtasks /Create /SC MINUTE /MO 1 /TN "PHR Penjadwal" ^
+  /TR "C:\xampp\htdocs\pelaporan\scripts\jalankan_penjadwal.cmd"
+```
+
 ### 5.2. Cadangan basis data
 
 ```bat
@@ -263,6 +276,17 @@ dilindungi `.htaccess` → 403, dan diabaikan Git). Kata sandi dilewatkan lewat
 
 ```bat
 mysql -u pelaporan_app -p pelaporan < backups\pelaporan_20261016_013000.sql
+```
+
+Untuk lingkungan Laravel tersedia `scripts\backup_db.ps1` (+ `backup_db.cmd`)
+yang membaca kredensial dari `.env`, menjalankan
+`mysqldump --single-transaction`, menyimpan ke
+`backups\pelaporan-YYYYMMDD-HHmmss.sql`, mencatat ke `backups\backup.log`, dan
+merotasi berkas lebih tua dari 30 hari:
+
+```bat
+scripts\backup_db.cmd                 REM simpan 30 hari
+scripts\backup_db.cmd -HariSimpan 14 -Tujuan D:\backups
 ```
 
 ### 5.3. Layanan AI (opsional)

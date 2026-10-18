@@ -57,6 +57,32 @@ pasang-tugas-penjadwal.cmd
 
 Admin juga dapat mengirim pengingat manual dari menu **Pengingat** di aplikasi.
 
+### 2.1 Penjadwal Laravel (lingkungan migrasi)
+
+Setelah aplikasi dijalankan lewat Laravel, pengingat harian memakai perintah
+Artisan **`pengingat:harian`** — porting dari skrip di atas, tetap idempoten:
+
+```bat
+REM uji tanpa mengirim
+C:\xampp\php\php.exe artisan pengingat:harian --kering
+
+REM kirim sungguhan untuk tanggal tertentu
+C:\xampp\php\php.exe artisan pengingat:harian --tanggal=2026-10-16
+
+REM lihat jadwal yang terdaftar
+C:\xampp\php\php.exe artisan schedule:list
+```
+
+Penjadwalan ditangani Laravel Scheduler: satu tugas sistem menjalankan
+`scripts\jalankan_penjadwal.cmd` **tiap menit** (memanggil
+`php artisan schedule:run`). Perintah `pengingat:harian` dijadwalkan harian
+pukul 08:00 (lihat `routes/console.php`):
+
+```bat
+schtasks /Create /SC MINUTE /MO 1 /TN "PHR Penjadwal" ^
+  /TR "C:\xampp\htdocs\pelaporan\scripts\jalankan_penjadwal.cmd"
+```
+
 ---
 
 ## 3. Pencadangan & pemulihan
@@ -70,6 +96,36 @@ Hal yang perlu diketahui:
   oleh akun non-SUPER.
 - Setiap berkas dicatat di tabel `backup_riwayat` (ukuran + checksum).
 - Setelah memulihkan, 11 view Power BI tetap utuh.
+
+### 3.1 Pencadangan terjadwal (lingkungan Laravel)
+
+Skrip `scripts\backup_db.ps1` menjalankan `mysqldump --single-transaction`
+(aman saat basis data live), menyimpan ke
+`backups\pelaporan-YYYYMMDD-HHmmss.sql`, mencatat ke `backups\backup.log`, dan
+merotasi berkas lebih tua dari 30 hari. Kredensial dibaca dari `.env`
+(tidak ada sandi di dalam skrip).
+
+```bat
+REM manual (pembungkus .cmd)
+scripts\backup_db.cmd
+
+REM ke lokasi lain, simpan 14 hari
+scripts\backup_db.cmd -HariSimpan 14 -Tujuan D:\backups
+```
+
+Pemasangan harian pukul 23:30 (jalankan sebagai Administrator):
+
+```bat
+schtasks /Create /SC DAILY /ST 23:30 /TN "PHR Backup DB" ^
+  /TR "powershell -NoProfile -ExecutionPolicy Bypass -File C:\xampp\htdocs\pelaporan\scripts\backup_db.ps1"
+```
+
+Uji pemulihan ke basis data sementara:
+
+```bat
+C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE pelaporan_uji"
+C:\xampp\mysql\bin\mysql.exe -u root pelaporan_uji < D:\backups\pelaporan-20261019-021627.sql
+```
 
 ---
 

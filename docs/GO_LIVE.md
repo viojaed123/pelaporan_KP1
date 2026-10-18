@@ -35,6 +35,17 @@ Contoh (sesuaikan user/sandi):
 mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\pelaporan-%DATE%.sql
 ```
 
+> **Sudah tersedia:** `scripts\backup_db.ps1` (+ `scripts\backup_db.cmd`)
+> membuat dump `mysqldump --single-transaction` ke
+> `backups\pelaporan-YYYYMMDD-HHmmss.sql`, mencatat ke `backups\backup.log`,
+> dan merotasi berkas > 30 hari. Kredensial dibaca dari `.env`.
+> Pasang harian 23:30 (Administrator):
+> ```bat
+> schtasks /Create /SC DAILY /ST 23:30 /TN "PHR Backup DB" ^
+>   /TR "powershell -NoProfile -ExecutionPolicy Bypass -File C:\xampp\htdocs\pelaporan\scripts\backup_db.ps1"
+> ```
+> (Uji pemulihan: lihat `docs/OPERASIONAL.md` §3.1.)
+
 ## 3. SMTP surel organisasi
 
 - [ ] `.env`: `MAIL_MAILER=smtp`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`,
@@ -49,6 +60,16 @@ mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\p
 - [ ] `pengingat_harian.php` (lama) **atau** perintah Laravel padanannya aktif.
 - [ ] Bila memakai queue: `php artisan queue:work` berjalan sebagai layanan.
 - [ ] Verifikasi log: tugas terjadwal benar-benar tereksekusi.
+
+> **Sudah tersedia:** perintah Laravel `pengingat:harian` (porting
+> `scripts\pengingat_harian.php`, idempoten) dengan jadwal harian 08:00 di
+> `routes/console.php`. Jalankan penjadwal tiap menit dengan memasang
+> `scripts\jalankan_penjadwal.cmd`:
+> ```bat
+> schtasks /Create /SC MINUTE /MO 1 /TN "PHR Penjadwal" ^
+>   /TR "C:\xampp\htdocs\pelaporan\scripts\jalankan_penjadwal.cmd"
+> ```
+> Uji: `php artisan pengingat:harian --kering` (tanpa mengirim).
 
 ## 5. Akun admin & peran
 
