@@ -122,3 +122,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/tugas/simpan', [App\Http\Controllers\TugasController::class, 'simpan'])->middleware('role:mentor,admin')->name('tugas.simpan');
     Route::post('/tugas/{id}/status', [App\Http\Controllers\TugasController::class, 'perbaruiStatus'])->name('tugas.status');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Cangkang SPA React (/app)
+|--------------------------------------------------------------------------
+| Seluruh antarmuka pengguna berbasis token (web React) dirender di sini.
+| Autentikasi TIDAK memakai sesi web melainkan token API (Sanctum) yang
+| dikelola React -- sama seperti APK mobile, sehingga satu set endpoint
+| /api/v1/* melayani kedua klien. Rute terbuka; penjagaan ada di dalam
+| aplikasi (lihat resources/js/react/App.jsx).
+*/
+Route::view('/app', 'app')->name('spa');
+Route::view('/app/{any}', 'app')->where('any', '.*')->name('spa.any');
