@@ -93,4 +93,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/buat', [App\Http\Controllers\LaporanController::class, 'buat'])->name('laporan.buat');
     Route::get('/laporan/riwayat', [App\Http\Controllers\LaporanController::class, 'riwayat'])->name('laporan.riwayat');
     Route::get('/absensi', [App\Http\Controllers\AbsensiController::class, 'index'])->name('absensi.index');
+    Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])->name('notifikasi.index');
 });
