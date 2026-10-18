@@ -30,11 +30,23 @@ Android. Tandai `[x]` bila sudah beres.
 
 ## 2. Pencadangan basis data terjadwal
 
-- [ ] Skrip dump harian `mysqldump` (semua tabel; DB `pelaporan`).
+- [x] Skrip dump harian `mysqldump` (semua tabel; DB `pelaporan`) —
+      `scripts\backup_db.cmd`/`.ps1`, sudah diuji19 Okt 2026
+      (46 tabel +22 view,0,48 MB).
 - [ ] Simpan ke `backups/` **dan** salin ke lokasi lain (NAS/luar server).
+      (*Skrip mendukung `-Tujuan <path>`; penyalinan efektif menunggu
+      kredensial akses NAS.*)
 - [ ] `schtasks` harian, mis. 23:30, `mysqldump --single-transaction`.
-- [ ] Uji **pulihkan** dari cadangan ke DB sementara, minimal sekali.
-- [ ] Simpan cadangan minimal 30 hari (rotasi).
+      (*Butuh izin admin Windows; jalankan `scripts\jalankan_penjadwal.cmd`
+      sebagai Administrator.*)
+- [x] Uji **pulihkan** dari cadangan ke DB sementara, minimal sekali.
+      *(19 Okt 2026: `pelaporan-20261019-062821.sql` dipulihkan ke
+      `pelaporan_uji_restore` lalu dibandingkan baris per tabel:46 tabel —
+      selisih hanya7 tabel yang memang berubah SETelah jam cadangan
+      (pembersihan akun ganda),39 tabel identik,22 view =22.
+      DB sementara dihapus kembali.)*
+- [x] Simpan cadangan minimal30 hari (rotasi) — default
+      `backup_db.ps1 -HariSimpan 30` menghapus cadangan lebih tua.
 
 Contoh (sesuaikan user/sandi):
 ```bat
@@ -80,12 +92,18 @@ mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\p
 ## 5. Akun admin & peran
 
 - [ ] Akun administrator resmi dibuat (bukan akun uji).
-- [ ] Semua akun uji dihapus: `DELETE FROM users WHERE email LIKE 'tes\_%@uji.local';`
+- [x] Semua akun uji dihapus: `DELETE FROM users WHERE email LIKE 'tes\_%@uji.local';`
+      (verifikasi: `pengguna:audit` → "Akun uji (@uji.local): 0").
 - [ ] Peran (`karyawan`/`mentor`/`admin`) sudah benar untuk tiap pengguna.
-- [ ] Akun `root` tidak dipakai aplikasi.
-- [ ] Nama karyawan duplikat = 0 (`pengguna:audit`): nama ganda membuat
+- [x] Akun `root` tidak dipakai aplikasi (`.env` `DB_USERNAME=pelaporan_app`
+      dan `includes/config.php` `DB_USER=pelaporan_app`; `root` hanya ada
+      sebagai nilai bawaan *fallback* `config/database.php` yang tertimpa).
+- [x] Nama karyawan duplikat = 0 (`pengguna:audit`): nama ganda membuat
       pencocokan PIC/anggota kasus yang diketik bebas jadi ambigu.
-- [ ] Token API pengguna lama dicabut bila perlu: `DELETE FROM personal_access_tokens;`
+      *(Dibersihkan 19 Okt 2026: akun ganda #46/#47/#48 dihapus dengan
+      `pengguna:hapus`, #1 dipertahankan.)*
+- [x] Token API pengguna lama dicabut bila perlu: `DELETE FROM personal_access_tokens;`
+      (verifikasi: `pengguna:audit` → jumlah token 0).
 
 > **Alat bantu (read-only):** `php artisan pengguna:audit` melaporkan sebaran
 > peran & status, akun uji `@uji.local`, nama karyawan duplikat, akun belum
@@ -110,8 +128,9 @@ mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\p
 
 ## 7. Dokumentasi & SOP
 
-- [ ] `docs/PANDUAN_PENGGUNA.md` diperbarui (ada bagian SPA & APK).
-- [ ] `mobile/README.md` menjadi rujukan pemasangan APK.
+- [x] `docs/PANDUAN_PENGGUNA.md` diperbarui (ada bagian SPA & APK).
+- [x] `mobile/README.md` menjadi rujukan pemasangan APK (menyiapkan alamat
+      server, membangun, tanda tangan rilis, peta endpoint).
 - [ ] SOP operasional: cara cadangkan, pulihkan, tambah pengguna, atur 2FA.
 - [ ] Kontak dukungan/escalation jelas.
 
