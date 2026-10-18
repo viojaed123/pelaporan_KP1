@@ -103,9 +103,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/rekap/absensi', [App\Http\Controllers\RekapController::class, 'absensi'])->name('rekap.absensi');
     Route::get('/asisten', [App\Http\Controllers\AsistenController::class, 'index'])->name('asisten.index');
     Route::post('/asisten/kirim', [App\Http\Controllers\AsistenController::class, 'kirim'])->name('asisten.kirim');
+
+    Route::get('/impor', [App\Http\Controllers\ImporController::class, 'index'])->name('impor.index');
 });
-
-
-
-
-
