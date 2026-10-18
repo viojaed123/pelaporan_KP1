@@ -110,4 +110,13 @@ return [
     'organisasi'        => env('APP_ORGANISASI') ?: 'Pertamina Hulu Rokan',
     'aplikasi_singkat'  => env('APP_SINGKAT') ?: 'Pelaporan Harian',
 
+    /*
+    |----------------------------------------------------------------------
+    | Token API Power BI
+    |----------------------------------------------------------------------
+    | Token statis untuk endpoint /api/v1/* (lihat routes/api.php).
+    | Kosongkan untuk menonaktifkan API sepenuhnya.
+    */
+    'powerbi_token' => env('POWERBI_API_TOKEN', ''),
+
 ];
