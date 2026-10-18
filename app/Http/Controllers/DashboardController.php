@@ -26,23 +26,29 @@ class DashboardController extends Controller
     {
         $pengguna = $request->user();
 
-        return view('dashboard', [
+        $sisaIdle = max(
+            0,
+            (int) config('keamanan.sesi_idle_detik')
+                - (time() - (int) $request->session()->get('_sesi_terakhir', time()))
+        );
+        $sisaUsia = max(
+            0,
+            (int) config('keamanan.sesi_absolut_detik')
+                - (time() - (int) $request->session()->get('_sesi_mulai', time()))
+        );
+
+        $role = $pengguna?->role ?? $request->session()->get('role') ?? 'karyawan';
+        $view = match ($role) {
+            'admin'  => 'dashboard.admin',
+            'mentor' => 'dashboard.mentor',
+            default  => 'dashboard.index',
+        };
+
+        return view($view, [
             'pengguna' => $pengguna,
-            /*
-             * Sisa waktu sesi dihitung dari penanda yang SAMA dengan yang
-             * dipakai middleware BatasSesi, sehingga angka yang terlihat
-             * pengguna tidak pernah berbeda dari yang sebenarnya berlaku.
-             */
-            'sisaIdle' => max(
-                0,
-                (int) config('keamanan.sesi_idle_detik')
-                    - (time() - (int) $request->session()->get('_sesi_terakhir', time()))
-            ),
-            'sisaUsia' => max(
-                0,
-                (int) config('keamanan.sesi_absolut_detik')
-                    - (time() - (int) $request->session()->get('_sesi_mulai', time()))
-            ),
+            'sisaIdle' => $sisaIdle,
+            'sisaUsia' => $sisaUsia,
+            'menuAktif' => 'dashboard',
         ]);
     }
 }
