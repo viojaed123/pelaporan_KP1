@@ -88,4 +88,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin', [DashboardController::class, 'index'])
         ->middleware('role:admin')
         ->name('admin.dashboard');
+        
+    // Modul Laporan (migrasi bertahap)
+    Route::get('/laporan/buat', [App\Http\Controllers\LaporanController::class, 'buat'])->name('laporan.buat');
+    Route::get('/laporan/riwayat', [App\Http\Controllers\LaporanController::class, 'riwayat'])->name('laporan.riwayat');
 });
