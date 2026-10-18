@@ -44,11 +44,34 @@ class DashboardController extends Controller
             default  => 'dashboard.index',
         };
 
+        /*
+         * Ringkasan data nyata untuk kartu dashboard: laporan bulan ini,
+         * absensi hari ini, dan tugas aktif. Dipakai ketiga peran -- query
+         * dibatasi peran agar karyawan hanya melihat miliknya sendiri.
+         */
+        $bulanIni = [now()->startOfMonth()->toDateString(), now()->toDateString()];
+        $qLaporan = \App\Models\LaporanHarian::query()
+            ->whereBetween('tanggal', $bulanIni);
+        $qAbsensi = \App\Models\Absensi::query()
+            ->whereDate('tanggal', now()->toDateString());
+        $qTugas = \App\Models\Tugas::query()
+            ->whereNotIn('status', ['selesai', 'dibatalkan']);
+        if ($role === 'karyawan' && $pengguna) {
+            $qLaporan->where('user_id', $pengguna->id);
+            $qAbsensi->where('user_id', $pengguna->id);
+            $qTugas->where('user_id', $pengguna->id);
+        }
+
         return view($view, [
             'pengguna' => $pengguna,
             'sisaIdle' => $sisaIdle,
             'sisaUsia' => $sisaUsia,
             'menuAktif' => 'dashboard',
+            'jumlahLaporanBulanIni' => (clone $qLaporan)->count(),
+            'jumlahAbsensiHariIni' => (clone $qAbsensi)->count(),
+            'jumlahTugasAktif' => (clone $qTugas)->count(),
+            'tugasTerlambat' => (clone $qTugas)->terlambat()->count(),
+            'daftarTugas' => (clone $qTugas)->with('pemberiTugas:id,nama')->latest('tenggat')->limit(5)->get(),
         ]);
     }
 }

@@ -69,7 +69,7 @@ class LaporanApiController extends Controller
     {
         if (!$this->tokenSah($request)) { return $this->tolak(); }
         $data = $this->rentang($request)
-            ->with('user:id,name,email,role')
+            ->with('user:id,nama,role')
             ->orderBy('tanggal')->orderBy('id')
             ->get()
             ->map(fn ($l) => [
