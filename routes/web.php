@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -99,3 +99,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/kalender', [App\Http\Controllers\KalenderController::class, 'index'])->name('kalender.index');
     Route::get('/kasus', [App\Http\Controllers\KasusController::class, 'index'])->name('kasus.index');
 });
+
