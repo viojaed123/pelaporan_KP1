@@ -92,4 +92,5 @@ Route::middleware('auth')->group(function () {
     // Modul Laporan (migrasi bertahap)
     Route::get('/laporan/buat', [App\Http\Controllers\LaporanController::class, 'buat'])->name('laporan.buat');
     Route::get('/laporan/riwayat', [App\Http\Controllers\LaporanController::class, 'riwayat'])->name('laporan.riwayat');
+    Route::get('/absensi', [App\Http\Controllers\AbsensiController::class, 'index'])->name('absensi.index');
 });

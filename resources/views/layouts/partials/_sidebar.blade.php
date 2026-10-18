@@ -10,7 +10,7 @@
       ['key' => 'dashboard', 'ikon' => 'grafik', 'label' => 'Dashboard', 'file' => 'dashboard.php', 'route' => 'dashboard'],
       ['key' => 'buat', 'ikon' => 'tulis', 'label' => 'Buat Laporan', 'file' => 'buat_laporan.php', 'route' => 'laporan.buat'],
       ['key' => 'riwayat', 'ikon' => 'jam', 'label' => 'Riwayat Laporan', 'file' => 'riwayat.php', 'route' => 'laporan.riwayat'],
-      ['key' => 'absensi', 'ikon' => 'kalender', 'label' => 'Absensi', 'file' => 'absensi.php'],
+      ['key' => 'absensi', 'ikon' => 'kalender', 'label' => 'Absensi', 'file' => 'absensi.php', 'route' => 'absensi.index'],
     ],
     'mentor' => [
       ['grup' => 'Utama'],
