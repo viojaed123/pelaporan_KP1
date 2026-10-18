@@ -96,4 +96,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::get('/profil', [App\Http\Controllers\ProfilController::class, 'index'])->name('profil.index');
     Route::get('/ringkasan', [App\Http\Controllers\RingkasanController::class, 'index'])->name('ringkasan.index');
+    Route::get('/kalender', [App\Http\Controllers\KalenderController::class, 'index'])->name('kalender.index');
 });
