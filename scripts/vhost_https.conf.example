@@ -1,0 +1,57 @@
+# =====================================================================
+#  scripts/vhost_https.conf.example
+#  Contoh vhost HTTPS untuk XAMPP (Apache) — Laravel di public/.
+#
+#  CARA PAKAI
+#    1) Salin blok di bawah ke C:\xampp\apache\conf\extra\httpd-vhosts.conf
+#       (atau berkas lain yang di-Include), lalu sesuaikan nama domain &
+#       jalur sertifikat.
+#    2) Aktifkan SSL: buka C:\xampp\apache\conf\httpd.conf dan hapus tanda
+#       '#' pada baris berikut, lalu restart Apache:
+#           LoadModule ssl_module modules/mod_ssl.so
+#       (biarkan Include conf/extra/httpd-ssl.conf tetap aktif).
+#    3) Sediakan sertifikat & kunci, mis.:
+#           C:\xampp\apache\conf\ssl\pelaporan.crt
+#           C:\xampp\apache\conf\ssl\pelaporan.key
+#       Untuk uji internal dapat memakai mkcert / CA internal PHR.
+#    4) Pastikan nama domain menunjuk ke server (DNS internal atau hosts).
+#
+#  CATATAN APK
+#    Setelah HTTPS aktif: ganti BASE_URL di aplikasi Android ke https://…
+#    dan hapus android:usesCleartextTraffic="true" dari AndroidManifest.xml.
+#    Lihat docs/GO_LIVE.md §1.
+# =====================================================================
+
+# --- Alihkan seluruh HTTP ke HTTPS -----------------------------------
+<VirtualHost *:80>
+    ServerName pelaporan.phr.co.id
+    Redirect permanent / https://pelaporan.phr.co.id/
+</VirtualHost>
+
+# --- Aplikasi Laravel (HTTPS) ----------------------------------------
+<VirtualHost *:443>
+    ServerName pelaporan.phr.co.id
+    DocumentRoot "C:/xampp/htdocs/pelaporan/public"
+
+    SSLEngine on
+    SSLCertificateFile      "C:/xampp/apache/conf/ssl/pelaporan.crt"
+    SSLCertificateKeyFile   "C:/xampp/apache/conf/ssl/pelaporan.key"
+    # Sertifikat berantai (bila ada):
+    # SSLCertificateChainFile "C:/xampp/apache/conf/ssl/pelaporan-ca.crt"
+
+    <Directory "C:/xampp/htdocs/pelaporan/public">
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # Header keamanan dasar (butuh mod_headers, aktif bawaan XAMPP).
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Aktifkan HSTS hanya setelah HTTPS terbukti stabil:
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    ErrorLog  "logs/pelaporan-ssl-error.log"
+    CustomLog "logs/pelaporan-ssl-access.log" combined
+</VirtualHost>

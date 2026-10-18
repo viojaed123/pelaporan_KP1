@@ -22,6 +22,12 @@ Android. Tandai `[x]` bila sudah beres.
       build ulang.
 - [ ] Uji: buka `https://…/app` → SPA memuat tanpa peringatan campuran konten.
 
+> **Sudah tersedia:** contoh vhost HTTPS siap sunting di
+> `scripts\vhost_https.conf.example` — memuat pengalihan HTTP→HTTPS, `DocumentRoot`
+> ke `public/`, header keamanan dasar, dan catatan sertifikat. Salin isinya ke
+> `C:\xampp\apache\conf\extra\httpd-vhosts.conf`, aktifkan `mod_ssl`, lalu
+> restart Apache.
+
 ## 2. Pencadangan basis data terjadwal
 
 - [ ] Skrip dump harian `mysqldump` (semua tabel; DB `pelaporan`).
@@ -78,6 +84,11 @@ mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\p
 - [ ] Peran (`karyawan`/`mentor`/`admin`) sudah benar untuk tiap pengguna.
 - [ ] Akun `root` tidak dipakai aplikasi.
 - [ ] Token API pengguna lama dicabut bila perlu: `DELETE FROM personal_access_tokens;`
+
+> **Alat bantu (read-only):** `php artisan pengguna:audit` melaporkan sebaran
+> peran & status, akun uji `@uji.local`, nama karyawan duplikat, akun belum
+> aktif, dan jumlah token API — tanpa mengubah data. Nama duplikat penting
+> karena PIC/anggota kasus diketik bebas lalu dicocokkan ke nama pengguna.
 
 ## 6. UAT (User Acceptance Test)
 
