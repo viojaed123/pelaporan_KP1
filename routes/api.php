@@ -64,7 +64,11 @@ Route::prefix('v1')->group(function () {
             ->whereNumber('id');
 
         Route::get('/kasus', [KasusController::class, 'daftar']);
+        Route::post('/kasus', [KasusController::class, 'simpan'])
+            ->middleware('role:mentor,admin');
         Route::get('/kasus/{id}', [KasusController::class, 'detail'])
+            ->whereNumber('id');
+        Route::put('/kasus/{id}', [KasusController::class, 'perbarui'])
             ->whereNumber('id');
 
         Route::get('/notifikasi', [NotifikasiController::class, 'daftar']);

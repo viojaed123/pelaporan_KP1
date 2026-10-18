@@ -48,6 +48,7 @@ class Kasus extends Model
         'progres',
         'dibuat_oleh',
         'penanggung_jawab_id',
+        'penanggung_jawab_teks',
         'kategori',
         'sumber',
         'target_selesai',

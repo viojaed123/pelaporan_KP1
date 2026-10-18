@@ -99,6 +99,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/ringkasan', [App\Http\Controllers\RingkasanController::class, 'index'])->name('ringkasan.index');
     Route::get('/kalender', [App\Http\Controllers\KalenderController::class, 'index'])->name('kalender.index');
     Route::get('/kasus', [App\Http\Controllers\KasusController::class, 'index'])->name('kasus.index');
+    Route::get('/kasus/buat', [App\Http\Controllers\KasusController::class, 'buat'])->name('kasus.buat');
+    Route::post('/kasus/simpan', [App\Http\Controllers\KasusController::class, 'simpan'])->name('kasus.simpan');
+    Route::get('/kasus/{id}', [App\Http\Controllers\KasusController::class, 'detail'])->whereNumber('id')->name('kasus.detail');
+    Route::get('/kasus/{id}/edit', [App\Http\Controllers\KasusController::class, 'edit'])->whereNumber('id')->name('kasus.edit');
+    Route::post('/kasus/{id}/perbarui', [App\Http\Controllers\KasusController::class, 'perbarui'])->whereNumber('id')->name('kasus.perbarui');
 
     Route::get('/rekap/laporan', [App\Http\Controllers\RekapController::class, 'laporan'])->name('rekap.laporan');
     Route::get('/rekap/absensi', [App\Http\Controllers\RekapController::class, 'absensi'])->name('rekap.absensi');

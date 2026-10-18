@@ -39,6 +39,7 @@ class KasusPenugasan extends Model
     protected $fillable = [
         'kasus_id',
         'user_id',
+        'nama_teks',
         'peran',
         'ditugaskan_oleh',
     ];

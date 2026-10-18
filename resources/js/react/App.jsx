@@ -8,6 +8,7 @@ import BuatLaporan from './pages/BuatLaporan';
 import Absensi from './pages/Absensi';
 import Tugas from './pages/Tugas';
 import Kasus from './pages/Kasus';
+import KasusForm from './pages/KasusForm';
 import Notifikasi from './pages/Notifikasi';
 import Asisten from './pages/Asisten';
 import Profil from './pages/Profil';
@@ -41,6 +42,8 @@ export default function App() {
                         <Route path="/absensi" element={<Absensi />} />
                         <Route path="/tugas" element={<Tugas />} />
                         <Route path="/kasus" element={<Kasus />} />
+                        <Route path="/kasus/buat" element={<KasusForm />} />
+                        <Route path="/kasus/:id/edit" element={<KasusForm />} />
                         <Route path="/notifikasi" element={<Notifikasi />} />
                         <Route path="/asisten" element={<Asisten />} />
                         <Route path="/profil" element={<Profil />} />

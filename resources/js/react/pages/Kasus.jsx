@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api';
 
 /*
@@ -16,9 +17,9 @@ export default function Kasus() {
             .catch(() => setGalat('Gagal memuat daftar kasus.'));
     }, []);
 
-    const buka = async (kode) => {
+    const buka = async (id) => {
         try {
-            const res = await api.get(`/kasus/${kode}`);
+            const res = await api.get(`/kasus/${id}`);
             setTerpilih(res.data.kasus);
         } catch (err) {
             setGalat(err.response?.data?.pesan ?? 'Gagal memuat detail kasus.');
@@ -27,7 +28,10 @@ export default function Kasus() {
 
     return (
         <>
-            <h2 className="judul-halaman">Kasus</h2>
+            <div className="baris-atas">
+                <h2 className="judul-halaman">Kasus</h2>
+                <Link className="btn btn-utama" to="/kasus/buat">+ Buat Kasus Baru</Link>
+            </div>
             {galat && <div className="peringatan">{galat}</div>}
 
             <div className="kartu">
@@ -48,13 +52,13 @@ export default function Kasus() {
                             </thead>
                             <tbody>
                                 {data.map((k) => (
-                                    <tr key={k.kode}>
+                                    <tr key={k.id}>
                                         <td>{k.kode}</td>
                                         <td>{k.judul}</td>
                                         <td><span className={`badge badge-${urgensi(k.urgensi)}`}>{k.urgensi}</span></td>
                                         <td>{k.status}</td>
                                         <td>{k.progres}%</td>
-                                        <td><button className="btn" onClick={() => buka(k.kode)}>Detail</button></td>
+                                        <td><button className="btn" onClick={() => buka(k.id)}>Detail</button></td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -67,6 +71,7 @@ export default function Kasus() {
                 <div className="kartu">
                     <div className="kartu-kepala">
                         {terpilih.kode} — {terpilih.judul}
+                        <Link className="btn" to={`/kasus/${terpilih.id}/edit`}>Edit</Link>
                         <button className="btn tutup" onClick={() => setTerpilih(null)}>Tutup</button>
                     </div>
                     <div className="kartu-tubuh">
