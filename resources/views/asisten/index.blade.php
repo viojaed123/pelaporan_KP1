@@ -20,18 +20,33 @@
 <script>
 document.getElementById('form-asisten').addEventListener('submit', async function(e){
   e.preventDefault();
-  const pesan = document.getElementById('pesan').value;
+  const pesan = document.getElementById('pesan').value.trim();
+  if (!pesan) return;
   const box = document.getElementById('chat-box');
-  box.innerHTML += '<div><strong>Anda:</strong> ' + pesan + '</div>';
+  const tombol = this.querySelector('button');
+  box.innerHTML += '<div><strong>Anda:</strong> ' + pesan.replace(/</g,'&lt;') + '</div>';
   document.getElementById('pesan').value = '';
-  const res = await fetch('{{ route(\"asisten.kirim\") }}', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
-    body: JSON.stringify({pesan})
-  });
-  const data = await res.json();
-  box.innerHTML += '<div><strong>Asisten:</strong> ' + data.jawaban + '</div>';
+  const tanda = document.createElement('div');
+  tanda.innerHTML = '<strong>Asisten:</strong> <em>mengetik&hellip;</em>';
+  box.appendChild(tanda);
   box.scrollTop = box.scrollHeight;
+  tombol.disabled = true;
+  try {
+    const res = await fetch('{{ route("asisten.kirim") }}', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+      body: JSON.stringify({pesan}),
+      signal: AbortSignal.timeout(20000)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    tanda.innerHTML = '<strong>Asisten:</strong> ' + (data.jawaban || '(kosong)').replace(/</g,'&lt;');
+  } catch (err) {
+    tanda.innerHTML = '<strong>Asisten:</strong> Maaf, saya sedang sibuk -- silakan coba lagi beberapa saat lagi.';
+  } finally {
+    tombol.disabled = false;
+    box.scrollTop = box.scrollHeight;
+  }
 });
 </script>
 @endpush

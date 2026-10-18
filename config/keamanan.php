@@ -119,4 +119,26 @@ return [
     */
     'powerbi_token' => env('POWERBI_API_TOKEN', ''),
 
+    /*
+    |----------------------------------------------------------------------
+    | LLM Asisten AI (opsional)
+    |----------------------------------------------------------------------
+    | Asisten tetap berfungsi penuh tanpa LLM (jawaban berbasis data
+    | database). LLM hanya menambah jawaban generatif.
+    |
+    |   llm_base_url : endpoint provider. KOSONGKAN = LLM nonaktif.
+    |                  Contoh: https://api.openai.com/v1
+    |   llm_api_key  : key milik provider tersebut.
+    |   llm_model    : nama model.
+    |
+    | Bila provider menolak key (401) atau tidak terjangkau, LLM otomatis
+    | DINONAKTIFKAN sementara (lihat AsistenController) supaya permintaan
+    | tidak pernah menggantung dan halaman tetap responsif.
+    */
+    'llm_base_url' => rtrim((string) env('LLM_BASE_URL', ''), '/'),
+    'llm_api_key'  => (string) env('LLM_API_KEY', ''),
+    'llm_model'    => (string) env('LLM_MODEL', 'gpt-4o-mini'),
+    'llm_timeout'  => (int) env('LLM_TIMEOUT', 12),
+    'llm_off_detik' => (int) env('LLM_OFF_DETIK', 3600),
+
 ];

@@ -144,13 +144,28 @@ class AsistenController extends Controller
     }
 
     /* ----------------------------------------------------------------
-     * Lapis 2: LLM opsional (OPENAI_API_KEY)
+     * Lapis 2: LLM opsional (konfigurasi .env: LLM_BASE_URL/LLM_API_KEY)
+     *
+     * Keselamatan permintaan:
+     *   - Bila belum dikonfigurasi (base_url kosong) → langsung dilewati.
+     *   - Bila provider menolak (401) atau tidak terjangkau → LLM
+     *     DINONAKTIFKAN otomatis selama `llm_off_detik` (default 1 jam)
+     *     lewat cache. Selama kunci mati itu, semua pertanyaan dijawab
+     *     dari database tanpa satu pun HTTP keluar -- permintaan tidak
+     *     pernah menggantung dan halaman tidak pernah "tutup".
      * -------------------------------------------------------------- */
 
     private function lewatLlm(string $pesan, $riwayat): ?string
     {
-        $key = (string) env('OPENAI_API_KEY', '');
-        if ($key === '') { return null; }
+        $baseUrl = (string) config('keamanan.llm_base_url');
+        $key = (string) config('keamanan.llm_api_key');
+
+        if ($baseUrl === '' || $key === '') {
+            return null;
+        }
+        if (cache()->get('asisten:llm_mati')) {
+            return null;
+        }
 
         $system = 'Anda adalah Asisten AI Sistem Pelaporan Kegiatan Harian (PHR) '
             . config('keamanan.organisasi') . '. '
@@ -165,15 +180,29 @@ class AsistenController extends Controller
         $messages[] = ['role' => 'user', 'content' => $pesan];
 
         try {
-            $res = Http::withToken($key)->timeout(20)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
-                'messages' => $messages,
-                'max_tokens' => 500,
-            ]);
+            $res = Http::withToken($key)
+                ->connectTimeout(5)
+                ->timeout((int) config('keamanan.llm_timeout', 12))
+                ->post($baseUrl . '/chat/completions', [
+                    'model' => config('keamanan.llm_model'),
+                    'messages' => $messages,
+                    'max_tokens' => 500,
+                ]);
+
+            if ($res->status() === 401 || $res->status() === 403) {
+                // Key ditolak provider: kunci mati agar tidak dicoba lagi
+                // berulang-ulang setiap pesan.
+                cache()->put('asisten:llm_mati', true, (int) config('keamanan.llm_off_detik', 3600));
+                return null;
+            }
             if ($res->ok()) {
-                return (string) data_get($res->json(), 'choices.0.message.content', '');
+                $isi = trim((string) data_get($res->json(), 'choices.0.message.content', ''));
+                return $isi !== '' ? $isi : null;
             }
         } catch (\Throwable $e) {
+            // Timeout / koneksi gagal: kunci mati sebentar supaya halaman
+            // tidak menunggu kegagalan yang sama pada pesan berikutnya.
+            cache()->put('asisten:llm_mati', true, (int) config('keamanan.llm_off_detik', 3600));
             report($e);
         }
         return null;
