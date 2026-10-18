@@ -12,12 +12,25 @@ import KasusForm from './pages/KasusForm';
 import Notifikasi from './pages/Notifikasi';
 import Asisten from './pages/Asisten';
 import Profil from './pages/Profil';
+import RekapLaporan from './pages/RekapLaporan';
+import RekapAbsensi from './pages/RekapAbsensi';
+import RingkasanKegiatan from './pages/RingkasanKegiatan';
+import KalenderAktivitas from './pages/KalenderAktivitas';
 
 /* Penjaga rute: tanpa token → halaman masuk. */
 function Jaga({ children }) {
     const { pengguna, sibuk } = useAuth();
     if (sibuk) return <div className="muat">Memuat…</div>;
     if (!pengguna) return <Navigate to="/masuk" replace />;
+    return children;
+}
+
+/* Penjaga peran: halaman khusus mentor/admin (API tetap menolak 403). */
+function PerluPeran({ peran, children }) {
+    const { pengguna } = useAuth();
+    if (!peran.includes(pengguna?.role)) {
+        return <div className="peringatan">Halaman ini khusus untuk mentor/admin.</div>;
+    }
     return children;
 }
 
@@ -47,6 +60,16 @@ export default function App() {
                         <Route path="/notifikasi" element={<Notifikasi />} />
                         <Route path="/asisten" element={<Asisten />} />
                         <Route path="/profil" element={<Profil />} />
+                        <Route
+                            path="/rekap/laporan"
+                            element={<PerluPeran peran={['mentor', 'admin']}><RekapLaporan /></PerluPeran>}
+                        />
+                        <Route
+                            path="/rekap/absensi"
+                            element={<PerluPeran peran={['mentor', 'admin']}><RekapAbsensi /></PerluPeran>}
+                        />
+                        <Route path="/ringkasan" element={<RingkasanKegiatan />} />
+                        <Route path="/kalender" element={<KalenderAktivitas />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>
                 </Routes>

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\AbsensiController;
+use App\Http\Controllers\Api\AnalitikController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\KasusController;
 use App\Http\Controllers\Api\LaporanController;
@@ -79,5 +80,16 @@ Route::prefix('v1')->group(function () {
         /* Asisten AI: memakai logika yang sama dengan halaman web. */
         Route::post('/asisten/kirim', [AsistenController::class, 'kirim'])
             ->middleware('throttle:20,1');
+
+        /* Analitik (porting rekap/ringkasan/kalender).
+           Rekap menyeluruh khusus mentor/admin; ringkasan & kalender
+           dapat diakses semua pengguna (penskalaan di dalam controller). */
+        Route::middleware('role:mentor,admin')->group(function () {
+            Route::get('/rekap/laporan', [AnalitikController::class, 'rekapLaporan']);
+            Route::get('/rekap/absensi', [AnalitikController::class, 'rekapAbsensi']);
+        });
+
+        Route::get('/ringkasan-kegiatan', [AnalitikController::class, 'ringkasan']);
+        Route::get('/kalender', [AnalitikController::class, 'kalender']);
     });
 });
