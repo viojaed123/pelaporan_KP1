@@ -100,3 +100,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/kasus', [App\Http\Controllers\KasusController::class, 'index'])->name('kasus.index');
 });
 
+
