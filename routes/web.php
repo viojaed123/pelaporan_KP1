@@ -95,4 +95,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/absensi', [App\Http\Controllers\AbsensiController::class, 'index'])->name('absensi.index');
     Route::get('/notifikasi', [App\Http\Controllers\NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::get('/profil', [App\Http\Controllers\ProfilController::class, 'index'])->name('profil.index');
+    Route::get('/ringkasan', [App\Http\Controllers\RingkasanController::class, 'index'])->name('ringkasan.index');
 });
