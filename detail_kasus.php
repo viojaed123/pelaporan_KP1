@@ -76,6 +76,7 @@ $sql = "
         target_selesai,
         dibuat_oleh,
         penanggung_jawab_id,
+        penanggung_jawab_teks,
         dibuat_pada,
         diperbarui_pada
     FROM kasus
@@ -302,6 +303,11 @@ if ($uidPembuat > 0 || $uidPic > 0) {
     }
     $nama_pembuat = $petaNamaKasus[$uidPembuat] ?? '';
     $nama_pic     = $petaNamaKasus[$uidPic] ?? '';
+}
+/* PIC bukan pengguna sistem (atau kasus dibuat lewat ketikan bebas):
+ * tampilkan nama sebagaimana diketik. */
+if (trim($nama_pic) === '') {
+    $nama_pic = trim((string) ($kasus['penanggung_jawab_teks'] ?? ''));
 }
 
 /* ==========================================

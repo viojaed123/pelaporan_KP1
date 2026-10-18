@@ -3,9 +3,12 @@
  * buat_kasus.php — membuat kasus baru (modul Pelacakan Kasus multi-pengguna).
  *
  * Semua pengguna yang sudah masuk boleh membuat kasus. Pembuat otomatis
- * menjadi pembuat (dibuat_oleh) dan, bila tak memilih PIC lain, sekaligus
- * penanggung jawab. Bila teks lokasi diisi tanpa koordinat, sistem mencoba
- * geokode otomatis (master wilayah + cache, lalu Nominatim).
+ * menjadi pembuat (dibuat_oleh) dan, bila PIC dikosongkan, sekaligus
+ * penanggung jawab. PIC & anggota tim DIIKETIK BEBAS (bukan dropdown):
+ * nama yang cocok dengan pengguna terdaftar otomatis tertaut ke user_id
+ * (kasus_cocok_pengguna), yang tidak cocok tetap tersimpan sebagai teks.
+ * Bila teks lokasi diisi tanpa koordinat, sistem mencoba geokode otomatis
+ * (master wilayah + cache, lalu Nominatim).
  */
 
 declare(strict_types=1);
@@ -32,11 +35,14 @@ $draft = [
     'garis_lintang'       => '',
     'garis_bujur'         => '',
     'target_selesai'      => '',
-    'penanggung_jawab_id' => $uid,
+    'penanggung_jawab'    => sesi_nama(),
 ];
-$anggotaTerpilih = [];
+$anggotaTeks = '';
 
 $pesan = '';
+
+/* Dipakai untuk pencocokan ketikan dan pilihan saran. */
+$daftarUser = kasus_daftar_user($conn);
 
 /* ==========================================
  * 2. PROSES SIMPAN
@@ -55,12 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $draft['garis_lintang'] = trim((string) ($_POST['garis_lintang'] ?? ''));
     $draft['garis_bujur']   = trim((string) ($_POST['garis_bujur'] ?? ''));
     $draft['target_selesai'] = trim((string) ($_POST['target_selesai'] ?? ''));
-    $draft['penanggung_jawab_id'] = (int) ($_POST['penanggung_jawab_id'] ?? 0);
-
-    $anggotaTerpilih = array_values(array_filter(
-        array_map('intval', (array) ($_POST['anggota'] ?? [])),
-        static fn ($v) => $v > 0
-    ));
+    $draft['penanggung_jawab'] = (string) ($_POST['penanggung_jawab'] ?? '');
+    $anggotaTeks               = (string) ($_POST['anggota_teks'] ?? '');
 
     /* ---- Validasi ---- */
     if ($draft['judul'] === '') {
@@ -96,28 +98,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    /* Penanggung jawab harus pengguna aktif yang sah. */
-    $petaUser = [];
-    foreach (kasus_daftar_user($conn) as $u) {
-        $petaUser[(int) $u['id']] = $u;
+    /* PIC & anggota tim: ketik bebas, dicocokkan ke pengguna terdaftar. */
+    if ($pesan === '' && mb_strlen($draft['penanggung_jawab']) > 150) {
+        $pesan = 'Penanggung jawab maksimal 150 karakter.';
     }
-    if ($pesan === '' && $draft['penanggung_jawab_id'] > 0 && !isset($petaUser[$draft['penanggung_jawab_id']])) {
-        $pesan = 'Penanggung jawab tidak dikenal.';
+    if ($pesan === '' && mb_strlen($anggotaTeks) > 4000) {
+        $pesan = 'Daftar anggota tim maksimal 4.000 karakter.';
     }
-    if ($pesan === '' && ($draft['penanggung_jawab_id'] < 1)) {
-        $draft['penanggung_jawab_id'] = $uid;
+
+    $pic        = ['teks' => '', 'user_id' => null];
+    $anggotaTim = [];
+    if ($pesan === '') {
+        $pic = kasus_cocok_pengguna($daftarUser, $draft['penanggung_jawab']);
+
+        /* Dikosongkan → pembuat menjadi PIC (perilaku lama dipertahankan). */
+        if ($pic['teks'] === '') {
+            $pic = ['teks' => sesi_nama(), 'user_id' => $uid];
+        }
+
+        $anggotaTim = kasus_tim_teks_cocok($daftarUser, $anggotaTeks);
+
+        /* Anggota tidak boleh duplikat: nama sama dengan PIC, atau pengguna
+           yang sama dengan PIC (bila PIC terdaftar). Pengguna TIDAK terdaftar
+           (user_id null) tidak dianggap sama hanya karena sama-sama null. */
+        $kunciPic = mb_strtolower($pic['teks']);
+        $anggotaTim = array_values(array_filter(
+            $anggotaTim,
+            static fn ($a) => mb_strtolower($a['teks']) !== $kunciPic
+                && ($pic['user_id'] === null || $a['user_id'] !== $pic['user_id'])
+        ));
     }
-    /* Anggota tim: hanya id yang sah, dan bukan PIC utama. */
-    $anggotaTerpilih = array_values(array_unique(array_filter(
-        $anggotaTerpilih,
-        static fn ($v) => isset($petaUser[$v]) && $v !== (int) $draft['penanggung_jawab_id']
-    )));
 
     if ($pesan === '') {
         $kode = kasus_buat_kode($conn);
         $progres = max(0, min(100, (int) $draft['progres']));
         $target = $draft['target_selesai'] !== '' ? $draft['target_selesai'] : null;
-        $pj = $draft['penanggung_jawab_id'] > 0 ? $draft['penanggung_jawab_id'] : null;
+        $pj = $pic['user_id'];
         $lokasi = $draft['nama_lokasi'] !== '' ? $draft['nama_lokasi'] : null;
 
         $kasusId = kasus_simpan($conn, [
@@ -135,6 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'target_selesai'    => $target,
             'dibuat_oleh'       => $uid,
             'penanggung_jawab_id' => $pj,
+            'penanggung_jawab_teks' => $pic['teks'] !== '' ? $pic['teks'] : null,
         ]);
 
         if ($kasusId < 1) {
@@ -142,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             /* Linimasa awal + anggota tim. */
             kasus_catat_status($conn, $kasusId, null, $draft['status_kasus'], $progres, 'Kasus dibuat.', $uid);
-            kasus_sinkron_tim($conn, $kasusId, $anggotaTerpilih, $uid);
+            kasus_sinkron_tim_teks($conn, $kasusId, $anggotaTim, $uid);
 
             /* Geokode otomatis bila lokasi ada tetapi koordinat kosong. */
             if ($lat === null && $lng === null && $lokasi !== null && function_exists('wilayah_geokode_teks')) {
@@ -181,8 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* ==========================================
  * 3. TAMPILAN
  * ========================================== */
-
-$daftarUser = kasus_daftar_user($conn);
 
 mulai_halaman([
     'judul' => 'Buat Kasus',
@@ -295,26 +310,24 @@ mulai_halaman([
 
             <div class="grid grid-2">
                 <div class="grup-form">
-                    <label class="label-form" for="penanggung_jawab_id">Penanggung Jawab (PIC)</label>
-                    <select id="penanggung_jawab_id" name="penanggung_jawab_id">
-                        <?php foreach ($daftarUser as $u): ?>
-                            <option value="<?= (int) $u['id'] ?>" <?= (int) $draft['penanggung_jawab_id'] === (int) $u['id'] ? 'selected' : '' ?>>
-                                <?= e($u['nama']) ?> (<?= e($u['role']) ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <label class="label-form" for="penanggung_jawab">Penanggung Jawab (PIC)</label>
+                    <input type="text" id="penanggung_jawab" name="penanggung_jawab" maxlength="150"
+                           value="<?= e($draft['penanggung_jawab']) ?>"
+                           placeholder="Nama atau surel PIC — ketik sendiri">
+                    <span class="text-redup text-kecil">
+                        Ketik bebas. Nama yang sama dengan pengguna terdaftar otomatis menerima notifikasi;
+                        bila kosong, Anda menjadi PIC.
+                    </span>
                 </div>
 
                 <div class="grup-form">
-                    <label class="label-form" for="anggota">Anggota Tim (boleh lebih dari satu)</label>
-                    <select id="anggota" name="anggota[]" multiple size="6">
-                        <?php foreach ($daftarUser as $u): ?>
-                            <option value="<?= (int) $u['id'] ?>" <?= in_array((int) $u['id'], $anggotaTerpilih, true) ? 'selected' : '' ?>>
-                                <?= e($u['nama']) ?> (<?= e($u['role']) ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <span class="text-redup text-kecil">Pilih anggota tambahan bila kasus ditangani bersama.</span>
+                    <label class="label-form" for="anggota_teks">Anggota Tim (boleh lebih dari satu)</label>
+                    <textarea id="anggota_teks" name="anggota_teks" rows="4" maxlength="4000"
+                              placeholder="Satu nama per baris, contoh:&#10;Budi Santoso&#10;Siti Aminah"><?= e($anggotaTeks) ?></textarea>
+                    <span class="text-redup text-kecil">
+                        Ketik mandiri tanpa harus memilih daftar. Nama yang cocok dengan pengguna
+                        terdaftar tertaut otomatis; yang tidak cocok tetap tersimpan sebagai teks.
+                    </span>
                 </div>
             </div>
         </div>

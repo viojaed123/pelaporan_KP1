@@ -5,7 +5,8 @@
  * Izin: pembuat, PIC, anggota tim, atau mentor/admin. Karyawan lain ditolak
  * (HTTP 403). Setiap perubahan dicatat pada audit trail; perubahan status
  * atau progres juga dicatat pada linimasa kasus dan dinotifikasikan ke pihak
- * terkait.
+ * terkait. PIC & anggota tim DIIKETIK BEBAS (bukan dropdown) — sama dengan
+ * formulir buat_kasus dan formulir aplikasi Laravel/React.
  */
 
 declare(strict_types=1);
@@ -45,15 +46,14 @@ $boleh_hapus = kasus_izin_hapus($conn, $kasus, $uid, $role);
  * ========================================== */
 
 $daftarUser = kasus_daftar_user($conn);
-$petaUser   = [];
-foreach ($daftarUser as $u) {
-    $petaUser[(int) $u['id']] = $u;
-}
 
-$anggotaTerpilih = array_map(
-    static fn ($a) => (int) $a['user_id'],
+/* Ketikan anggota saat ini (nama_teks; nama pengguna bila baris lama). */
+$anggotaTeks = implode("\n", array_map(
+    static fn ($a) => trim((string) ($a['nama_teks'] ?? '')) !== ''
+        ? (string) $a['nama_teks']
+        : (string) ($a['nama'] ?? ''),
     kasus_penugasan_daftar($conn, (int) $kasus_id)
-);
+));
 
 $pesan = '';
 
@@ -74,13 +74,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $latStr    = trim((string) ($_POST['garis_lintang'] ?? ''));
     $lngStr    = trim((string) ($_POST['garis_bujur'] ?? ''));
     $target    = trim((string) ($_POST['target_selesai'] ?? ''));
-    $pjId      = (int) ($_POST['penanggung_jawab_id'] ?? 0);
+    $pjTeksKetik = (string) ($_POST['penanggung_jawab'] ?? '');
+    $anggotaTeks = (string) ($_POST['anggota_teks'] ?? '');
     $catatan   = trim((string) ($_POST['catatan_status'] ?? ''));
 
-    $anggota = array_values(array_unique(array_filter(
-        array_map('intval', (array) ($_POST['anggota'] ?? [])),
-        static fn ($v) => $v > 0
-    )));
+    /* PIC & anggota tim: ketik bebas, dicocokkan ke pengguna terdaftar. */
+    $pic        = kasus_cocok_pengguna($daftarUser, $pjTeksKetik);
+    $anggotaTim = kasus_tim_teks_cocok($daftarUser, $anggotaTeks);
+    $kunciPic   = mb_strtolower($pic['teks']);
+    $anggotaTim = array_values(array_filter(
+        $anggotaTim,
+        static fn ($a) => mb_strtolower($a['teks']) !== $kunciPic
+            && ($pic['user_id'] === null || $a['user_id'] !== $pic['user_id'])
+    ));
 
     if ($judul === '') {
         $pesan = 'Judul kasus wajib diisi.';
@@ -114,19 +120,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($pesan === '' && $pjId > 0 && !isset($petaUser[$pjId])) {
-        $pesan = 'Penanggung jawab tidak dikenal.';
+    if ($pesan === '' && mb_strlen($pjTeksKetik) > 150) {
+        $pesan = 'Penanggung jawab maksimal 150 karakter.';
     }
-    if ($pesan === '' && $pjId < 1) {
-        $pjId = (int) ($kasus['penanggung_jawab_id'] ?? 0);
+    if ($pesan === '' && mb_strlen($anggotaTeks) > 4000) {
+        $pesan = 'Daftar anggota tim maksimal 4.000 karakter.';
     }
-    $anggota = array_values(array_filter($anggota, static fn ($v) => isset($petaUser[$v]) && $v !== $pjId));
 
     if ($pesan === '') {
         $statusLama  = (string) $kasus['status_kasus'];
         $progresLama = (int) $kasus['progres'];
         $targetVal   = $target !== '' ? $target : null;
-        $pjVal       = $pjId > 0 ? $pjId : null;
+        $pjVal       = $pic['user_id'];
         $deskVal     = $deskripsi !== '' ? $deskripsi : null;
         $lokVal      = $lokasi !== '' ? $lokasi : null;
         $katVal      = $kategori !== '' ? $kategori : null;
@@ -144,12 +149,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'kategori'           => $katVal,
             'target_selesai'     => $targetVal,
             'penanggung_jawab_id' => $pjVal,
+            'penanggung_jawab_teks' => $pic['teks'] !== '' ? $pic['teks'] : null,
         ]);
 
         if (!$diperbarui) {
             $pesan = 'Perubahan gagal disimpan. Silakan coba lagi.';
         } else {
-            kasus_sinkron_tim($conn, (int) $kasus_id, $anggota, $uid);
+            kasus_sinkron_tim_teks($conn, (int) $kasus_id, $anggotaTim, $uid);
 
                 /* Linimasa bila status atau progres berubah. */
                 if ($status !== $statusLama || $progres !== $progresLama) {
@@ -198,15 +204,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $kasus['garis_lintang']       = $latStr !== '' ? $latStr : null;
     $kasus['garis_bujur']         = $lngStr !== '' ? $lngStr : null;
     $kasus['target_selesai']      = $target;
-    $kasus['penanggung_jawab_id'] = $pjId;
-    $anggotaTerpilih              = $anggota;
+    $kasus['penanggung_jawab_id']   = $pic['user_id'];
+    $kasus['penanggung_jawab_teks'] = $pic['teks'];
 }
 
 /* ==========================================
  * 4. TAMPILAN
  * ========================================== */
 
-$pjSekarang = (int) ($kasus['penanggung_jawab_id'] ?? 0);
+/* Nama PIC untuk mengisi kolom ketik: teks ketikan, atau nama pengguna
+ * untuk kasus lama yang dibuat lewat dropdown (teksnya masih kosong). */
+$pjSekarang   = (int) ($kasus['penanggung_jawab_id'] ?? 0);
+$pjTeksTampil = trim((string) ($kasus['penanggung_jawab_teks'] ?? ''));
+if ($pjTeksTampil === '' && $pjSekarang > 0) {
+    $qNamaPic = $conn->prepare('SELECT nama FROM users WHERE id = ? LIMIT 1');
+    if ($qNamaPic) {
+        $qNamaPic->bind_param('i', $pjSekarang);
+        $qNamaPic->execute();
+        $barisNamaPic = $qNamaPic->get_result()->fetch_assoc();
+        $qNamaPic->close();
+        $pjTeksTampil = (string) ($barisNamaPic['nama'] ?? '');
+    }
+}
 
 mulai_halaman([
     'judul' => 'Edit Kasus',
@@ -309,24 +328,23 @@ mulai_halaman([
 
             <div class="grid grid-2">
                 <div class="grup-form">
-                    <label class="label-form" for="penanggung_jawab_id">Penanggung Jawab (PIC)</label>
-                    <select id="penanggung_jawab_id" name="penanggung_jawab_id">
-                        <?php foreach ($daftarUser as $u): ?>
-                            <option value="<?= (int) $u['id'] ?>" <?= $pjSekarang === (int) $u['id'] ? 'selected' : '' ?>>
-                                <?= e($u['nama']) ?> (<?= e($u['role']) ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <label class="label-form" for="penanggung_jawab">Penanggung Jawab (PIC)</label>
+                    <input type="text" id="penanggung_jawab" name="penanggung_jawab" maxlength="150"
+                           value="<?= e($pjTeksTampil) ?>"
+                           placeholder="Nama atau surel PIC — ketik sendiri">
+                    <span class="text-redup text-kecil">
+                        Ketik bebas; nama yang sama dengan pengguna terdaftar otomatis menerima
+                        notifikasi. Kosongkan bila kasus tanpa PIC.
+                    </span>
                 </div>
                 <div class="grup-form">
-                    <label class="label-form" for="anggota">Anggota Tim</label>
-                    <select id="anggota" name="anggota[]" multiple size="6">
-                        <?php foreach ($daftarUser as $u): ?>
-                            <option value="<?= (int) $u['id'] ?>" <?= in_array((int) $u['id'], $anggotaTerpilih, true) ? 'selected' : '' ?>>
-                                <?= e($u['nama']) ?> (<?= e($u['role']) ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <label class="label-form" for="anggota_teks">Anggota Tim (satu nama per baris)</label>
+                    <textarea id="anggota_teks" name="anggota_teks" rows="4" maxlength="4000"
+                              placeholder="Satu nama per baris, contoh:&#10;Budi Santoso&#10;Siti Aminah"><?= e($anggotaTeks) ?></textarea>
+                    <span class="text-redup text-kecil">
+                        Ketik mandiri tanpa harus memilih daftar. Nama yang cocok dengan pengguna
+                        terdaftar tertaut otomatis; yang tidak cocok tetap tersimpan sebagai teks.
+                    </span>
                 </div>
             </div>
         </div>

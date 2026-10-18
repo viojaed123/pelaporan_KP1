@@ -205,7 +205,10 @@ $sql_detail_kasus = "
         k.target_selesai,
         k.dibuat_pada,
         (SELECT u2.nama FROM users u2 WHERE u2.id = k.dibuat_oleh) AS nama_pembuat,
-        (SELECT u3.nama FROM users u3 WHERE u3.id = k.penanggung_jawab_id) AS nama_pic_user,
+        COALESCE(
+            (SELECT u3.nama FROM users u3 WHERE u3.id = k.penanggung_jawab_id),
+            k.penanggung_jawab_teks
+        ) AS nama_pic_user,
         GROUP_CONCAT(
             DISTINCT p.nama_lengkap
             ORDER BY p.nama_lengkap

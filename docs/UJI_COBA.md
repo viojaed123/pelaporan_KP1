@@ -259,8 +259,17 @@ dipasang berdampingan (`192.168.56.1` / `pelaporan.local`) tanpa
 - [x] Uji `ApiMobileTest` (peran, 401/403, penguncian, 2FA).
 
 ### Fase B - Kasus dengan PIC/anggota teks bebas
-- [x] PIC & anggota DIKETIK BEBAS lalu dicocokkan otomatis ke pengguna (`App\Services\CocokPengguna`); form lama `buat_kasus.php` dibiarkan.
-- [x] Uji `KasusTeksTest`.
+- [x] PIC & anggota DIKETIK BEBAS lalu dicocokkan otomatis ke pengguna (`App\Services\CocokPengguna`).
+- [x] Formulir legacy `buat_kasus.php` & `edit_kasus.php` ikut dikonversi ke ketik bebas
+      (isian teks PIC + textarea satu-nama-per-baris), memakai aturan pencocokan
+      IDENTIK di `includes/kasus.php` (`kasus_cocok_pengguna`, `kasus_tim_teks_cocok`,
+      `kasus_sinkron_tim_teks`) -- tanpa dropdown, tanpa memilih dari daftar.
+- [x] Tampilan `detail_kasus.php` & `dashboard_kasus.php` memakai `COALESCE(nama pengguna, teks ketikan)`.
+- [x] Migrasi `2026_10_19_100000` -- `kasus_penugasan.user_id` menjadi NULLable agar
+      anggota non-pengguna benar-benar tersimpan (lihat kotak "Bug" di bawah).
+- [x] Uji `KasusTeksTest` (PHPUnit) + uji E2E `scripts/uji_e2e_kasus_teks.php --yakin`
+      (36 pemeriksaan: login -> buat -> cek DB -> detail/dashboard -> edit -> cek DB;
+      akun & kasus uji dibersihkan otomatis).
 
 ### Fase C/D - React SPA + analitik
 - [x] Cangkang SPA di `/app` (rute Blade lama dipertahankan agar uji tak rusak).
@@ -285,4 +294,15 @@ dipasang berdampingan (`192.168.56.1` / `pelaporan.local`) tanpa
 ### Verifikasi
 - [x] PHPUnit **138 uji / 458 asersi** lulus; `npm run build` sukses (Vite).
 - [x] Tidak ada `migrate:fresh`; seluruh migrasi bersifat tambahan.
+- [x] Uji E2E legacy `C:\xampp\php\php.exe scripts\uji_e2e_kasus_teks.php --yakin`
+      terhadap `http://localhost/pelaporan`: **36 pemeriksaan lulus**
+      (akun & kasus uji dibuat lalu dihapus otomatis, termasuk jejak auditnya).
+
+> **Dua bug nyata yang ditangkap uji E2E di atas** (segera diperbaiki):
+> 1. `kasus_perbarui()` mengikat `penanggung_jawab_teks` sebagai *integer*
+>    (urutan tipe `bind_param` meleset satu), sehingga PIC yang diketik tersimpan "0".
+> 2. `kasus_penugasan.user_id` masih NOT NULL di produksi walau desainnya
+>    "user_id diisi bila cocok" -- INSERT anggota non-pengguna ditolak MySQL
+>    (pelanggaran integritas) dan namanya hilang diam-diam. Uji PHPUnit tidak
+>    melihatnya karena skema uji memakai `user_id` nullable.
 

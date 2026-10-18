@@ -251,7 +251,8 @@ if (!function_exists('kasus_simpan')) {
      * Kunci yang diharapkan di $d: kode_kasus, judul, tingkat_urgensi,
      * status_kasus, progres, dibuat_oleh, dan opsional: deskripsi,
      * nama_lokasi, garis_lintang, garis_bujur, kategori, sumber,
-     * target_selesai, penanggung_jawab_id.
+     * target_selesai, penanggung_jawab_id, penanggung_jawab_teks
+     * (nama PIC sebagaimana diketik -- bila PIC bukan pengguna sistem).
      *
      * Seluruh pemetaan kolom <-> tipe pembindan berada di sini (teruji),
      * agar halaman formulir tidak menulis SQL inline.
@@ -261,8 +262,8 @@ if (!function_exists('kasus_simpan')) {
         $sql = 'INSERT INTO kasus
                     (kode_kasus, judul, deskripsi, nama_lokasi, garis_lintang, garis_bujur,
                      tingkat_urgensi, status_kasus, progres, kategori, sumber,
-                     target_selesai, dibuat_oleh, penanggung_jawab_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                     target_selesai, dibuat_oleh, penanggung_jawab_id, penanggung_jawab_teks)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             return 0;
@@ -282,12 +283,15 @@ if (!function_exists('kasus_simpan')) {
         $target     = isset($d['target_selesai']) ? (string) $d['target_selesai'] : null;
         $pembuat    = (int) $d['dibuat_oleh'];
         $pj         = isset($d['penanggung_jawab_id']) ? (int) $d['penanggung_jawab_id'] : null;
+        $pjTeks     = isset($d['penanggung_jawab_teks']) && trim((string) $d['penanggung_jawab_teks']) !== ''
+            ? trim((string) $d['penanggung_jawab_teks'])
+            : null;
 
         $stmt->bind_param(
-            'ssssddssisssii',
+            'ssssddssisssiis',
             $kode, $judul, $deskripsi, $lokasi, $lat, $lng,
             $urgensi, $status, $progres, $kategori, $sumber,
-            $target, $pembuat, $pj
+            $target, $pembuat, $pj, $pjTeks
         );
 
         if (!$stmt->execute()) {
@@ -304,6 +308,7 @@ if (!function_exists('kasus_perbarui')) {
     /**
      * Perbarui kasus sedia ada. true bila berhasil.
      * Kunci wajib: id, judul, tingkat_urgensi, status_kasus, progres.
+     * Kunci opsional: penanggung_jawab_id & penanggung_jawab_teks.
      */
     function kasus_perbarui(mysqli $conn, array $d): bool
     {
@@ -311,7 +316,8 @@ if (!function_exists('kasus_perbarui')) {
                     judul = ?, deskripsi = ?, nama_lokasi = ?,
                     garis_lintang = ?, garis_bujur = ?,
                     tingkat_urgensi = ?, status_kasus = ?, progres = ?,
-                    kategori = ?, target_selesai = ?, penanggung_jawab_id = ?
+                    kategori = ?, target_selesai = ?, penanggung_jawab_id = ?,
+                    penanggung_jawab_teks = ?
                 WHERE id = ?';
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
@@ -329,12 +335,15 @@ if (!function_exists('kasus_perbarui')) {
         $kategori   = isset($d['kategori'])    ? (string) $d['kategori']    : null;
         $target     = isset($d['target_selesai']) ? (string) $d['target_selesai'] : null;
         $pj         = isset($d['penanggung_jawab_id']) ? (int) $d['penanggung_jawab_id'] : null;
+        $pjTeks     = isset($d['penanggung_jawab_teks']) && trim((string) $d['penanggung_jawab_teks']) !== ''
+            ? trim((string) $d['penanggung_jawab_teks'])
+            : null;
         $id         = (int) $d['id'];
 
         $stmt->bind_param(
-            'sssddssissii',
+            'sssddssissisi',
             $judul, $deskripsi, $lokasi, $lat, $lng,
-            $urgensi, $status, $progres, $kategori, $target, $pj, $id
+            $urgensi, $status, $progres, $kategori, $target, $pj, $pjTeks, $id
         );
 
         $berhasil = (bool) $stmt->execute();
@@ -413,11 +422,13 @@ if (!function_exists('kasus_penugasan_daftar')) {
     function kasus_penugasan_daftar(mysqli $conn, int $kasusId): array
     {
         $out = [];
-        $sql = 'SELECT kp.id, kp.user_id, kp.peran, u.nama, u.role, u.divisi
+        $sql = 'SELECT kp.id, kp.user_id, kp.peran, kp.nama_teks,
+                       COALESCE(u.nama, kp.nama_teks) AS nama,
+                       u.role, u.divisi
                   FROM kasus_penugasan kp
                   LEFT JOIN users u ON u.id = kp.user_id
                  WHERE kp.kasus_id = ?
-                 ORDER BY u.nama';
+                 ORDER BY COALESCE(u.nama, kp.nama_teks)';
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             return $out;
@@ -434,11 +445,11 @@ if (!function_exists('kasus_penugasan_daftar')) {
 }
 
 if (!function_exists('kasus_daftar_user')) {
-    /** Daftar pengguna aktif untuk pilihan PIC / anggota tim. */
+    /** Daftar pengguna AKTIF: bahan pencocokan ketikan & (dulu) pilihan dropdown. */
     function kasus_daftar_user(mysqli $conn): array
     {
         $out = [];
-        $res = $conn->query("SELECT id, nama, role, divisi FROM users WHERE status = 'aktif' ORDER BY nama");
+        $res = $conn->query("SELECT id, nama, email, role, divisi FROM users WHERE status = 'aktif' ORDER BY nama");
         while ($res && ($r = $res->fetch_assoc())) {
             $out[] = $r;
         }
@@ -446,6 +457,164 @@ if (!function_exists('kasus_daftar_user')) {
             $res->free();
         }
         return $out;
+    }
+}
+
+if (!function_exists('kasus_cocok_pengguna')) {
+    /**
+     * Cocokkan satu nama/surel ketikan dengan pengguna terdaftar.
+     *
+     * Aturan dibuat IDENTIK dengan App\Services\CocokPengguna (sisi Laravel
+     * & React) sehingga form legacy ini menghasilkan data yang sama persis
+     * dengan form aplikasi:
+     *   1. surel persis (abaikan huruf besar/kecil);
+     *   2. nama persis (abaikan huruf besar/kecil);
+     *   3. nama berawalan ketikan -- hanya bila cocok TEPAT SATU pengguna.
+     *
+     * Ketikan yang tidak cocok ATAU ambigu tidak dicocokkan (user_id null),
+     * tetap dikembalikan sebagai teks murni, supaya orang yang salah tidak
+     * pernah ditugaskan.
+     *
+     * @param array<int, array<string, mixed>> $daftarUser hasil kasus_daftar_user()
+     * @return array{teks: string, user_id: int|null}
+     */
+    function kasus_cocok_pengguna(array $daftarUser, string $ketikan): array
+    {
+        $teks = trim((string) preg_replace('/\s+/u', ' ', $ketikan));
+
+        if ($teks === '') {
+            return ['teks' => '', 'user_id' => null];
+        }
+
+        $rujuk = [];
+        foreach ($daftarUser as $u) {
+            $id = (int) ($u['id'] ?? 0);
+            if ($id < 1) {
+                continue;
+            }
+            $rujuk[$id] = [
+                'nama'  => mb_strtolower(trim((string) ($u['nama'] ?? ''))),
+                'surel' => mb_strtolower(trim((string) ($u['email'] ?? ''))),
+            ];
+        }
+
+        /* 1) Surel persis. */
+        if (filter_var($teks, FILTER_VALIDATE_EMAIL)) {
+            $kunci = mb_strtolower($teks);
+            foreach ($rujuk as $id => $r) {
+                if ($r['surel'] !== '' && $r['surel'] === $kunci) {
+                    return ['teks' => $teks, 'user_id' => $id];
+                }
+            }
+        }
+
+        $rendah = mb_strtolower($teks);
+
+        /* 2) Nama persis. */
+        foreach ($rujuk as $id => $r) {
+            if ($r['nama'] !== '' && $r['nama'] === $rendah) {
+                return ['teks' => $teks, 'user_id' => $id];
+            }
+        }
+
+        /* 3) Nama berawalan -- hanya bila unik. */
+        $cocok = [];
+        foreach ($rujuk as $id => $r) {
+            if ($r['nama'] !== '' && str_starts_with($r['nama'], $rendah)) {
+                $cocok[] = $id;
+            }
+        }
+        if (count($cocok) === 1) {
+            return ['teks' => $teks, 'user_id' => $cocok[0]];
+        }
+
+        return ['teks' => $teks, 'user_id' => null];
+    }
+}
+
+if (!function_exists('kasus_tim_teks_cocok')) {
+    /**
+     * Pecah kotak teks multi-baris anggota (satu nama per baris; koma juga
+     * diterima sebagai pemisah) menjadi daftar tercocok.
+     *
+     * @param array<int, array<string, mixed>> $daftarUser hasil kasus_daftar_user()
+     * @return list<array{teks: string, user_id: int|null}>
+     */
+    function kasus_tim_teks_cocok(array $daftarUser, string $kotak): array
+    {
+        $baris = preg_split('/[\r\n,]+/', $kotak) ?: [];
+        $hasil = [];
+
+        foreach ($baris as $b) {
+            $c = kasus_cocok_pengguna($daftarUser, $b);
+            if ($c['teks'] === '') {
+                continue;
+            }
+
+            /* Hindari pengulangan user_id yang sama dalam satu kasus. */
+            if ($c['user_id'] !== null) {
+                $sudah = false;
+                foreach ($hasil as $h) {
+                    if ($h['user_id'] === $c['user_id']) {
+                        $sudah = true;
+                        break;
+                    }
+                }
+                if ($sudah) {
+                    continue;
+                }
+            }
+
+            $hasil[] = $c;
+        }
+
+        return $hasil;
+    }
+}
+
+if (!function_exists('kasus_sinkron_tim_teks')) {
+    /**
+     * Ganti daftar anggota tim kasus dari ketikan bebas: setiap baris selalu
+     * tersimpan sebagai `nama_teks`, dan `user_id` hanya diisi bila nama itu
+     * cocok dengan pengguna terdaftar (agar notifikasi & izin tetap bekerja).
+     *
+     * @param list<array{teks: string, user_id: int|null}> $daftar
+     */
+    function kasus_sinkron_tim_teks(mysqli $conn, int $kasusId, array $daftar, ?int $oleh = null): void
+    {
+        $oleh = $oleh ?? (int) sesi_user_id();
+
+        try {
+            $del = $conn->prepare('DELETE FROM kasus_penugasan WHERE kasus_id = ?');
+            if ($del) {
+                $kid = $kasusId;
+                $del->bind_param('i', $kid);
+                $del->execute();
+                $del->close();
+            }
+
+            $ins = $conn->prepare(
+                'INSERT INTO kasus_penugasan (kasus_id, user_id, nama_teks, peran, ditugaskan_oleh)
+                 VALUES (?, ?, ?, ?, ?)'
+            );
+            if (!$ins) {
+                return;
+            }
+
+            foreach ($daftar as $baris) {
+                $teks = (string) ($baris['teks'] ?? '');
+                if ($teks === '') {
+                    continue;
+                }
+                $uid  = isset($baris['user_id']) && (int) $baris['user_id'] > 0 ? (int) $baris['user_id'] : null;
+                $peran = 'Anggota Tim';
+                $ins->bind_param('iissi', $kasusId, $uid, $teks, $peran, $oleh);
+                $ins->execute();
+            }
+            $ins->close();
+        } catch (\Throwable $t) {
+            // Penugasan tim bersifat opsional.
+        }
     }
 }
 
