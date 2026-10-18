@@ -239,3 +239,50 @@
 - [x] Bagian **Absensi Bulan Ini** pada dasbor karyawan menjadi **grid-3: Sakit / Izin / Alpha** (jumlah hadir dipindah ke keterangan; nilai enum basis data tetap `alpa`).
 - [x] Judul bagian memakai `.bagian-judul`; gaya ikon/panel grafik/sorotan ditambahkan ke `assets/css/app.css`.
 - [x] Simbol geometris `&#9776;` (menu) dan `&#9662;` (chevron) dipertahankan (bukan emoji).
+
+---
+
+## 17. Migrasi bertahap ke Laravel 12 + React SPA + APK Android (Oktober 2026)
+
+Strategi *strangler-fig*: aplikasi lama di `localhost` tetap hidup; Laravel
+dipasang berdampingan (`192.168.56.1` / `pelaporan.local`) tanpa
+`migrate:fresh` (basis data produksi berisi 44 tabel + view lama).
+
+### Fondasi (Fase 0-F)
+- [x] Laravel 12.70.0 di PHP 8.2.12 (XAMPP), `phpoffice/phpspreadsheet ^5.10`, `laravel/sanctum ^4.3`.
+- [x] Model Eloquent untuk seluruh tabel warisan + trait/peran (`role:mentor,admin` via `CekPeran`).
+- [x] API Power BI 4 endpoint statis-token (`POWERBI_API_TOKEN`) di `/api/v1`.
+- [x] Autentikasi Sanctum (token Bearer) untuk SPA & APK, memakai `personal_access_tokens`.
+
+### Fase A - API mobile & autentikasi
+- [x] `/api/v1/auth/login|verifikasi|logout|profil|ganti-password`; laporan, absensi, tugas, kasus, notifikasi, ringkasan.
+- [x] Uji `ApiMobileTest` (peran, 401/403, penguncian, 2FA).
+
+### Fase B - Kasus dengan PIC/anggota teks bebas
+- [x] PIC & anggota DIKETIK BEBAS lalu dicocokkan otomatis ke pengguna (`App\Services\CocokPengguna`); form lama `buat_kasus.php` dibiarkan.
+- [x] Uji `KasusTeksTest`.
+
+### Fase C/D - React SPA + analitik
+- [x] Cangkang SPA di `/app` (rute Blade lama dipertahankan agar uji tak rusak).
+- [x] Halaman SPA: Dasbor, Buat Laporan, Riwayat, Absensi, Tugas, Kasus, Asisten AI, Notifikasi, Profil.
+- [x] Analitik `AnalitikController`: rekap laporan & rekap absensi (mentor/admin), ringkasan kegiatan & kalender (semua peran, karyawan dipersempit ke dirinya).
+- [x] Halaman React `RekapLaporan`, `RekapAbsensi`, `RingkasanKegiatan`, `KalenderAktivitas` + rute/menu berperan.
+- [x] Blok CSS SPA dipetakan ke token korporat (#003D7D/#005EB8/#EB1C24/#159447, bg #F5F5F5).
+- [x] Uji `SpaTest`, `ApiAnalitikTest`.
+
+### Fase E - APK Android native
+- [x] Proyek Kotlin/Compose di `mobile/` (package `com.phr.pelaporan`, compileSdk 36, minSdk 24).
+- [x] `BASE_URL` dapat diubah di layar masuk (DataStore), default `http://10.0.2.2/`; `usesCleartextTraffic` untuk uji lokal.
+- [x] Build sukses: `mobile/app/build/outputs/apk/debug/app-debug.apk`.
+
+### Go-Live (lihat `docs/GO_LIVE.md`)
+- [x] Perintah `pengingat:harian` (Artisan) + Laravel Scheduler; `pengguna:audit` (read-only).
+- [x] `scripts/backup_db.ps1`/`.cmd` (mysqldump + rotasi) dan `scripts/jalankan_penjadwal.cmd`.
+- [x] Template vhost HTTPS `scripts/vhost_https.conf.example`.
+- [ ] **UAT (tanda tangan pemilik proses):** jalankan skenario harian karyawan di web `/app` **dan** APK; skenario mentor/admin (rekap, verifikasi, kasus PIC bebas).
+- [ ] HTTPS, SMTP organisasi, cadangan terjadwal, dan pembersihan akun uji — lihat `docs/GO_LIVE.md`.
+
+### Verifikasi
+- [x] PHPUnit **138 uji / 458 asersi** lulus; `npm run build` sukses (Vite).
+- [x] Tidak ada `migrate:fresh`; seluruh migrasi bersifat tambahan.
+

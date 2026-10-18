@@ -5,6 +5,40 @@ dijaga di server (menghasilkan 403 walaupun URL ditikis manual).
 
 ---
 
+## Antarmuka baru: SPA React (`/app`) & APK Android
+
+Selain halaman lama (`*.php`), tersedia dua antarmuka baru yang memakai API
+`/api/v1` dan **token Bearer** (bukan sesi PHP):
+
+### SPA React — `https://<server>/app`
+
+- Masuk dengan **surel + kata sandi**; token disimpan di peramban sehingga
+  tetap masuk sampai keluar atau token dicabut.
+- Menu menyesuaikan peran:
+  - **Karyawan**: Dasbor, Buat Laporan, Riwayat, Absensi, Tugas Saya, Kasus,
+    Ringkasan Kegiatan, Kalender Aktivitas, Asisten AI, Notifikasi, Profil.
+  - **Mentor/Admin**: tambahan grup **Analitik** — Rekap Laporan, Rekap
+    Absensi, Ringkasan Kegiatan, Kalender Aktivitas.
+- Halaman rekap hanya untuk mentor/admin; karyawan yang membukanya langsung
+  mendapat pesan penolakan (dan API tetap menjawab 403).
+- Tampilan/warna sama dengan aplikasi lama (biru PHR), karena memakai berkas
+  CSS yang sama.
+
+### APK Android (native)
+
+1. Pasang `mobile/app/build/outputs/apk/debug/app-debug.apk` (aktifkan
+   "sumber tidak dikenal" bila perlu).
+2. Di layar masuk, isi **Alamat Server** (mis. `http://192.168.56.1/` atau
+   `https://pelaporan.phr.co.id/`). Nilai ini tersimpan di perangkat dan
+   dapat diubah kapan saja.
+3. Masuk dengan surel + kata sandi akun PHR. Fitur: laporan harian, absensi
+   check-in/out, tugas, kasus, notifikasi, ringkasan, kalender.
+
+> Untuk produksi, ganti alamat server ke `https://…` dan pasang APK yang
+> dibangun tanpa `usesCleartextTraffic` (lihat `docs/GO_LIVE.md` §1).
+
+---
+
 ## Karyawan
 
 | Menu | Halaman | Fungsi |
@@ -78,6 +112,14 @@ notifikasi. Untuk pengiriman terjadwal, jalankan lewat Task Scheduler:
 
 ```
 php C:\xampp\htdocs\pelaporan\scripts\pengingat_harian.php
+```
+
+Di lingkungan Laravel, gunakan perintah Artisan padanannya (tetap idempoten),
+dijadwalkan harian 08:00 lewat Laravel Scheduler:
+
+```
+php artisan pengingat:harian --kering        REM uji tanpa mengirim
+php artisan pengingat:harian                 REM kirim sungguhan
 ```
 
 ---
