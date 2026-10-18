@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Model untuk tabel `kasus_penugasan` (6 kolom).
@@ -53,5 +54,15 @@ class KasusPenugasan extends Model
             'user_id' => 'int',
             'ditugaskan_oleh' => 'int',
         ];
+    }
+
+    /* =================================================================
+     * RELASI (ditulis tangan -- bagian generator tidak menyentuhnya)
+     * =============================================================== */
+
+    /** Pengguna anggota tim (null bila hanya teks -- lihat `nama_teks`). */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

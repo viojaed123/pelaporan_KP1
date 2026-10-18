@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Model untuk tabel `kasus_status_log` (8 kolom).
@@ -54,5 +55,15 @@ class KasusStatusLog extends Model
             'kasus_id' => 'int',
             'user_id' => 'int',
         ];
+    }
+
+    /* =================================================================
+     * RELASI (ditulis tangan -- bagian generator tidak menyentuhnya)
+     * =============================================================== */
+
+    /** Pengguna yang mengubah status. */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

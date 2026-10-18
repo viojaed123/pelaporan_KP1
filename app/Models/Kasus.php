@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Model untuk tabel `kasus` (18 kolom).
@@ -65,5 +67,33 @@ class Kasus extends Model
             'penanggung_jawab_id' => 'int',
             'target_selesai' => 'date',
         ];
+    }
+
+    /* =================================================================
+     * RELASI (ditulis tangan -- bagian generator tidak menyentuhnya)
+     * =============================================================== */
+
+    /** Pengguna yang membuat kasus. */
+    public function dibuatOleh(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dibuat_oleh');
+    }
+
+    /** Pengguna penanggung jawab. */
+    public function penanggungJawab(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'penanggung_jawab_id');
+    }
+
+    /** Anggota tim yang ditugaskan pada kasus ini. */
+    public function anggota(): HasMany
+    {
+        return $this->hasMany(KasusPenugasan::class, 'kasus_id');
+    }
+
+    /** Riwayat perubahan status kasus. */
+    public function statusLog(): HasMany
+    {
+        return $this->hasMany(KasusStatusLog::class, 'kasus_id');
     }
 }
