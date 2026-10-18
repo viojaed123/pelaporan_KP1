@@ -98,6 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profil/ganti-password', [App\Http\Controllers\ProfilController::class, 'gantiPassword'])->name('profil.gantiPassword');
     Route::get('/ringkasan', [App\Http\Controllers\RingkasanController::class, 'index'])->name('ringkasan.index');
     Route::get('/kalender', [App\Http\Controllers\KalenderController::class, 'index'])->name('kalender.index');
+    Route::get('/kasus', [App\Http\Controllers\KasusController::class, 'index'])->name('kasus.index');
 
     Route::get('/rekap/laporan', [App\Http\Controllers\RekapController::class, 'laporan'])->name('rekap.laporan');
     Route::get('/rekap/absensi', [App\Http\Controllers\RekapController::class, 'absensi'])->name('rekap.absensi');
