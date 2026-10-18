@@ -110,4 +110,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/impor/pemetaan', [App\Http\Controllers\ImporController::class, 'pemetaan'])->name('impor.pemetaan');
 
     Route::post('/impor/pratinjau', [App\Http\Controllers\ImporController::class, 'pratinjau'])->name('impor.pratinjau');
+
+    Route::post('/impor/simpan', [App\Http\Controllers\ImporController::class, 'simpan'])->name('impor.simpan');
+    Route::post('/impor/profil', [App\Http\Controllers\ImporController::class, 'simpanProfil'])->name('impor.profil.simpan');
 });
+

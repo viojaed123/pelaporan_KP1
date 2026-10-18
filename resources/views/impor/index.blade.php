@@ -9,6 +9,7 @@
     <div style="margin-bottom:14px">
       <label>Jenis Data</label>
       <select name="jenis" class="input">
+        <option value="auto">Deteksi Otomatis</option>
         <option value="laporan">Laporan Harian</option>
         <option value="absensi">Absensi</option>
       </select>
