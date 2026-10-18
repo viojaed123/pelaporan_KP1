@@ -83,12 +83,22 @@ mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\p
 - [ ] Semua akun uji dihapus: `DELETE FROM users WHERE email LIKE 'tes\_%@uji.local';`
 - [ ] Peran (`karyawan`/`mentor`/`admin`) sudah benar untuk tiap pengguna.
 - [ ] Akun `root` tidak dipakai aplikasi.
+- [ ] Nama karyawan duplikat = 0 (`pengguna:audit`): nama ganda membuat
+      pencocokan PIC/anggota kasus yang diketik bebas jadi ambigu.
 - [ ] Token API pengguna lama dicabut bila perlu: `DELETE FROM personal_access_tokens;`
 
 > **Alat bantu (read-only):** `php artisan pengguna:audit` melaporkan sebaran
 > peran & status, akun uji `@uji.local`, nama karyawan duplikat, akun belum
 > aktif, dan jumlah token API — tanpa mengubah data. Nama duplikat penting
 > karena PIC/anggota kasus diketik bebas lalu dicocokkan ke nama pengguna.
+>
+> **Pembersihan akun ganda:** `php artisan pengguna:hapus <id>` (tanpa opsi
+> apa pun = laporan read-only, aman dijalankan kapan saja) lalu
+> `php artisan pengguna:hapus <id> --yakin`. Akun yang masih memiliki data
+> bisnis ditolak kecuali `--paksakan`; kasus di mana akun sekadar PIC tidak
+> ikut terhapus (hanya `penanggung_jawab_id` dikosongkan, nama ketikan tetap).
+> Seluruh operasi satu transaksi, tercatat pada `audit_log`, dan ada
+> `scripts\backup_db.cmd` untuk cadangan sebelum eksekusi.
 
 ## 6. UAT (User Acceptance Test)
 
