@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -113,5 +113,11 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/impor/simpan', [App\Http\Controllers\ImporController::class, 'simpan'])->name('impor.simpan');
     Route::post('/impor/profil', [App\Http\Controllers\ImporController::class, 'simpanProfil'])->name('impor.profil.simpan');
-});
 
+
+    // Modul Penugasan Tugas (mentor/admin -> karyawan)
+    Route::get('/tugas', [App\Http\Controllers\TugasController::class, 'index'])->name('tugas.index');
+    Route::get('/tugas/buat', [App\Http\Controllers\TugasController::class, 'buat'])->middleware('role:mentor,admin')->name('tugas.buat');
+    Route::post('/tugas/simpan', [App\Http\Controllers\TugasController::class, 'simpan'])->middleware('role:mentor,admin')->name('tugas.simpan');
+    Route::post('/tugas/{id}/status', [App\Http\Controllers\TugasController::class, 'perbaruiStatus'])->name('tugas.status');
+});

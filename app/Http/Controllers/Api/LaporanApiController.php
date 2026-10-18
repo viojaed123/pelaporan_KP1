@@ -76,7 +76,7 @@ class LaporanApiController extends Controller
                 'id' => $l->id,
                 'tanggal' => optional($l->tanggal)->toDateString(),
                 'user_id' => $l->user_id,
-                'pengguna' => $l->user->name ?? null,
+                'pengguna' => $l->user->nama ?? null,
                 'jam_mulai' => $l->jam_mulai,
                 'jam_selesai' => $l->jam_selesai,
                 'kegiatan' => $l->kegiatan,
@@ -100,12 +100,12 @@ class LaporanApiController extends Controller
         if ($request->filled('dari')) { $q->where('tanggal', '>=', $request->query('dari')); }
         if ($request->filled('sampai')) { $q->where('tanggal', '<=', $request->query('sampai')); }
         if ($request->filled('user_id')) { $q->where('user_id', (int) $request->query('user_id')); }
-        $data = $q->with('user:id,name,role')->orderBy('tanggal')->orderBy('id')->get()
+        $data = $q->with('user:id,nama,role')->orderBy('tanggal')->orderBy('id')->get()
             ->map(fn ($a) => [
                 'id' => $a->id,
                 'tanggal' => optional($a->tanggal)->toDateString(),
                 'user_id' => $a->user_id,
-                'pengguna' => $a->user->name ?? null,
+                'pengguna' => $a->user->nama ?? null,
                 'jam_masuk' => $a->jam_masuk,
                 'jam_pulang' => $a->jam_pulang,
                 'status' => $a->status,
@@ -140,8 +140,8 @@ class LaporanApiController extends Controller
         if (!$this->tokenSah($request)) { return $this->tolak(); }
         $rows = $this->rentang($request)
             ->join('users', 'users.id', '=', 'laporan_harian.user_id')
-            ->selectRaw('laporan_harian.user_id, users.name as pengguna, COUNT(*) as jumlah_laporan, SUM(laporan_harian.status = "disetujui") as disetujui')
-            ->groupBy('laporan_harian.user_id', 'users.name')
+            ->selectRaw('laporan_harian.user_id, users.nama as pengguna, COUNT(*) as jumlah_laporan, SUM(laporan_harian.status = "disetujui") as disetujui')
+            ->groupBy('laporan_harian.user_id', 'users.nama')
             ->orderBy('jumlah_laporan', 'desc')->get();
         return response()->json(['ok' => true, 'jumlah' => $rows->count(), 'data' => $rows->values()]);
     }

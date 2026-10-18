@@ -66,6 +66,23 @@ if (! function_exists('inisial')) {
     }
 }
 
+/**
+ * Path dasar public/ yang aman dipanggil dari suite Laravel MAUPUN suite
+ * legacy. public_path() bawaan Laravel membutuhkan instance Application;
+ * di suite legacy yang hanya memuat Container, fungsi itu melempar error.
+ */
+if (! function_exists('phr_public_path')) {
+    function phr_public_path(string $sub = ''): string
+    {
+        $app = function_exists('app') ? app() : null;
+        $base = $app instanceof \Illuminate\Foundation\Application
+            ? public_path()
+            : dirname(__DIR__) . '/public';
+
+        return $sub === '' ? $base : $base . '/' . $sub;
+    }
+}
+
 if (! function_exists('foto_profil_url')) {
     /**
      * URL relatif foto profil bila berkasnya benar-benar ada, atau null.
@@ -83,7 +100,7 @@ if (! function_exists('foto_profil_url')) {
             return null;
         }
 
-        return is_file(public_path('uploads/avatar/' . $foto))
+        return is_file(phr_public_path('uploads/avatar/' . $foto))
             ? 'uploads/avatar/' . rawurlencode($foto)
             : null;
     }
@@ -124,6 +141,27 @@ if (! function_exists('avatar_tampil')) {
 
         return '<span class="' . e($kelas) . ' ' . e(avatar_kelas($role)) . '">'
             . e(inisial($nama)) . '</span>';
+    }
+}
+
+if (! function_exists('logo_phr')) {
+    /**
+     * Lambang (logo) PHR — porting langsung dari includes/layout.php.
+     * Mengutamakan PNG di public/assets/img; tanpa berkas gambar, memakai
+     * teks "PH" agar tampilan tetap utuh.
+     */
+    function logo_phr(bool $dengan_wadah = true): string
+    {
+        $png = phr_public_path('assets/img/logo-phr.png');
+        $src = is_file($png) ? 'assets/img/logo-phr.png' : '';
+
+        if ($src === '') {
+            return $dengan_wadah ? '<span class="logo">PH</span>' : 'PH';
+        }
+
+        $gambar = '<img src="' . e($src) . '" alt="PHR" width="64" height="64">';
+
+        return $dengan_wadah ? '<span class="logo logo-gambar">' . $gambar . '</span>' : $gambar;
     }
 }
 

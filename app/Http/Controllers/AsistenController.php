@@ -97,7 +97,7 @@ class AsistenController extends Controller
                     $baris .= "\n\n5 terakhir:";
                     foreach ($terakhir as $l) {
                         $baris .= "\n- " . optional($l->tanggal)->toDateString() . " — " . $l->kegiatan
-                            . " (" . ($l->user->name ?? '-') . ", " . $l->status . ")";
+                            . " (" . ($l->user->nama ?? '-') . ", " . $l->status . ")";
                     }
                 }
             }
