@@ -136,9 +136,18 @@ mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\p
 
 ## 8. Pemantauan galat & kesehatan
 
-- [ ] Kanal `LOG_CHANNEL` diarahkan ke berkas/rotasi yang terpantau.
+- [x] Kanal `LOG_CHANNEL` diarahkan ke berkas/rotasi yang terpantau
+      (`LOG_CHANNEL=daily` → `storage/logs/laravel-YYYY-MM-DD.log`,
+      retensi `LOG_DAILY_DAYS=14`, `LOG_LEVEL=error`, `APP_DEBUG=false`).
+      Disamakan pada `.env.example`. *Terverifikasi19 Okt2026: berkas
+      harian terbentuk saat log ditulis.*
 - [ ] Halaman `/health` (layanan AI) & rute diagnostik Laravel dipantau.
-- [ ] Pengingat melihat `storage/logs/laravel.log` berkala.
+      (*Sudah disiapkan: rute bawaan Laravel `/up` menjawab `200 Application
+      up` — diuji19 Okt2026 lewat `http://localhost/pelaporan/public/up`;
+      `/health` layanan AI hanya relevan bila `LLM_BASE_URL` diaktifkan —
+      periksa lewat `status.php` (perlu masuk).*)
+- [ ] Pengingat melihat `storage/logs/laravel-YYYY-MM-DD.log` berkala
+      (kanal daily; berkas lama `laravel.log` milik kanal `stack` lama).
 - [ ] (Opsional) Integrasi pelaporan error (mis. Sentry) bila diizinkan.
 
 ## 9. Penutup: matikan jalur lama
