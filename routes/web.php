@@ -105,4 +105,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/asisten/kirim', [App\Http\Controllers\AsistenController::class, 'kirim'])->name('asisten.kirim');
 
     Route::get('/impor', [App\Http\Controllers\ImporController::class, 'index'])->name('impor.index');
+    Route::post('/impor/unggah', [App\Http\Controllers\ImporController::class, 'unggah'])->name('impor.unggah');
+
+    Route::get('/impor/pemetaan', [App\Http\Controllers\ImporController::class, 'pemetaan'])->name('impor.pemetaan');
+
+    Route::post('/impor/pratinjau', [App\Http\Controllers\ImporController::class, 'pratinjau'])->name('impor.pratinjau');
 });
