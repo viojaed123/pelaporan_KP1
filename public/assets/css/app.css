@@ -1,4 +1,4 @@
-/* ==================================================================
+﻿/* ==================================================================
    app.css - Design System Pelaporan Harian
    Warna korporat PHR dipertahankan:
      Biru #005EB8 | Biru tua #003D7D | Merah #EB1C24 | Hijau #159447
@@ -414,11 +414,12 @@ p { margin: 0 0 1em; }
 
 /* --- Isi --- */
 .isi {
-    padding: 24px;
+    padding: 24px 24px 40px;
     flex: 1;
     max-width: 1440px;
     width: 100%;
     margin: 0 auto;
+    min-height: calc(100vh - var(--topbar-h));
 }
 
 /* --- Kartu --- */
@@ -2377,3 +2378,4 @@ h3 .sp-ikon, h4 .sp-ikon { width: 18px; height: 18px; }
 .pratinjau-bungkus table { font-size: 12.5px; }
 .baris-gagal { background: #FEF2F2; }
 .baris-lewat { background: #FFFBEB; }
+
