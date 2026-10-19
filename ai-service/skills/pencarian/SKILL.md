@@ -5,8 +5,8 @@ description: >-
   ini bila pengguna menanyakan informasi publik, berita, peraturan, istilah
   teknis mutakhir, atau hal apa pun yang tidak tersedia di basis data aplikasi.
   Menjelaskan kapan memakai `web_search`, kapan memakai data internal
-  (`search_notes`, `statistics`), cara memasang SearXNG, dan cara menyebut
-  sumber dengan benar.
+  (`search_notes`, `statistics`), urutan penyedia pencarian (Gemini Search →
+  SearXNG → DuckDuckGo), dan cara menyebut sumber dengan benar.
 ---
 
 # Skill: Pencarian Web
@@ -51,7 +51,13 @@ Contoh: `web_search(kueri="regulasi K3 sektor migas 2025", bahasa="id")`.
 
 ## Penyedia & konfigurasi
 
-1. **SearXNG** (utama) — instans meta-search yang dihosting sendiri.
+Urutan dicoba otomatis oleh `ai-service/app/tools/search.py`:
+
+1. **Google Search grounding Gemini** (utama) — aktif otomatis bila
+   `AI_GEMINI_API_KEY` terisi; tidak perlu konfigurasi tambahan. Hasil
+   disertai tautan sumber resmi dari Google. Bila kuota dibatasi (galat 429),
+   lanjut ke penyedia berikutnya.
+2. **SearXNG** (cadangan pertama) — instans meta-search yang dihosting sendiri.
    - Set `AI_SEARXNG_URL` (mis. `http://127.0.0.1:8888`) pada `ai-service/.env`.
    - Jalankan lewat Docker, contoh:
 
@@ -64,8 +70,8 @@ Contoh: `web_search(kueri="regulasi K3 sektor migas 2025", bahasa="id")`.
            - SEARXNG_BASE_URL=http://localhost:8888/
      ```
 
-2. **DuckDuckGo Lite** (cadangan) — dipakai otomatis bila `AI_SEARXNG_URL`
-   kosong atau SearXNG gagal. Best-effort, tanpa kunci API.
+3. **DuckDuckGo Lite** (cadangan terakhir) — dipakai otomatis bila Gemini
+   Search dan SearXNG sama-sama gagal. Best-effort, tanpa kunci API.
 
 Sakelar utama: `AI_WEB_SEARCH_AKTIF`. Bila `false`, `web_search` selalu
 menolak dengan pesan jelas.

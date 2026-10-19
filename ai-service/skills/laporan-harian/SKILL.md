@@ -24,14 +24,18 @@ dan laporan akhir. Ada tiga peran:
 | `admin`    | Pengelola. Akses penuh, termasuk pencadangan/pemulihan basis data.    |
 
 Layanan AI berupa microservice **Python/FastAPI** (`ai-service/`) yang menjadi
-gateway tunggal antara aplikasi PHP dan **Ollama** (model `qwen2.5:7b`). PHP
-tidak pernah memanggil Ollama langsung.
+gateway tunggal antara aplikasi PHP dan model LLM: **Google Gemini
+(`gemini-3.8-flash`) sebagai model utama**, dengan **Ollama (`qwen2.5:7b`)**
+sebagai cadangan lokal otomatis. PHP tidak pernah memanggil Gemini/Ollama
+langsung.
 
 ## Kontrak layanan AI
 
 Semua endpoint **kecuali** `GET /health` memerlukan header
-`X-Service-Key: <AI_SERVICE_KEY>`. Bila Ollama mati, endpoint AI membalas
-HTTP **503** dengan badan `{"detail": "..."}`.
+`X-Service-Key: <AI_SERVICE_KEY>`. Bila seluruh rantai model (Gemini maupun
+Ollama) tidak tersedia, endpoint AI membalas HTTP **503** dengan badan
+`{"detail": "..."}` (atau jawaban deterministik bila
+`AI_DEGRADE_DETERMINISTIC=true`).
 
 | Metode & jalur            | Guna                                        | Kunci balasan |
 | ------------------------- | ------------------------------------------- | ------------- |

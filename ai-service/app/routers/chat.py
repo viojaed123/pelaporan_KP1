@@ -63,6 +63,16 @@ async def chat(request: ChatRequest) -> ChatResponse:
     except DatabaseError:
         riwayat = []
 
+    # Klien legacy (api_chat.php) menyimpan pesan user SEBELUM memanggil
+    # endpoint ini, jadi pesan terkini bisa muncul dua kali — buang duplikat
+    # terakhir bila identik dengan ``pesan``.
+    if (
+        riwayat
+        and riwayat[-1].get("role") == "user"
+        and str(riwayat[-1].get("content", "")).strip() == request.pesan.strip()
+    ):
+        riwayat = riwayat[:-1]
+
     try:
         hasil = await jalankan_agen(
             sistem=bangun_prompt(request),
@@ -73,8 +83,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
     except ModelUnavailable as exc:
         log.warning("Model tidak tersedia: %s", exc)
         raise galat_layanan(
-            "Layanan AI (Ollama) sedang tidak tersedia. Pastikan Ollama berjalan dan model "
-            "sudah diunduh (ollama pull qwen2.5:7b)."
+            "Layanan AI sedang tidak tersedia. Periksa kunci Gemini (AI_GEMINI_API_KEY) "
+            "atau pastikan Ollama berjalan dengan model qwen2.5:7b (ollama pull qwen2.5:7b)."
         ) from exc
     except DatabaseError as exc:
         raise cegah_galat_db(exc) from exc

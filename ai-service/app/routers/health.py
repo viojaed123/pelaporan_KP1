@@ -7,7 +7,7 @@ import logging
 from fastapi import APIRouter
 
 from .. import db
-from ..ollama_client import get_client
+from ..llm import get_client
 from ..schemas import HealthResponse
 
 log = logging.getLogger("ai-service.health")
@@ -20,13 +20,13 @@ async def health() -> HealthResponse:
     """Kembalikan status layanan.
 
     PHP (``ai_hidup()``) hanya memeriksa respons HTTP 2xx. Endpoint ini **tidak
-    pernah** gagal meski Ollama atau basis data sedang mati: nilainya cukup
-    dilaporkan pada field ``ollama``/``database``.
+    pernah** gagal meski Gemini, Ollama, atau basis data sedang mati: nilainya
+    cukup dilaporkan pada field ``gemini``/``ollama``/``database``.
     """
     try:
         info = await get_client().health()
     except Exception as exc:  # noqa: BLE001 - kesehatan tidak boleh melempar
-        log.warning("Pemeriksaan Ollama gagal: %s", exc)
+        log.warning("Pemeriksaan model gagal: %s", exc)
         info = {"reachable": False, "models": [], "model": "", "model_tersedia": False}
 
     try:
@@ -38,7 +38,8 @@ async def health() -> HealthResponse:
     return HealthResponse(
         ok=True,
         model=info.get("model") or "",
-        ollama=bool(info.get("reachable")),
+        gemini=bool(info.get("gemini")),
+        ollama=bool(info.get("ollama") or info.get("reachable")),
         database=db_ok,
         models_tersedia=list(info.get("models") or []),
     )

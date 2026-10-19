@@ -1,11 +1,13 @@
 """Alat pencarian web: ``web_search``.
 
 Tujuan: memberi agen kemampuan mencari informasi terkini di internet yang
-tidak tersedia di basis data aplikasi. Dua sumber:
+tidak tersedia di basis data aplikasi. Tiga sumber, dicoba berurutan:
 
-  1. **SearXNG** (utama) — instans meta-search yang dihosting sendiri
+  1. **Google Search grounding** (utama) — bawaan Gemini
+     (``AI_GEMINI_API_KEY`` terisi). Butuh model ``AI_GEMINI_SEARCH_MODEL``.
+  2. **SearXNG** — instans meta-search yang dihosting sendiri
      (variabel ``AI_SEARXNG_URL``). Hasilnya JSON, ramah privasi.
-  2. **DuckDuckGo Lite** (cadangan) — dipakai bila SearXNG belum diatur
+  3. **DuckDuckGo Lite** (cadangan) — dipakai bila keduanya belum diatur
      atau gagal. Best-effort, tanpa kunci API.
 
 Alat ini HANYA membaca internet; tidak pernah menulis apa pun. Bila
@@ -174,7 +176,10 @@ def web_search(ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
     bahasa = str(args.get("bahasa") or "").strip()
     segar = str(args.get("segar") or "").strip().lower() in {"1", "true", "ya", "yes"}
 
-    kunci = f"{(settings.ai_searxng_url or '').strip()}|{bahasa}|{jumlah}|{kueri.lower()}"
+    kunci = (
+        f"gemini|{(getattr(settings, 'ai_gemini_api_key', '') or '').strip() and settings.ai_gemini_model}"
+        f"|{(settings.ai_searxng_url or '').strip()}|{bahasa}|{jumlah}|{kueri.lower()}"
+    )
     if not segar:
         tersimpan = _cache_ambil(kunci)
         if tersimpan is not None:
@@ -190,8 +195,22 @@ def web_search(ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
     galat: list[str] = []
     hasil: list[dict[str, Any]] = []
 
+    if (getattr(settings, "ai_gemini_api_key", "") or "").strip():
+        try:
+            from ..gemini_client import pencarian_google
+
+            google = pencarian_google(kueri, jumlah, bahasa)
+            hasil = list(google.get("hasil") or [])
+            if hasil and google.get("jawaban"):
+                # Sisipkan ringkasan Gemini agar model dapat merujuknya.
+                hasil[0]["ringkasan"] = (google["jawaban"] + " " + str(hasil[0].get("ringkasan") or "")).strip()[:700]
+        except Exception as exc:  # noqa: BLE001 - cadangan harus tetap dicoba
+            galat.append(f"Gemini Search: {exc}")
+            log.warning("Gemini Search gagal: %s", exc)
+
     try:
-        hasil = _cari_searxng(kueri, jumlah, bahasa)
+        if not hasil:
+            hasil = _cari_searxng(kueri, jumlah, bahasa)
     except Exception as exc:  # noqa: BLE001 - cadangan harus tetap dicoba
         galat.append(f"SearXNG: {exc}")
         log.warning("SearXNG gagal: %s", exc)
@@ -208,8 +227,8 @@ def web_search(ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
             "ok": False,
             "kueri": kueri,
             "pesan": (
-                "Tidak ada hasil pencarian web. Pastikan instans SearXNG aktif "
-                "(AI_SEARXNG_URL) atau koneksi internet tersedia."
+                "Tidak ada hasil pencarian web. Pastikan kunci Gemini (AI_GEMINI_API_KEY) "
+                "valid, instans SearXNG aktif (AI_SEARXNG_URL), atau koneksi internet tersedia."
             ),
             "galat": galat,
         }
@@ -241,7 +260,8 @@ def bangun() -> list[Tool]:
         Tool(
             nama="web_search",
             deskripsi=(
-                "Cari informasi TERKINI di internet (SearXNG, cadangan DuckDuckGo). "
+                "Cari informasi TERKINI di internet (Google Search bawaan Gemini; "
+                "cadangan SearXNG/DuckDuckGo). "
                 "Gunakan bila pertanyaan menyangkut berita/peraturan/istilah mutakhir yang "
                 "tidak ada di basis data aplikasi. JANGAN pakai untuk data laporan/absensi "
                 "internal — untuk itu gunakan search_notes/statistics. Selalu sebutkan "

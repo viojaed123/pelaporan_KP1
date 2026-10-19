@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .db import ambil_banyak, json_aman
-from .ollama_client import ChatResult, OllamaClient, get_client
+from .llm import ChatResult, get_client
 from .tools import ToolContext, ToolRegistry, get_registry
 
 log = logging.getLogger("ai-service.agent")
@@ -66,7 +66,7 @@ async def jalankan_agen(
     riwayat: list[dict[str, str]] | None = None,
     ctx: ToolContext,
     registry: ToolRegistry | None = None,
-    client: OllamaClient | None = None,
+    client: Any | None = None,
     max_iterasi: int | None = None,
 ) -> AgentResult:
     """Jalankan gelung agen sampai jawaban akhir diperoleh.
@@ -124,7 +124,9 @@ async def jalankan_agen(
             teks = json_aman(keluaran)
             if len(teks) > BATAS_HASIL_ALAT:
                 teks = teks[:BATAS_HASIL_ALAT] + '..."dipotong"}'
-            messages.append({"role": "tool", "content": teks})
+            # `tool_name` dipakai klien Gemini (functionResponse); Ollama
+            # mengabaikan kunci tambahan ini.
+            messages.append({"role": "tool", "tool_name": nama, "content": teks})
 
     # Batas putaran tercapai — susun jawaban cadangan dari hasil alat terakhir.
     cadangan = terakhir.content.strip() if terakhir else ""

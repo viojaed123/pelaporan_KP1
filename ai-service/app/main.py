@@ -20,7 +20,8 @@ from . import __version__
 from .auth import ServiceKeyMiddleware
 from .config import get_settings
 from .db import DatabaseError
-from .ollama_client import ModelUnavailable, tutup_client
+from .ollama_client import ModelUnavailable
+from .llm import model_utama, tutup_client
 from .routers import chat, health, jobs, reports
 
 log = logging.getLogger("ai-service.main")
@@ -43,9 +44,9 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     konfigurasi_log(settings.ai_log_level)
     log.info(
-        "Layanan AI mulai — model=%s fallback=%s ollama=%s",
-        settings.ai_model,
-        settings.ai_model_fallback,
+        "Layanan AI mulai — model=%s gemini=%s ollama=%s",
+        model_utama(),
+        "aktif" if settings.ai_gemini_api_key.strip() else "nonaktif",
         settings.ai_ollama_base_url,
     )
     try:
@@ -62,7 +63,8 @@ def buat_app() -> FastAPI:
     app = FastAPI(
         title="Layanan AI Pelaporan Harian",
         description=(
-            "Gateway Python/FastAPI antara aplikasi PHP dan Ollama (Qwen 2.5). "
+            "Gateway Python/FastAPI antara aplikasi PHP dan model LLM "
+            "(Google Gemini utama, Ollama/Qwen cadangan). "
             "Menyediakan chatbot asisten, ringkasan, narasi, validasi, ekspor, "
             "dan pemrosesan antrean ai_jobs."
         ),
@@ -86,8 +88,9 @@ def buat_app() -> FastAPI:
             status_code=503,
             content={
                 "detail": (
-                    "Layanan AI (Ollama) sedang tidak tersedia. Pastikan Ollama berjalan dan "
-                    "model sudah diunduh (ollama pull qwen2.5:7b)."
+                    "Layanan AI sedang tidak tersedia. Periksa kunci Gemini "
+                    "(AI_GEMINI_API_KEY) atau pastikan Ollama berjalan dengan model "
+                    "qwen2.5:7b (ollama pull qwen2.5:7b)."
                 )
             },
         )
@@ -110,7 +113,7 @@ def buat_app() -> FastAPI:
             "ok": True,
             "layanan": "Layanan AI Pelaporan Harian",
             "versi": __version__,
-            "model": settings.ai_model,
+            "model": model_utama(),
             "endpoint": ["/health", "/chat", "/summarize", "/narrative", "/validate", "/jobs"],
             "dokumentasi": "/docs",
         }

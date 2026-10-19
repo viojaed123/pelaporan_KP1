@@ -9,7 +9,8 @@ from typing import Any
 from fastapi import HTTPException, status
 
 from ..db import DatabaseError, json_aman
-from ..ollama_client import ChatResult, get_client
+from ..llm import get_client
+from ..ollama_client import ChatResult
 from ..tools import ToolContext
 
 log = logging.getLogger("ai-service.routers")

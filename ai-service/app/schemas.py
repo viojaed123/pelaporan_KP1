@@ -113,6 +113,7 @@ class HealthResponse(BaseModel):
 
     ok: bool = True
     model: str
+    gemini: bool = False
     ollama: bool
     database: bool = False
     versi: str = "1.0.0"

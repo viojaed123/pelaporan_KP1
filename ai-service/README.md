@@ -1,11 +1,13 @@
 # Layanan AI Pelaporan Harian (ai-service)
 
 Microservice **Python / FastAPI** yang menjadi *gateway* tunggal antara aplikasi
-PHP **Sistem Pelaporan Kegiatan Harian** dan model lokal **Ollama (Qwen 2.5)**.
-Layanan ini menyediakan chatbot asisten (dengan *function calling*), ringkasan,
-narasi, validasi, ekspor dokumen, pencadangan, dan pemrosesan antrean `ai_jobs`.
+PHP **Sistem Pelaporan Kegiatan Harian** dan model LLM — **Google Gemini
+(`gemini-3.8-flash`) sebagai model utama**, dengan **Ollama (Qwen 2.5)** sebagai
+cadangan lokal otomatis. Layanan ini menyediakan chatbot asisten (dengan
+*function calling*), ringkasan, narasi, validasi, ekspor dokumen, pencadangan,
+dan pemrosesan antrean `ai_jobs`.
 
-Aplikasi PHP tidak pernah memanggil Ollama secara langsung — semuanya lewat
+Aplikasi PHP tidak pernah memanggil Gemini/Ollama secara langsung — semuanya lewat
 layanan ini, sesuai kontrak di `includes/ai_client.php` dan `api_chat.php`.
 
 > **English summary** — see [English](#english) at the bottom.
@@ -23,7 +25,6 @@ layanan ini, sesuai kontrak di `includes/ai_client.php` dan `api_chat.php`.
 - [Alat (tools) agen](#alat-tools-agen)
 - [Antrean ai_jobs](#antrean-ai_jobs)
 - [Pengujian](#pengujian)
-- [Hermes Agent](#hermes-agent)
 - [Skill laporan-harian](#skill-laporan-harian)
 - [Catatan penting](#catatan-penting)
 - [Struktur berkas](#struktur-berkas)
@@ -34,12 +35,19 @@ layanan ini, sesuai kontrak di `includes/ai_client.php` dan `api_chat.php`.
 ## Arsitektur singkat
 
 ```
-┌──────────────┐   HTTP + X-Service-Key   ┌───────────────────┐   /api/chat   ┌──────────┐
-│  Aplikasi    │ ───────────────────────► │  ai-service       │ ────────────► │  Ollama  │
-│  PHP (web)   │ ◄─────────────────────── │  FastAPI + agen   │ ◄──────────── │ qwen2.5  │
-└──────┬───────┘   JSON (balasan, sumber)  └─────────┬─────────┘               └──────────┘
+┌──────────────┐   HTTP + X-Service-Key   ┌───────────────────┐   REST Gemini   ┌──────────────┐
+│  Aplikasi    │ ───────────────────────► │  ai-service       │ ──────────────► │ Google       │
+│  PHP (web)   │ ◄─────────────────────── │  FastAPI + agen   │ ◄────────────── │ Gemini 3.8   │
+└──────┬───────┘   JSON (balasan, sumber)  └─────────┬─────────┘                 └──────────────┘
+       │                                             │ (bila Gemini gagal)
+       │                                             │ /api/chat
+       │                                             ▼
+       │                                       ┌──────────┐
+       │                                       │  Ollama  │  ← cadangan lokal
+       │                                       │ qwen2.5  │
+       │                                       └──────────┘
        │                                             │
-       │                                             │ PyMySQL (parameter terikat)
+       │         PyMySQL (parameter terikat)          │
        ▼                                             ▼
   ┌──────────────────────────────────────────────────────────┐
   │  MariaDB/MySQL  pelaporan  (+ tabel ai_jobs)          │
@@ -51,10 +59,11 @@ layanan ini, sesuai kontrak di `includes/ai_client.php` dan `api_chat.php`.
 | Komponen | Versi / Catatan |
 | -------- | --------------- |
 | Python   | 3.11 – 3.13 (diuji pada 3.13) |
-| Ollama   | Terpasang & berjalan di `http://localhost:11434` |
-| Model    | `qwen2.5:7b` (Q4), cadangan `qwen2.5:3b` |
+| Kunci API Gemini | Dari https://aistudio.google.com/apikey → `AI_GEMINI_API_KEY` |
+| Ollama   | *(opsional — cadangan lokal)* Terpasang & berjalan di `http://localhost:11434` |
+| Model    | Gemini `gemini-3.8-flash` (utama); lokal `qwen2.5:7b` (Q4), cadangan `qwen2.5:3b` |
 | MariaDB  | 10.4+ (XAMPP), database `pelaporan` |
-| RAM      | 8–16 GB, target **CPU-only** |
+| RAM      | 8–16 GB bila memakai Ollama lokal; Gemini berjalan di cloud |
 
 Unduh model:
 
@@ -98,9 +107,12 @@ Ringkasan yang sering diubah:
 | Variabel | Bawaan | Guna |
 | -------- | ------ | ---- |
 | `AI_SERVICE_KEY` | *(wajib diisi sendiri)* | Kunci layanan (header `X-Service-Key`). |
-| `AI_MODEL` / `AI_MODEL_FALLBACK` | `qwen2.5:7b` / `qwen2.5:3b` | Model utama & cadangan. |
+| `AI_GEMINI_API_KEY` | *(opsional; kosong = Ollama saja)* | Kunci AI Studio; mengaktifkan Gemini sebagai model utama. |
+| `AI_GEMINI_MODEL` / `AI_GEMINI_MODEL_FALLBACK` | `gemini-3.8-flash` / `gemini-3.5-flash-lite` | Model Gemini utama & cadangan. |
+| `AI_GEMINI_SEARCH_MODEL` | `gemini-3.5-flash-lite` | Model pemanggil Google Search grounding (alat `web_search`). |
+| `AI_MODEL` / `AI_MODEL_FALLBACK` | `qwen2.5:7b` / `qwen2.5:3b` | Model Ollama (cadangan lokal). |
 | `AI_NUM_CTX` | `8192` | Ukuran konteks Ollama. |
-| `AI_DEGRADE_DETERMINISTIC` | `false` | `false`: Ollama mati → HTTP 503. `true`: pakai hasil deterministik. |
+| `AI_DEGRADE_DETERMINISTIC` | `false` | `false`: seluruh model mati → HTTP 503. `true`: pakai hasil deterministik. |
 | `AI_DB_APP_USER` / `AI_DB_APP_PASSWORD` | `pelaporan_app` / … | Akun tulis. |
 | `AI_DB_READONLY_USER` / `…_PASSWORD` | `bi_reader` / … | Akun baca-saja (jatuh ke akun aplikasi bila belum diberi hak). |
 | `AI_BACKUP_DIR` | `../backups/db` | Folder berkas `.sql` (sama dengan PHP). |
@@ -130,15 +142,17 @@ Dokumentasi interaktif (Swagger) tersedia di `/docs` bila `AI_DOCS_PUBLIC=true`.
 
 Semua endpoint **kecuali `/health`** memerlukan header:
 `X-Service-Key: <AI_SERVICE_KEY>`. Tanpa kunci sah → **401** `{"detail": ...}`.
-Bila Ollama tidak dapat dijangkau → **503** `{"detail": ...}`.
+Bila seluruh rantai model tidak dapat dijangkau → **503** `{"detail": ...}`
+(atau jawaban deterministik bila `AI_DEGRADE_DETERMINISTIC=true`).
 
 ### `GET /health`
 
-Selalu **200**, bahkan saat Ollama/DB mati (PHP hanya memeriksa status 2xx).
+Selalu **200**, bahkan saat Gemini/Ollama/DB mati (PHP hanya memeriksa status 2xx).
 
 ```json
-{"ok": true, "model": "qwen2.5:7b", "ollama": true, "database": true,
- "versi": "1.0.0", "models_tersedia": ["qwen2.5:7b"]}
+{"ok": true, "model": "gemini-3.8-flash", "gemini": true, "ollama": true,
+ "database": true, "versi": "1.0.0",
+ "models_tersedia": ["gemini-3.8-flash", "qwen2.5:7b"]}
 ```
 
 ### `POST /chat`
@@ -150,7 +164,7 @@ Selalu **200**, bahkan saat Ollama/DB mati (PHP hanya memeriksa status 2xx).
 
 ```json
 {"ok": true, "balasan": "…", "sumber": [{"tipe":"laporan_harian","id":4,"tanggal":"2026-10-11","kegiatan":"asd"}],
- "session": 0, "model": "qwen2.5:7b", "tools_dipakai": ["search_notes"], "iterasi": 2}
+ "session": 0, "model": "gemini-3.8-flash", "tools_dipakai": ["search_notes"], "iterasi": 2}
 ```
 
 PHP membaca `balasan` dan `sumber`.
@@ -212,7 +226,7 @@ Mengunduh berkas `.xlsx`/`.docx` hasil `export_excel`/`export_word`
 | `backup_database` / `list_backups` | admin | Cadangan & riwayat. |
 | `restore_database` | admin | **Approval-gated** (`konfirmasi="PULIHKAN"`). |
 | `send_email` / `send_whatsapp` | semua | **Approval-gated** — hanya usulan. |
-| `web_search` | semua | Cari info publik/terkini di internet (SearXNG; cadangan DuckDuckGo). |
+| `web_search` | semua | Cari info publik/terkini di internet (Google Search Gemini; cadangan SearXNG/DuckDuckGo). |
 | `daftar_jadwal` | semua | Tampilkan agenda pribadi pengguna. |
 | `buat_jadwal` / `ubah_jadwal` / `hapus_jadwal` | semua | Kelola agenda; **pratinjau** bawaan, `konfirmasi=true` menerapkan. |
 | `ingatkan_jadwal` | semua | Kirim pengingat agenda segera; butuh `konfirmasi=true`. |
@@ -230,8 +244,9 @@ otomatis membuat **cadangan pengaman** sebelum menimpa data.
 
 Pencarian web diatur lewat `AI_WEB_SEARCH_AKTIF`, `AI_SEARXNG_URL`,
 `AI_WEB_SEARCH_HASIL`, dan (opsional) `AI_HTTP_CA_BUNDLE` untuk CA kustom di
-balik proxy korporat. Panduan tiap kemampuan ada di `skills/laporan-harian/`,
-`skills/pencarian/`, dan `skills/jadwal/`.
+balik proxy korporat — urutan provider: Google Search Gemini → SearXNG →
+DuckDuckGo (lihat `docs/SEARXNG.md`). Panduan tiap kemampuan ada di
+`skills/laporan-harian/`, `skills/pencarian/`, dan `skills/jadwal/`.
 
 ## Antrean ai_jobs
 
@@ -261,29 +276,7 @@ Untuk produksi di Windows, jalankan pekerja lewat **Task Scheduler** dengan
 .venv\Scripts\python -m pytest
 ```
 
-Seluruh uji berjalan **tanpa Ollama hidup** (klien model di-*mock*).
-
-## Hermes Agent
-
-`hermes/hermes.config.yaml` berisi konfigurasi **Hermes Agent** untuk memakai
-Ollama lokal sebagai *custom provider* (tanpa biaya API).
-
-1. Salin menjadi `%USERPROFILE%\.hermes\config.yaml` (Windows) atau
-   `~/.hermes/config.yaml` (Linux/macOS).
-2. Pastikan Ollama berjalan (`ollama serve`) dan model sudah diunduh.
-3. Salin skill `skills/laporan-harian/` ke `~/.hermes/skills/laporan-harian/`.
-4. `hermes chat`.
-
-Blok inti:
-
-```yaml
-model:
-  provider: custom
-  default: qwen2.5:7b
-  base_url: http://localhost:11434/v1
-  api_mode: chat_completions
-  context_length: 8192
-```
+Seluruh uji berjalan **tanpa Gemini/Ollama hidup** (klien model di-*mock*).
 
 ## Skill
 
@@ -292,11 +285,10 @@ Panduan kerja agen (Bahasa Indonesia) ada di folder `skills/`:
 - `skills/laporan-harian/SKILL.md` — peran & hak akses, skema basis data, alur
   status laporan, konvensi ringkasan, kontrak endpoint, aturan tindakan berisiko.
 - `skills/pencarian/SKILL.md` — kapan memakai `web_search` vs data internal,
-  penyedia (SearXNG/DuckDuckGo), cache, dan cara menyebut sumber.
+  urutan penyedia (Gemini Search/SearXNG/DuckDuckGo), cache, dan cara menyebut
+  sumber.
 - `skills/jadwal/SKILL.md` — model data `jadwal`, alur *approval-gated*, format
   waktu, dan pengingat otomatis (`scripts/pengingat_jadwal.php`).
-
-Salin ke folder skill agen Anda (mis. `~/.hermes/skills/`).
 
 ## Catatan penting
 
@@ -305,15 +297,16 @@ Salin ke folder skill agen Anda (mis. `~/.hermes/skills/`).
   inti, atau `powerbi/sql/02_views.sql` untuk view), layanan **otomatis jatuh ke
   akun aplikasi** dan mencatat peringatan `"Kunci baca-saja gagal …"`. Berikan
   hak yang sesuai agar pemisahan hak benar-benar berlaku.
-- **Degradasi.** Bawaan `AI_DEGRADE_DETERMINISTIC=false`: saat Ollama mati,
-  endpoint AI membalas **503** `{"detail": …}` (sesuai kontrak PHP). Set `true`
-  untuk memakai hasil deterministik tanpa model.
+- **Degradasi.** Bawaan `AI_DEGRADE_DETERMINISTIC=false`: saat seluruh model
+  (Gemini & Ollama) mati, endpoint AI membalas **503** `{"detail": …}`
+  (sesuai kontrak PHP). Set `true` untuk memakai hasil deterministik tanpa
+  model.
 - **Penulisan terbatas.** `update_note` menulis ke `laporan_harian`, dan alat
   jadwal menulis ke `jadwal` — keduanya dengan daftar-putih/pemeriksaan pemilik,
   penyaringan, serta pencatatan audit.
-- **Pencarian web** mengembalikan `ok:false` dengan pesan jelas bila SearXNG
-  tidak diatur dan cadangan gagal (mis. TLS proxy). Set `AI_HTTP_CA_BUNDLE` bila
-  berada di balik proxy korporat.
+- **Pencarian web** mengembalikan `ok:false` dengan pesan jelas bila Gemini
+  Search, SearXNG, dan cadangan DuckDuckGo semuanya gagal (mis. TLS proxy).
+  Set `AI_HTTP_CA_BUNDLE` bila berada di balik proxy korporat.
 - **Semua kueri ber-parameter** (`%s`) — terlindungi dari injeksi SQL.
 - **`users` tidak punya `updated_at`** (hanya `created_at`).
 
@@ -326,7 +319,9 @@ ai-service/
 │  ├─ config.py            # pengaturan terpusat (pydantic-settings, prefix AI_)
 │  ├─ auth.py              # middleware X-Service-Key
 │  ├─ db.py                # PyMySQL: kueri ber-parameter, jatuh baca-saja, audit
-│  ├─ ollama_client.py     # klien async Ollama (fungsi calling, fallback model)
+│  ├─ gemini_client.py     # klien REST Gemini (function calling + Google Search)
+│  ├─ ollama_client.py     # klien async Ollama (cadangan lokal)
+│  ├─ llm.py               # rantai klien: Gemini utama → Ollama cadangan
 │  ├─ agent.py             # gelung agen (function calling)
 │  ├─ schemas.py           # skema permintaan/balasan (Pydantic)
 │  ├─ prompts/             # prompt sistem (Bahasa Indonesia, .md)
@@ -338,8 +333,7 @@ ai-service/
 ├─ skills/laporan-harian/SKILL.md
 ├─ skills/pencarian/SKILL.md
 ├─ skills/jadwal/SKILL.md
-├─ hermes/hermes.config.yaml
-├─ tests/                  # pytest (tanpa Ollama hidup)
+├─ tests/                  # pytest (tanpa Gemini/Ollama hidup; 78 uji)
 ├─ .env.example
 ├─ requirements.txt
 ├─ run.ps1 / run.bat
@@ -351,25 +345,27 @@ ai-service/
 ## English
 
 **AI Service for Reporting** is a Python/FastAPI microservice that acts as the
-single gateway between the PHP **Activity Reporting** app and a local
-**Ollama (Qwen 2.5)** model. It provides a chat assistant with tool/function
-calling, summaries, narratives, validation, document export, database
-backup/restore, and processing of the `ai_jobs` queue. The PHP app never talks
-to Ollama directly.
+single gateway between the PHP **Activity Reporting** app and LLM models —
+**Google Gemini (`gemini-3.8-flash`) as the primary model**, with local
+**Ollama (Qwen 2.5)** as automatic fallback. It provides a chat assistant with
+tool/function calling, summaries, narratives, validation, document export,
+database backup/restore, and processing of the `ai_jobs` queue. The PHP app
+never talks to Gemini/Ollama directly.
 
 **Quick start**
 
 ```powershell
 cd ai-service
 Copy-Item .env.example .env        # set AI_SERVICE_KEY (must match PHP)
+                                   # + AI_GEMINI_API_KEY (Gemini AI Studio)
 .\run.ps1                          # creates .venv, installs deps, starts server
 ```
 
 **Contract** — every endpoint except `GET /health` requires the
-`X-Service-Key` header. `GET /health` always returns 200. If Ollama is down,
-AI endpoints return HTTP **503** `{"detail": ...}` unless
-`AI_DEGRADE_DETERMINISTIC=true`. The PHP client reads `balasan`/`jawaban`,
-`sumber`, and the error `detail`/`pesan` fields.
+`X-Service-Key` header. `GET /health` always returns 200. If the whole model
+chain (Gemini & Ollama) is down, AI endpoints return HTTP **503**
+`{"detail": ...}` unless `AI_DEGRADE_DETERMINISTIC=true`. The PHP client reads
+`balasan`/`jawaban`, `sumber`, and the error `detail`/`pesan` fields.
 
 **Endpoints** — `GET /health`, `POST /chat`, `POST /summarize`,
 `POST /narrative`, `POST /validate`, `POST /jobs/proses`,
@@ -386,8 +382,9 @@ back to the app account when it lacks grants. Destructive actions
 (restore, email, WhatsApp) require explicit user approval. All SQL is
 parameterized.
 
-**Hermes Agent** — copy `hermes/hermes.config.yaml` to `~/.hermes/config.yaml`
-to use local Ollama as a custom provider; copy `skills/laporan-harian/` to
-`~/.hermes/skills/`. See [Hermes Agent](#hermes-agent).
+**Web search** — the `web_search` tool tries Google Search grounding (Gemini)
+first, then a self-hosted SearXNG, then DuckDuckGo Lite as a last resort.
+See `docs/SEARXNG.md`.
 
-**Tests** — `.venv\Scripts\python -m pytest` (runs without a live Ollama).
+**Tests** — `.venv\Scripts\python -m pytest` (runs without live Gemini/Ollama;
+78 tests).

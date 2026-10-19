@@ -77,6 +77,35 @@ class Settings(BaseSettings):
     )
 
     # ------------------------------------------------------------------
+    # Google Gemini (model utama)
+    # ------------------------------------------------------------------
+    ai_gemini_api_key: str = Field(
+        default="",
+        description=(
+            "Kunci API Google AI Studio (AIza...). Kosong = Gemini dilewati dan "
+            "layanan memakai Ollama seperti sediakala."
+        ),
+    )
+    ai_gemini_base_url: str = Field(
+        default="https://generativelanguage.googleapis.com/v1beta",
+        description="Alamat dasar REST Gemini (bisa diganti lewat proxy).",
+    )
+    ai_gemini_model: str = Field(
+        default="gemini-3.8-flash", description="Model Gemini utama (function calling)."
+    )
+    ai_gemini_model_fallback: str = Field(
+        default="gemini-3.5-flash-lite",
+        description="Model Gemini cadangan bila model utama gagal/rate limit.",
+    )
+    ai_gemini_search_model: str = Field(
+        default="gemini-3.5-flash-lite",
+        description="Model pemanggil Google Search grounding (alat web_search).",
+    )
+    ai_gemini_search_timeout: float = Field(
+        default=30.0, description="Batas tunggu satu pencarian grounding Gemini (detik)."
+    )
+
+    # ------------------------------------------------------------------
     # Basis data
     # ------------------------------------------------------------------
     ai_db_host: str = Field(default="localhost")
