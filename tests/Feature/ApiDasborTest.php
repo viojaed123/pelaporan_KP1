@@ -365,14 +365,10 @@ class ApiDasborTest extends TestCase
             $res = $this->get($url, $this->header($tokenMentor))->assertOk();
             $this->assertStringStartsWith('PK', $res->streamedContent());
 
+            $this->app->make('auth')->forgetGuards();
             $karyawanRes = $this->getJson($url, $this->header($tokenKaryawan));
-            config(['app.debug_suji' => true]);
-            $karyawanRes = $this->getJson($url, $this->header($tokenKaryawan));
-            config(['app.debug_suji' => false]);
-            if ($karyawanRes->baseResponse->getStatusCode() !== 403) {
-                dump($url, $karyawanRes->baseResponse->getStatusCode());
-            }
             $karyawanRes->assertForbidden();
+            $this->app->make('auth')->forgetGuards();
         }
     }
 
