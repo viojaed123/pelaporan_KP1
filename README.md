@@ -17,7 +17,8 @@ Warna korporat dipertahankan: **#003D7D** (biru tua), **#005EB8** (biru),
 | Database | MariaDB 10.4 (XAMPP) |
 | Composer | dipakai untuk dependensi PHP |
 | Python | 3.10+ (opsional, untuk layanan AI) |
-| Ollama | model `qwen2.5:7b` (opsional, untuk AI) |
+| Kunci API Google Gemini | (opsional, untuk AI) — dari https://aistudio.google.com/apikey |
+| Ollama | model `qwen2.5:7b` (opsional; cadangan lokal bila Gemini tidak dipakai) |
 | Power BI Desktop | (opsional, untuk visualisasi) |
 
 ---
@@ -27,24 +28,24 @@ Warna korporat dipertahankan: **#003D7D** (biru tua), **#005EB8** (biru),
 ### 2.1. Basis data
 
 ```bat
-mysql -u pelaporan_app -p pelaporan < database\migrations\001_skema_awal.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\002_keamanan_login.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\003_audit_log.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\004_ai_service.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\010_user_db.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\011_hak_akses_app.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\012_pengiriman_laporan.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\013_peningkatan_akun.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\014_komentar_laporan.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\015_absensi_kegiatan_kesehatan.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\016_foto_profil.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\017_impor_laporan.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\018_jadwal.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\020_otp_jenis.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\021_srm_cid.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\022_cid_bigint.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\023_wilayah_lokasi.sql
-mysql -u pelaporan_app -p pelaporan < database\migrations\024_geokode_cache.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\001_skema_awal.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\002_keamanan_login.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\003_audit_log.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\004_ai_service.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\010_user_db.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\011_hak_akses_app.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\012_pengiriman_laporan.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\013_peningkatan_akun.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\014_komentar_laporan.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\015_absensi_kegiatan_kesehatan.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\016_foto_profil.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\017_impor_laporan.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\018_jadwal.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\020_otp_jenis.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\021_srm_cid.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\022_cid_bigint.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\023_wilayah_lokasi.sql
+mysql -u pelaporan_app -p pelaporan < database\schema\legacy\024_geokode_cache.sql
 ```
 
 Migrations 010-011 membuat akun DB terpisah dengan hak minimum. Gunakan akun tersebut di `config_lokal.php`.
@@ -52,9 +53,9 @@ Migrations 010-011 membuat akun DB terpisah dengan hak minimum. Gunakan akun ter
 Migrations 010, 011, dan 019 memberi/membuat akun DB dan hak akses, jadi **harus dijalankan sebagai `root`** (akun aplikasi tidak punya `GRANT OPTION`):
 
 ```bat
-mysql -u root pelaporan < database\migrations\010_user_db.sql
-mysql -u root pelaporan < database\migrations\011_hak_akses_app.sql
-mysql -u root pelaporan < database\migrations\019_akses_baca_ai.sql
+mysql -u root pelaporan < database\schema\legacy\010_user_db.sql
+mysql -u root pelaporan < database\schema\legacy\011_hak_akses_app.sql
+mysql -u root pelaporan < database\schema\legacy\019_akses_baca_ai.sql
 ```
 
 Lapisan analitik Power BI (22 view) juga dibuat dengan akun `root`:
@@ -152,7 +153,11 @@ dilanjutkan lewat `scripts\resolusi_lokasi.php`.
 
 ### 2.7. Layanan AI (opsional)
 
-Lihat `ai-service/README.md` untuk menjalankan FastAPI + Ollama/Hermes.
+Lihat `ai-service/README.md` untuk menjalankan FastAPI. Model utama: **Google
+Gemini** (isi `AI_GEMINI_API_KEY` di `ai-service/.env`); cadangan lokal Ollama.
+Asisten di SPA Laravel & aplikasi Android aktif dengan mengisi `LLM_BASE_URL`,
+`LLM_API_KEY`, dan `LLM_MODEL` pada `.env` root (endpoint kompatibel OpenAI
+Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`).
 
 ---
 

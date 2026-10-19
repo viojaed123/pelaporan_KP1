@@ -23,8 +23,9 @@ Options -Indexes
     RewriteEngine On
 
     # --- Direktori proyek (bukan halaman yang dilayankan ke browser) ---
-    # Baris lama dipertahankan, ditambah direktori bawaan Laravel.
-    RewriteRule ^(vendor|database|ai-service|scripts|backups|docs|includes|powerbi)(/|$) - [F,L,NC]
+    # Baris lama dipertahankan, ditambah direktori bawaan Laravel +
+    # direktori non-web lain (tools/, mobile/, node_modules/, lang/).
+    RewriteRule ^(vendor|database|ai-service|scripts|backups|docs|includes|powerbi|tools|mobile|node_modules|lang)(/|$) - [F,L,NC]
 
     # --- Direktori bawaan Laravel: hanya public/ yang boleh tersaji ---
     RewriteRule ^(app|bootstrap|config|routes|resources|storage|tests)(/|$) - [F,L,NC]
