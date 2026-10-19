@@ -25,7 +25,7 @@
   </div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="{{ asset('assets/vendor/chart.umd.min.js') }}"></script>
 <script>
 new Chart(document.getElementById('grafikHasil'), {
   type: 'doughnut',

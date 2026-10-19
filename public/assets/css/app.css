@@ -426,15 +426,20 @@ p { margin: 0 0 1em; }
 .kartu {
     background: #fff;
     border: 1px solid var(--garis);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--bayangan);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--bayangan-sm);
     margin-bottom: 22px;
     overflow: hidden;
+    transition: var(--transisi);
+}
+.kartu:hover {
+    box-shadow: var(--bayangan-md);
+    transform: translateY(-1px);
 }
 .kartu-kepala,
 .kartu-header {
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--garis);
+    padding: 18px 22px 8px;
+    border-bottom: 1px solid rgba(16, 24, 40, .05);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -446,7 +451,7 @@ p { margin: 0 0 1em; }
 .kartu-kepala .aksi,
 .kartu-header .aksi { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
 .kartu-badan,
-.kartu-tubuh { padding: 22px; }
+.kartu-tubuh { padding: 20px 22px 22px; }
 .kartu-badan.padat,
 .kartu-tubuh.padat { padding: 0; }
 .kartu-kaki {
@@ -1731,26 +1736,6 @@ table.tabel td.text-tengah, table.tabel th.text-tengah { text-align: center; }
     --transisi: all .15s ease-in-out;
 }
 
-.kartu {
-    background: #fff;
-    border: 1px solid var(--garis);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--bayangan-sm);
-    transition: var(--transisi);
-}
-.kartu:hover {
-    box-shadow: var(--bayangan-md);
-    transform: translateY(-1px);
-}
-
-.kartu-header {
-    padding: 18px 22px 8px;
-    border-bottom: 1px solid rgba(16,24,40,.05);
-}
-.kartu-tubuh {
-    padding: 20px 22px 22px;
-}
-
 .baris {
     display: flex;
     flex-wrap: wrap;
@@ -2497,4 +2482,11 @@ h3 .sp-ikon, h4 .sp-ikon { width: 18px; height: 18px; }
 .daftar-notifikasi li p { margin: 0; flex: 1; }
 .daftar-notifikasi li.belum-dibaca p { font-weight: 600; }
 .daftar-notifikasi li.sudah-dibaca { color: var(--teks-redup); }
+
+/* --- Scrollbar ramping (sentuhan visual seragam) --- */
+* { scrollbar-width: thin; scrollbar-color: #c3cede transparent; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c3cede; border-radius: 9px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; background-clip: content-box; }
 

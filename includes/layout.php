@@ -477,7 +477,7 @@ function render_panel_chat(): string
         <span class="avatar avatar-kecil" style="background:rgba(255,255,255,.2)">AI</span>
         <span>
             <span class="judul">Asisten Pelaporan</span><br>
-            <span class="status">Terhubung ke Qwen 2.5 &middot; Hermes</span>
+            <span class="status">Terhubung ke Gemini 3.8 &middot; Google Search</span>
         </span>
         <button class="tutup" type="button" id="tutupChat" aria-label="Tutup chat">&times;</button>
     </div>

@@ -193,7 +193,8 @@ $url_excel = 'export_excel.php?' . $parameter_filter;
 $opsi = [
     'judul' => 'Rekap Laporan',
     'crumb' => 'Mentor',
-    'head'  => '<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>',
+    'head'  => '<script src="assets/js/vendor/chart.umd.min.js" defer></script>'
+             . '<script src="assets/js/grafik.js" defer></script>',
 ];
 
 mulai_halaman($opsi);

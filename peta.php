@@ -648,7 +648,8 @@ mulai_halaman([
     'aktif' => 'peta',
     'head'  => '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">'
              . '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>'
-             . '<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>',
+             . '<script src="assets/js/vendor/chart.umd.min.js" defer></script>'
+             . '<script src="assets/js/grafik.js" defer></script>',
 ]);
 ?>
 
