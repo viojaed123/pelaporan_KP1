@@ -72,6 +72,25 @@ class CekPeran
             $peran
         )));
 
+        if (app()->runningUnitTests() && config('app.debug_suji')) {
+            $guard = Auth::guard('sanctum');
+            $cermin = new \ReflectionClass($guard);
+            $kunci = [];
+            foreach ($cermin->getProperties() as $prop) {
+                $prop->setAccessible(true);
+                $nilai = $prop->isStatic() ? null : $prop->getValue($guard);
+                $kunci[$prop->getName()] = is_object($nilai) ? get_class($nilai) . '#' . spl_object_id($nilai)
+                    : (is_scalar($nilai) || is_null($nilai) ? $nilai : gettype($nilai));
+            }
+            dump([
+                'ceks' => [$request->path(), $user->id, $user->email],
+                'guard_class' => get_class($guard),
+                'guard_props' => $kunci,
+                'bearer' => substr((string) $request->bearerToken(), 0, 12),
+                'auth_user_id' => Auth::id(),
+            ]);
+        }
+
         /*
          * Metode punyaPeran() ada pada model User dan membandingkan role
          * secara ketat (strict). Dengan begitu peran yang tidak dikenal pada

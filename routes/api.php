@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\AbsensiController;
 use App\Http\Controllers\Api\AnalitikController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EksporController;
 use App\Http\Controllers\Api\KasusController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\LaporanApiController;
@@ -36,6 +37,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/absensi', [LaporanApiController::class, 'absensi']);
     Route::get('/rekap/harian', [LaporanApiController::class, 'rekapHarian']);
     Route::get('/rekap/pengguna', [LaporanApiController::class, 'rekapPengguna']);
+    /* Kasus memakai awalan /bi/ agar tidak bentrok dengan rute
+       Sanctum GET /kasus (daftar kasus untuk klien mobile). */
+    Route::get('/bi/kasus', [LaporanApiController::class, 'kasus']);
 
     /* --- 2. Aplikasi mobile (token Sanctum per pengguna) --- */
 
@@ -81,12 +85,21 @@ Route::prefix('v1')->group(function () {
         Route::post('/asisten/kirim', [AsistenController::class, 'kirim'])
             ->middleware('throttle:20,1');
 
+        /* Dasbor: kartu + tren + donut; penskalaan peran di controller. */
+        Route::get('/dasbor', [AnalitikController::class, 'dasbor']);
+
         /* Analitik (porting rekap/ringkasan/kalender).
            Rekap menyeluruh khusus mentor/admin; ringkasan & kalender
            dapat diakses semua pengguna (penskalaan di dalam controller). */
         Route::middleware('role:mentor,admin')->group(function () {
             Route::get('/rekap/laporan', [AnalitikController::class, 'rekapLaporan']);
             Route::get('/rekap/absensi', [AnalitikController::class, 'rekapAbsensi']);
+            Route::get('/rekap/kasus', [AnalitikController::class, 'rekapKasus']);
+
+            /* Ekspor .xlsx nyata (phpspreadsheet) untuk halaman rekap. */
+            Route::get('/ekspor/laporan', [EksporController::class, 'laporan']);
+            Route::get('/ekspor/absensi', [EksporController::class, 'absensi']);
+            Route::get('/ekspor/kasus', [EksporController::class, 'kasus']);
         });
 
         Route::get('/ringkasan-kegiatan', [AnalitikController::class, 'ringkasan']);

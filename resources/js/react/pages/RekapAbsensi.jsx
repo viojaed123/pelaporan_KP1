@@ -54,6 +54,26 @@ export default function RekapAbsensi() {
         ]
         : [];
 
+    const unduhXlsx = async () => {
+        try {
+            const params = {};
+            if (filter.awal) params.awal = filter.awal;
+            if (filter.akhir) params.akhir = filter.akhir;
+            const res = await api.get('/ekspor/absensi', { params, responseType: 'blob' });
+            const url = URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            const ts = new Date().toISOString().slice(0, 10);
+            link.href = url;
+            link.download = `rekap-absensi-${ts}.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            setGalat(e.response?.data?.pesan ?? 'Gagal mengunduh XLSX absensi.');
+        }
+    };
+
     return (
         <>
             <h2 className="judul-halaman">Rekap Absensi</h2>
@@ -72,6 +92,9 @@ export default function RekapAbsensi() {
                         <div className="form-grup">
                             <label htmlFor="akhir">Tanggal akhir</label>
                             <input id="akhir" type="date" className="isian" value={filter.akhir} onChange={ubah('akhir')} />
+                        </div>
+                        <div className="form-grup" style={{ alignSelf: 'flex-end' }}>
+                            <button type="button" className="btn btn-utama" onClick={unduhXlsx}>Unduh XLSX (Absensi)</button>
                         </div>
                     </div>
                 </div>

@@ -51,6 +51,28 @@ export default function RekapLaporan() {
         ]
         : [];
 
+    const unduhXlsx = async () => {
+        try {
+            const params = { per_halaman: 1000000 };
+            if (filter.tanggal_mulai) params.tanggal_mulai = filter.tanggal_mulai;
+            if (filter.tanggal_akhir) params.tanggal_akhir = filter.tanggal_akhir;
+            if (filter.status) params.status = filter.status;
+            if (filter.karyawan) params.karyawan = filter.karyawan;
+            const res = await api.get('/ekspor/laporan', { params, responseType: 'blob' });
+            const url = URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            const ts = new Date().toISOString().slice(0, 10);
+            link.href = url;
+            link.download = `rekap-laporan-${ts}.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            setGalat(e.response?.data?.pesan ?? 'Gagal mengunduh XLSX laporan.');
+        }
+    };
+
     return (
         <>
             <h2 className="judul-halaman">Rekap Laporan</h2>
@@ -85,6 +107,9 @@ export default function RekapLaporan() {
                                     <option key={k.id} value={k.id}>{k.nama}</option>
                                 ))}
                             </select>
+                        </div>
+                        <div className="form-grup" style={{ alignSelf: 'flex-end' }}>
+                            <button type="button" className="btn btn-utama" onClick={unduhXlsx}>Unduh XLSX (Laporan)</button>
                         </div>
                     </div>
                 </div>

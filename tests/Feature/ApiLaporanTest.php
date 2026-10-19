@@ -67,6 +67,42 @@ class ApiLaporanTest extends TestCase
             $t->string('kondisi_kesehatan')->nullable();
             $t->timestamps();
         });
+
+        /* Dipakai uji endpoint /bi/kasus (opsional agar uji lain tetap utuh). */
+        if (! Schema::hasTable('kasus')) {
+            Schema::create('kasus', function (Blueprint $t): void {
+                $t->increments('id');
+                $t->string('kode_kasus')->nullable();
+                $t->string('judul');
+                $t->text('deskripsi')->nullable();
+                $t->string('nama_lokasi')->nullable();
+                $t->decimal('garis_lintang', 10, 7)->nullable();
+                $t->decimal('garis_bujur', 10, 7)->nullable();
+                $t->string('tingkat_urgensi')->nullable();
+                $t->string('status_kasus')->nullable();
+                $t->integer('progres')->default(0);
+                $t->unsignedInteger('dibuat_oleh')->nullable();
+                $t->unsignedInteger('penanggung_jawab_id')->nullable();
+                $t->string('penanggung_jawab_teks')->nullable();
+                $t->string('kategori')->nullable();
+                $t->string('sumber')->nullable();
+                $t->date('target_selesai')->nullable();
+                $t->string('lampiran')->nullable();
+                $t->timestamp('dibuat_pada')->nullable();
+                $t->timestamp('diperbarui_pada')->nullable();
+            });
+        }
+        if (! Schema::hasTable('kasus_penugasan')) {
+            Schema::create('kasus_penugasan', function (Blueprint $t): void {
+                $t->increments('id');
+                $t->unsignedInteger('kasus_id');
+                $t->unsignedInteger('user_id')->nullable();
+                $t->string('nama_teks')->nullable();
+                $t->string('peran')->nullable();
+                $t->unsignedInteger('ditugaskan_oleh')->nullable();
+                $t->timestamp('dibuat_pada')->nullable();
+            });
+        }
     }
 
     private function buatPengguna(): User
@@ -133,15 +169,92 @@ class ApiLaporanTest extends TestCase
     public function test_rekap_harian_menghitung_per_status(): void
     {
         $user = $this->buatPengguna();
-        LaporanHarian::create(['user_id' => $user->id, 'tanggal' => '2026-10-10', 'kegiatan' => 'A', 'status' => 'disetujui']);
+        LaporanHarian::create(['user_id' => $user->id, 'tanggal' => '2026-10-10', 'kegiatan' => 'A', 'status' => 'dikirim']);
         LaporanHarian::create(['user_id' => $user->id, 'tanggal' => '2026-10-10', 'kegiatan' => 'B', 'status' => 'diperiksa']);
 
         $this->getJson('/api/v1/rekap/harian?token=' . self::TOKEN)
             ->assertOk()
             ->assertJsonPath('jumlah', 1)
             ->assertJsonPath('data.0.jumlah_laporan', 2)
-            ->assertJsonPath('data.0.disetujui', 1)
-            ->assertJsonPath('data.0.diperiksa', 1);
+            ->assertJsonPath('data.0.dikirim', 1)
+            ->assertJsonPath('data.0.diperiksa', 1)
+            /* Status yang tidak ada di data harus 0 (bukan kolom mati). */
+            ->assertJsonPath('data.0.draft', 0)
+            ->assertJsonPath('data.0.perlu_revisi', 0)
+            ->assertJsonPath('data.0.diajukan', 0);
+    }
+
+    public function test_rekap_pengguna_menghitung_status_sah_dan_divisi(): void
+    {
+        $user = $this->buatPengguna();
+        $user->divisi = 'Operasional';
+        $user->save();
+        LaporanHarian::create(['user_id' => $user->id, 'tanggal' => '2026-10-10', 'kegiatan' => 'A', 'status' => 'diperiksa']);
+        LaporanHarian::create(['user_id' => $user->id, 'tanggal' => '2026-10-11', 'kegiatan' => 'B', 'status' => 'perlu_revisi']);
+
+        $this->getJson('/api/v1/rekap/pengguna?token=' . self::TOKEN)
+            ->assertOk()
+            ->assertJsonPath('jumlah', 1)
+            ->assertJsonPath('data.0.pengguna', 'Pengguna API')
+            ->assertJsonPath('data.0.divisi', 'Operasional')
+            ->assertJsonPath('data.0.jumlah_laporan', 2)
+            ->assertJsonPath('data.0.diperiksa', 1)
+            ->assertJsonPath('data.0.perlu_revisi', 1)
+            ->assertJsonPath('data.0.dikirim', 0);
+    }
+
+    public function test_bi_kasus_mengembalikan_baris_dengan_pic_colesce(): void
+    {
+        $mentor = $this->buatPengguna();
+        $kasus = \App\Models\Kasus::create([
+            'kode_kasus' => 'KAS-20261019-0001',
+            'judul' => 'Pipa bocor',
+            'tingkat_urgensi' => 'Tinggi',
+            'status_kasus' => 'Dalam Proses',
+            'progres' => 40,
+            'kategori' => 'Infrastruktur',
+            'dibuat_oleh' => $mentor->id,
+            'penanggung_jawab_id' => null,
+            'penanggung_jawab_teks' => 'Budi Santoso',
+        ]);
+        \App\Models\KasusPenugasan::create([
+            'kasus_id' => (int) $kasus->id,
+            'user_id' => null,
+            'nama_teks' => 'Tim Lapangan',
+            'peran' => 'Anggota Tim',
+            'ditugaskan_oleh' => $mentor->id,
+        ]);
+
+        $res = $this->getJson('/api/v1/bi/kasus?token=' . self::TOKEN)
+            ->assertOk()
+            ->assertJsonPath('jumlah', 1)
+            ->assertJsonPath('data.0.kode_kasus', 'KAS-20261019-0001')
+            /* PIC tak cocok → tampil sebagai teks (paritas web/SPA/APK). */
+            ->assertJsonPath('data.0.penanggung_jawab', 'Budi Santoso')
+            ->assertJsonPath('data.0.penanggung_jawab_terdaftar', false)
+            ->assertJsonPath('data.0.jumlah_anggota', 1);
+
+        $this->assertSame('Dalam Proses', $res->json('data.0.status_kasus'));
+
+        $this->getJson('/api/v1/bi/kasus')->assertUnauthorized();
+        $this->getJson('/api/v1/bi/kasus?token=salah')->assertUnauthorized();
+    }
+
+    public function test_bi_kasus_memfilter_status_dan_urgensi(): void
+    {
+        $u = $this->buatPengguna();
+        \App\Models\Kasus::create(['kode_kasus' => 'KAS-1', 'judul' => 'Satu', 'tingkat_urgensi' => 'Rendah', 'status_kasus' => 'Terbuka', 'dibuat_oleh' => $u->id]);
+        \App\Models\Kasus::create(['kode_kasus' => 'KAS-2', 'judul' => 'Dua', 'tingkat_urgensi' => 'Kritis', 'status_kasus' => 'Selesai', 'dibuat_oleh' => $u->id]);
+
+        $this->getJson('/api/v1/bi/kasus?token=' . self::TOKEN . '&status=Terbuka')
+            ->assertOk()
+            ->assertJsonPath('jumlah', 1)
+            ->assertJsonPath('data.0.kode_kasus', 'KAS-1');
+
+        $this->getJson('/api/v1/bi/kasus?token=' . self::TOKEN . '&urgensi=Kritis')
+            ->assertOk()
+            ->assertJsonPath('jumlah', 1)
+            ->assertJsonPath('data.0.kode_kasus', 'KAS-2');
     }
 
     public function test_absensi_dikembalikan(): void

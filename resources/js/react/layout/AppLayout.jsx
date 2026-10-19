@@ -31,6 +31,7 @@ const MENU = {
         { grup: 'Analitik' },
         { key: 'rekap-laporan', ikon: 'dokumen', label: 'Rekap Laporan', to: '/rekap/laporan' },
         { key: 'rekap-absensi', ikon: 'kalender', label: 'Rekap Absensi', to: '/rekap/absensi' },
+        { key: 'rekap-kasus', ikon: 'dokumen', label: 'Rekap Kasus', to: '/rekap/kasus' },
         { key: 'ringkasan', ikon: 'grafik', label: 'Ringkasan Kegiatan', to: '/ringkasan' },
         { key: 'kalender', ikon: 'kalender', label: 'Kalender Aktivitas', to: '/kalender' },
         { grup: 'Lain-lain' },

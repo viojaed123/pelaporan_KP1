@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\Kasus;
 use App\Models\LaporanHarian;
+use App\Models\Tugas;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,6 +31,181 @@ class AnalitikController extends Controller
 {
     /** Status laporan yang dikenali (gabungan nilai legacy & API). */
     private const STATUS_LAPORAN = ['draft', 'dikirim', 'diperiksa', 'perlu_revisi', 'diajukan'];
+
+    /** Status kasus yang sah (pilihan legacy includes/kasus.php). */
+    private const STATUS_KASUS = ['Terbuka', 'Dalam Proses', 'Selesai'];
+
+    /** Tugas yang masih aktif (konsisten RingkasanController). */
+    private const TUGAS_AKTIF = ['baru', 'dikerjakan'];
+
+    /* =================================================================
+     * DASBOR (semua peran -- penskalaan otomatis di dalam)
+     *
+     * Satu panggilan untuk kartu + grafik halaman beranda SPA:
+     *   - karyawan   : datanya sendiri (laporan, absensi, kasus
+     *                  yang melibatkannya, tugasnya);
+     *   - mentor/admin: seluruh data (kartu global, tren, perlu-revisi).
+     * =============================================================== */
+
+    public function dasbor(Request $request): JsonResponse
+    {
+        $user     = $request->user();
+        $peran    = (string) $user->role;
+        $karyawan = $peran === 'karyawan';
+        $uid      = (int) $user->id;
+
+        $hariIni   = now()->toDateString();
+        $awalBulan = now()->startOfMonth()->toDateString();
+        $mulaiTren = now()->subDays(29)->toDateString();
+
+        /* --- Laporan: tren 30 hari + status bulan berjalan --- */
+        $tren = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $tren[now()->subDays($i)->toDateString()] = array_fill_keys(self::STATUS_LAPORAN, 0) + ['total' => 0];
+        }
+
+        $bulanStatus = array_fill_keys(self::STATUS_LAPORAN, 0);
+        $laporanTren = LaporanHarian::query()
+            ->when($karyawan, fn ($q) => $q->where('user_id', $uid))
+            ->whereDate('tanggal', '>=', $mulaiTren)
+            ->get(['tanggal', 'status']);
+
+        foreach ($laporanTren as $l) {
+            $tgl = Carbon::parse((string) $l->tanggal)->toDateString();
+            $st  = (string) $l->status;
+            if (isset($tren[$tgl])) {
+                $tren[$tgl]['total']++;
+                if (isset($tren[$tgl][$st])) {
+                    $tren[$tgl][$st]++;
+                }
+            }
+            if ($tgl >= $awalBulan && isset($bulanStatus[$st])) {
+                $bulanStatus[$st]++;
+            }
+        }
+
+        /* --- Absensi: hari ini + bulan berjalan --- */
+        $absensiHari = $this->hitungStatusAbsensi(
+            Absensi::query()
+                ->when($karyawan, fn ($q) => $q->where('user_id', $uid))
+                ->whereDate('tanggal', $hariIni)
+        );
+        $absensiBulan = $this->hitungStatusAbsensi(
+            Absensi::query()
+                ->when($karyawan, fn ($q) => $q->where('user_id', $uid))
+                ->whereDate('tanggal', '>=', $awalBulan)
+        );
+        $persenHadir = $absensiBulan['total'] > 0
+            ? (int) round($absensiBulan['hadir'] / $absensiBulan['total'] * 100)
+            : 0;
+
+        /* --- Kasus (karyawan: yang melibatkannya) --- */
+        $kasusQ = Kasus::query();
+        if ($karyawan) {
+            $kasusQ->where(function ($sub) use ($uid) {
+                $sub->where('dibuat_oleh', $uid)
+                    ->orWhere('penanggung_jawab_id', $uid)
+                    ->orWhereIn('id', function ($inner) use ($uid) {
+                        $inner->select('kasus_id')->from('kasus_penugasan')->where('user_id', $uid);
+                    });
+            });
+        }
+        $kasusRows = $kasusQ->get(['status_kasus', 'tingkat_urgensi', 'progres']);
+
+        $kasusStatus = array_fill_keys(self::STATUS_KASUS, 0);
+        $kasusUrgensi = [];
+        $progresJumlah = 0;
+        foreach ($kasusRows as $k) {
+            $st = (string) $k->status_kasus;
+            $kasusStatus[$st] = ($kasusStatus[$st] ?? 0) + 1;
+            $u = (string) ($k->tingkat_urgensi ?? 'Lainnya');
+            $kasusUrgensi[$u] = ($kasusUrgensi[$u] ?? 0) + 1;
+            $progresJumlah += (int) $k->progres;
+        }
+        $kasusTotal = $kasusRows->count();
+        $kasusProgresRata = $kasusTotal > 0 ? (int) round($progresJumlah / $kasusTotal) : 0;
+
+        /* --- Tugas aktif --- */
+        $tugasAktif = Tugas::query()
+            ->when($karyawan, fn ($q) => $q->where('user_id', $uid))
+            ->whereIn('status', self::TUGAS_AKTIF)
+            ->count();
+        $tugasTerlambat = Tugas::query()
+            ->when($karyawan, fn ($q) => $q->where('user_id', $uid))
+            ->whereIn('status', self::TUGAS_AKTIF)
+            ->whereDate('tenggat', '<', $hariIni)
+            ->count();
+
+        /* --- Kartu --- */
+        $kartu = [
+            'laporan_bulan_ini'  => (int) array_sum($bulanStatus),
+            'tugas_aktif'        => $tugasAktif,
+            'tugas_terlambat'    => $tugasTerlambat,
+            'kasus_total'        => $kasusTotal,
+            'kasus_terbuka'      => ($kasusStatus['Terbuka'] ?? 0) + ($kasusStatus['Dalam Proses'] ?? 0),
+            'kasus_progres_rata' => $kasusProgresRata,
+            'absensi_hari_ini'   => $absensiHari,
+            'persen_hadir_bulan' => $persenHadir,
+        ];
+
+        /* --- Tambahan mentor/admin (global) --- */
+        $perluRevisi = collect();
+        if (! $karyawan) {
+            $kartu['perlu_revisi_bulan_ini'] = LaporanHarian::whereDate('tanggal', '>=', $awalBulan)
+                ->where('status', 'perlu_revisi')->count();
+            $kartu['karyawan_total']        = User::where('role', 'karyawan')->count();
+            $kartu['karyawan_hadir_hari']   = $absensiHari['hadir'];
+
+            $perluRevisi = LaporanHarian::query()
+                ->join('users', 'users.id', '=', 'laporan_harian.user_id')
+                ->where('laporan_harian.status', 'perlu_revisi')
+                ->orderByDesc('laporan_harian.tanggal')->orderByDesc('laporan_harian.id')
+                ->limit(8)
+                ->get(['laporan_harian.tanggal', 'laporan_harian.kegiatan', 'users.nama'])
+                ->map(fn ($r) => [
+                    'tanggal'  => optional($r->tanggal)->toDateString(),
+                    'kegiatan' => (string) $r->kegiatan,
+                    'karyawan' => (string) $r->nama,
+                ])
+                ->values();
+        }
+
+        return response()->json([
+            'sukses'    => true,
+            'peran'     => $peran,
+            'hari_ini'  => $hariIni,
+            'kartu'     => $kartu,
+            'tren'      => collect($tren)
+                ->map(fn ($v, $tgl) => ['tanggal' => $tgl] + $v)
+                ->values(),
+            'donut_status' => collect($bulanStatus)
+                ->map(fn ($jml, $st) => ['status' => $st, 'jumlah' => $jml])
+                ->values(),
+            'kasus'     => [
+                'total'        => $kasusTotal,
+                'per_status'   => $kasusStatus,
+                'per_urgensi'  => $kasusUrgensi,
+                'progres_rata' => $kasusProgresRata,
+            ],
+            'kehadiran_bulan' => $absensiBulan,
+            'perlu_revisi'    => $perluRevisi,
+        ]);
+    }
+
+    /** Hitung jumlah absensi per status dari query yang sudah difilter. */
+    private function hitungStatusAbsensi($q): array
+    {
+        $hasil = ['total' => 0, 'hadir' => 0, 'izin' => 0, 'sakit' => 0, 'alpa' => 0];
+        foreach ($q->selectRaw('status, COUNT(*) as jumlah')->groupBy('status')->get() as $row) {
+            $kunci = strtolower((string) $row->status);
+            $hasil['total'] += (int) $row->jumlah;
+            if (array_key_exists($kunci, $hasil)) {
+                $hasil[$kunci] = (int) $row->jumlah;
+            }
+        }
+
+        return $hasil;
+    }
 
     /* =================================================================
      * REKAP LAPORAN (mentor/admin)
@@ -54,16 +231,66 @@ class AnalitikController extends Controller
             ->paginate(min(200, max(1, (int) $request->query('per_halaman', 50))))
             ->through(fn ($r) => [
                 'id'       => (int) $r->id,
-                'tanggal'  => (string) $r->tanggal,
+                'tanggal'  => optional($r->tanggal)->toDateString(),
                 'kegiatan' => (string) $r->kegiatan,
                 'status'   => (string) ($r->status ?? '-'),
                 'karyawan' => (string) $r->karyawan,
                 'divisi'   => $r->divisi !== null && $r->divisi !== '' ? (string) $r->divisi : null,
             ]);
 
+        /* Agregat per tanggal (bahan grafik tren di SPA). */
+        $agregatHarian = [];
+        foreach ((clone $dasar())->select(['laporan_harian.tanggal', 'laporan_harian.status'])->get() as $r) {
+            $tgl = optional($r->tanggal)->toDateString();
+            if (! isset($agregatHarian[$tgl])) {
+                $agregatHarian[$tgl] = ['tanggal' => $tgl, 'total' => 0] + array_fill_keys(self::STATUS_LAPORAN, 0);
+            }
+            $agregatHarian[$tgl]['total']++;
+            $st = (string) $r->status;
+            if (isset($agregatHarian[$tgl][$st])) {
+                $agregatHarian[$tgl][$st]++;
+            }
+        }
+        ksort($agregatHarian);
+
+        /* Agregat per karyawan (performa & tingkat revisi).
+           PENTING: query dasar sudah punya select(), maka kolom harus
+           diganti lewat select() -- get($columns) diabaikan Eloquent
+           bila select sudah terisi. */
+        $perPengguna = [];
+        foreach ((clone $dasar())->select([
+            'laporan_harian.user_id', 'laporan_harian.status', 'users.nama as karyawan', 'users.divisi',
+        ])->get() as $r) {
+            $id = (int) $r->user_id;
+            if (! isset($perPengguna[$id])) {
+                $perPengguna[$id] = [
+                    'user_id'    => $id,
+                    'karyawan'   => (string) $r->karyawan,
+                    'divisi'     => $r->divisi !== null && $r->divisi !== '' ? (string) $r->divisi : null,
+                    'total'      => 0,
+                    'diperiksa'  => 0,
+                    'perlu_revisi' => 0,
+                ];
+            }
+            $perPengguna[$id]['total']++;
+            $st = (string) $r->status;
+            if (isset($perPengguna[$id][$st])) {
+                $perPengguna[$id][$st]++;
+            }
+        }
+        foreach ($perPengguna as &$p) {
+            $p['persen_revisi'] = $p['total'] > 0
+                ? (int) round($p['perlu_revisi'] / $p['total'] * 100)
+                : 0;
+        }
+        unset($p);
+        uasort($perPengguna, fn ($a, $b) => $b['total'] <=> $a['total']);
+
         return response()->json([
             'sukses'          => true,
             'ringkasan'       => $ringkasan,
+            'agregat_harian'  => array_values($agregatHarian),
+            'per_pengguna'    => array_values($perPengguna),
             'daftar_karyawan' => $this->daftarKaryawan(),
             'data'            => $halaman,
         ]);
@@ -201,16 +428,18 @@ class AnalitikController extends Controller
                     ->pluck('jumlah', 'status');
 
                 $ambil = fn (string $s): int => (int) ($stat[$s] ?? 0);
+                $total = (int) $stat->sum();
 
                 return [
                     'user_id'       => (int) $u->id,
                     'nama'          => (string) $u->nama,
                     'email'         => (string) $u->email,
-                    'total_catatan' => (int) $stat->sum(),
+                    'total_catatan' => $total,
                     'hadir'         => $ambil('hadir'),
                     'izin'          => $ambil('izin'),
                     'sakit'         => $ambil('sakit'),
                     'alpa'          => $ambil('alpa'),
+                    'persen_hadir'  => $total > 0 ? (int) round($ambil('hadir') / $total * 100) : 0,
                 ];
             })
             ->values();
@@ -222,6 +451,162 @@ class AnalitikController extends Controller
             'per_peserta' => $perPeserta,
             'data'       => $halaman,
         ]);
+    }
+
+    /* =================================================================
+     * REKAP KASUS (mentor/admin)
+     * =============================================================== */
+
+    public function rekapKasus(Request $request): JsonResponse
+    {
+        $request->validate([
+            'tanggal_mulai' => ['nullable', 'date'],
+            'tanggal_akhir' => ['nullable', 'date'],
+            'status'        => ['nullable', 'string', 'max:30'],
+            'urgensi'       => ['nullable', 'string', 'max:30'],
+            'kategori'      => ['nullable', 'string', 'max:60'],
+        ]);
+
+        $dasar = fn () => $this->queryRekapKasus($request);
+        $hariIni = now()->toDateString();
+
+        /* --- Agregat (kasus umumnya sedikit; scan penuh aman) --- */
+        $ringkasan = [
+            'total' => 0, 'terbuka' => 0, 'dalam_proses' => 0, 'selesai' => 0,
+            'terlambat' => 0, 'tanpa_pic' => 0, 'progres_rata' => 0,
+        ];
+        $perUrgensi  = [];
+        $perKategori = [];
+        $perPj       = [];
+        $progresJumlah = 0;
+
+        $baris = $dasar()->with('penanggungJawab:id,nama')->get([
+            'kasus.id', 'kasus.tingkat_urgensi', 'kasus.status_kasus', 'kasus.progres',
+            'kasus.kategori', 'kasus.target_selesai', 'kasus.penanggung_jawab_id',
+            'kasus.penanggung_jawab_teks',
+        ]);
+
+        foreach ($baris as $k) {
+            $ringkasan['total']++;
+
+            $st = (string) ($k->status_kasus ?? '-');
+            match ($st) {
+                'Terbuka'      => $ringkasan['terbuka']++,
+                'Dalam Proses' => $ringkasan['dalam_proses']++,
+                'Selesai'      => $ringkasan['selesai']++,
+                default        => null,
+            };
+
+            $progres = (int) ($k->progres ?? 0);
+            $progresJumlah += $progres;
+
+            if ($st !== 'Selesai'
+                && $k->target_selesai !== null
+                && $k->target_selesai->toDateString() < $hariIni) {
+                $ringkasan['terlambat']++;
+            }
+
+            /* Tanpa PIC = tidak ada nama sama sekali (baik id pengguna
+               maupun teks ketik-bebas masih kosong). */
+            if ($k->penanggung_jawab_id === null
+                && ($k->penanggung_jawab_teks === null || $k->penanggung_jawab_teks === '')) {
+                $ringkasan['tanpa_pic']++;
+            }
+
+            $u = (string) ($k->tingkat_urgensi ?? '-');
+            $perUrgensi[$u] = ($perUrgensi[$u] ?? 0) + 1;
+
+            $kat = $k->kategori !== null && $k->kategori !== '' ? (string) $k->kategori : 'Tanpa Kategori';
+            $perKategori[$kat] = ($perKategori[$kat] ?? 0) + 1;
+
+            $namaPj = $k->penanggungJawab?->nama
+                ?? ($k->penanggung_jawab_teks !== null && $k->penanggung_jawab_teks !== ''
+                    ? (string) $k->penanggung_jawab_teks
+                    : 'Belum Ditentukan');
+            if (! isset($perPj[$namaPj])) {
+                $perPj[$namaPj] = [
+                    'nama'       => $namaPj,
+                    'terdaftar'  => $k->penanggung_jawab_id !== null,
+                    'jumlah'     => 0,
+                    'progres'    => 0,
+                ];
+            }
+            $perPj[$namaPj]['jumlah']++;
+            $perPj[$namaPj]['progres'] += $progres;
+        }
+
+        $ringkasan['progres_rata'] = $ringkasan['total'] > 0
+            ? (int) round($progresJumlah / $ringkasan['total'])
+            : 0;
+
+        foreach ($perPj as &$p) {
+            $p['progres_rata'] = $p['jumlah'] > 0 ? (int) round($p['progres'] / $p['jumlah']) : 0;
+            unset($p['progres']);
+        }
+        unset($p);
+        uasort($perPj, fn ($a, $b) => $b['jumlah'] <=> $a['jumlah']);
+
+        $urutanUrgensi = ['Kritis', 'Tinggi', 'Sedang', 'Rendah'];
+        uksort($perUrgensi, fn ($a, $b) =>
+            array_search($a, $urutanUrgensi, true) <=> array_search($b, $urutanUrgensi, true));
+
+        /* --- Daftar berhalaman --- */
+        $halaman = $dasar()
+            ->with(['penanggungJawab:id,nama', 'dibuatOleh:id,nama'])
+            ->orderByDesc('kasus.id')
+            ->paginate(min(100, max(1, (int) $request->query('per_halaman', 50))))
+            ->through(fn (Kasus $k) => [
+                'id'           => (int) $k->id,
+                'kode'         => (string) $k->kode_kasus,
+                'judul'        => (string) $k->judul,
+                'kategori'     => $k->kategori,
+                'urgensi'      => (string) ($k->tingkat_urgensi ?? '-'),
+                'status'       => (string) ($k->status_kasus ?? '-'),
+                'progres'      => (int) ($k->progres ?? 0),
+                'lokasi'       => $k->nama_lokasi,
+                'penanggung_jawab' => $k->penanggungJawab?->nama
+                    ?? ($k->penanggung_jawab_teks !== null ? (string) $k->penanggung_jawab_teks : null),
+                'target_selesai' => $k->target_selesai?->toDateString(),
+                'jumlah_anggota' => $k->anggota()->count(),
+                'dibuat_pada'  => optional($k->dibuat_pada)->toDateString(),
+            ]);
+
+        return response()->json([
+            'sukses'      => true,
+            'ringkasan'   => $ringkasan,
+            'per_urgensi' => collect($perUrgensi)
+                ->map(fn ($jml, $u) => ['urgensi' => $u, 'jumlah' => $jml])
+                ->values(),
+            'per_kategori' => collect($perKategori)
+                ->map(fn ($jml, $kat) => ['kategori' => $kat, 'jumlah' => $jml])
+                ->values(),
+            'per_penanggung_jawab' => array_values($perPj),
+            'data'        => $halaman,
+        ]);
+    }
+
+    /** Query dasar rekap kasus (filter identik untuk agregat & daftar). */
+    private function queryRekapKasus(Request $request)
+    {
+        $q = Kasus::query();
+
+        if ($request->filled('tanggal_mulai')) {
+            $q->whereDate('kasus.dibuat_pada', '>=', (string) $request->query('tanggal_mulai'));
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $q->whereDate('kasus.dibuat_pada', '<=', (string) $request->query('tanggal_akhir'));
+        }
+        if ($request->filled('status')) {
+            $q->where('kasus.status_kasus', (string) $request->query('status'));
+        }
+        if ($request->filled('urgensi')) {
+            $q->where('kasus.tingkat_urgensi', (string) $request->query('urgensi'));
+        }
+        if ($request->filled('kategori')) {
+            $q->where('kasus.kategori', (string) $request->query('kategori'));
+        }
+
+        return $q;
     }
 
     /* =================================================================

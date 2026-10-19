@@ -14,6 +14,7 @@ import Asisten from './pages/Asisten';
 import Profil from './pages/Profil';
 import RekapLaporan from './pages/RekapLaporan';
 import RekapAbsensi from './pages/RekapAbsensi';
+import RekapKasus from './pages/RekapKasus';
 import RingkasanKegiatan from './pages/RingkasanKegiatan';
 import KalenderAktivitas from './pages/KalenderAktivitas';
 
@@ -67,6 +68,10 @@ export default function App() {
                         <Route
                             path="/rekap/absensi"
                             element={<PerluPeran peran={['mentor', 'admin']}><RekapAbsensi /></PerluPeran>}
+                        />
+                        <Route
+                            path="/rekap/kasus"
+                            element={<PerluPeran peran={['mentor', 'admin']}><RekapKasus /></PerluPeran>}
                         />
                         <Route path="/ringkasan" element={<RingkasanKegiatan />} />
                         <Route path="/kalender" element={<KalenderAktivitas />} />
