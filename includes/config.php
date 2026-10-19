@@ -106,7 +106,7 @@ cfg('RESET_SANDI_DETIK', 60 * 60);        // atur ulang kata sandi: 1 jam
 cfg('ABSENI_JAM_MASUK', '07:30');
 cfg('ABSENI_JAM_PULANG', '17:00');
 
-/* --- Layanan AI (Python / FastAPI + Hermes + Ollama) --- */
+/* --- Layanan AI (Python / FastAPI + Gemini & Ollama) --- */
 cfg('AI_BASE_URL', 'http://127.0.0.1:8000');
 cfg('AI_SERVICE_KEY', 'GANTI_KUNCI_AI');   // <-- isi di config_lokal.php + ai-service/.env
 cfg('AI_TIMEOUT_DETIK', 60);            // panggilan sinkron (chat/validation)

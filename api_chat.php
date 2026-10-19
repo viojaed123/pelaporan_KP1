@@ -62,15 +62,36 @@ $_SESSION['chat_riwayat'] = $riwayat;
 $uid = sesi_user_id();
 $sid = (int) ($badan['session_id'] ?? 0);
 
-$stmt = $conn->prepare(
-    'INSERT INTO chat_sessions (user_id, judul) VALUES (?, ?)'
-);
-$judul = mb_substr($pesan, 0, 60, 'UTF-8');
-if ($stmt) {
-    $stmt->bind_param('is', $uid, $judul);
-    $stmt->execute();
-    $sid = (int) $conn->insert_id;
-    $stmt->close();
+// Lanjutkan sesi yang dikirim klien bila masih milik pengguna ini.
+// (Dulu sesi SELALU dibuat baru tiap pesan — ingatan percakapan hilang
+//  dan riwayat di asisten.php terpotong tiap satu pertukaran.)
+if ($sid > 0) {
+    $stmt = $conn->prepare('SELECT id FROM chat_sessions WHERE id = ? AND user_id = ?');
+    if ($stmt) {
+        $stmt->bind_param('ii', $sid, $uid);
+        $stmt->execute();
+        $ada = $stmt->get_result()->fetch_row();
+        $stmt->close();
+        if (!$ada) {
+            $sid = 0;
+        }
+    } else {
+        $sid = 0;
+    }
+}
+
+// Percakapan pertama (atau sesi lama tidak sah) — buat sesi baru.
+if ($sid <= 0) {
+    $stmt = $conn->prepare(
+        'INSERT INTO chat_sessions (user_id, judul) VALUES (?, ?)'
+    );
+    $judul = mb_substr($pesan, 0, 60, 'UTF-8');
+    if ($stmt) {
+        $stmt->bind_param('is', $uid, $judul);
+        $stmt->execute();
+        $sid = (int) $conn->insert_id;
+        $stmt->close();
+    }
 }
 
 if ($sid > 0) {

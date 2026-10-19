@@ -3,7 +3,8 @@
  * asisten.php — Asisten AI (halaman penuh).
  *
  * Menyediakan ruang percakapan luas dengan layanan AI (Python/FastAPI +
- * Hermes + Ollama Qwen 2.5). Berbeda dari panel mengapung di sudut kanan
+ * Google Gemini sebagai model utama, Ollama Qwen 2.5 sebagai cadangan lokal).
+ * Berbeda dari panel mengapung di sudut kanan
  * bawah, halaman ini menampilkan riwayat percakapan terakhir, kartu
  * kemampuan, dan status layanan.
  *
@@ -55,7 +56,13 @@ if ($sesiId > 0) {
     }
 }
 
-$aiSiap = AI_AKTIF ? ai_hidup() : false;
+/* Ambil status rinci layanan (/health): model aktif & penyedia (Gemini/Ollama). */
+$aiSehat  = AI_AKTIF ? ai_panggil('health', [], 6, 'GET') : ['ok' => false, 'data' => []];
+$aiSiap   = (bool) ($aiSehat['ok'] ?? false);
+$aiData   = is_array($aiSehat['data'] ?? null) ? $aiSehat['data'] : [];
+$aiModel  = (string) ($aiData['model'] ?? '-');
+$aiGemini = (bool) ($aiData['gemini'] ?? false);
+$aiLabel  = $aiGemini ? 'Gemini · Google Search' : 'Ollama (lokal)';
 
 /** Saran pertanyaan sesuai peran pengguna. */
 $saran = $role === 'karyawan'
@@ -102,11 +109,11 @@ mulai_halaman([
             <span class="avatar avatar-kecil" style="background:var(--biru-600);color:#fff">AI</span>
             <div class="flex-1">
                 <h3 style="margin:0;font-size:15px">Asisten Pelaporan</h3>
-                <span class="text-redup text-kecil">Qwen 2.5 · Hermes Agent · Ollama (lokal)</span>
+                <span class="text-redup text-kecil"><?= $aiSiap ? e($aiModel) . ' · ' . e($aiLabel) : 'Menunggu layanan AI' ?></span>
             </div>
         </div>
 
-        <div class="badan" id="asistenBadan"
+        <div class="badan" id="asistenBadan" data-sesi="<?= $sesiId ?>"
              style="height:min(58vh,560px);overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--abu-50)">
             <?php if ($riwayat === []): ?>
                 <div class="pesan-chat bot">
@@ -170,8 +177,8 @@ mulai_halaman([
             <div class="kartu-kepala"><h3>ℹ Tentang</h3></div>
             <div class="kartu-badan">
                 <div class="rincian">
-                    <div class="baris"><span class="kunci">Model</span><span class="nilai">Qwen 2.5 (lokal)</span></div>
-                    <div class="baris"><span class="kunci">Agen</span><span class="nilai">Hermes</span></div>
+                    <div class="baris"><span class="kunci">Model</span><span class="nilai"><?= e($aiModel) ?></span></div>
+                    <div class="baris"><span class="kunci">Penyedia</span><span class="nilai"><?= e($aiLabel) ?></span></div>
                     <div class="baris"><span class="kunci">Status</span>
                         <span class="nilai">
                             <span class="badge <?= $aiSiap ? 'badge-hijau' : 'badge-merah' ?> badge-tanpa-titik">
@@ -181,8 +188,10 @@ mulai_halaman([
                     </div>
                 </div>
                 <p class="text-redup text-kecil mt-3 mb-0">
-                    Seluruh pemrosesan berjalan lokal pada server Anda. Percakapan disimpan
-                    pada basis data dan hanya dapat diakses oleh akun Anda.
+                    Model berjalan di Google Gemini (bila kunci aktif) dengan cadangan lokal
+                    Ollama. Data aplikasi tidak dikirim ke internet kecuali saat pencarian
+                    web; percakapan disimpan pada basis data dan hanya dapat diakses
+                    oleh akun Anda.
                 </p>
             </div>
         </section>

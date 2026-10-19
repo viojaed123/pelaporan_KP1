@@ -3,7 +3,7 @@
  * includes/ai_client.php
  * Klien HTTP tunggal ke layanan AI (Python / FastAPI).
  *
- * PHP TIDAK pernah bicara langsung ke Ollama maupun Hermes — semuanya
+ * PHP TIDAK pernah bicara langsung ke Gemini maupun Ollama — semuanya
  * melewati gateway ini sehingga kunci layanan & model tersimpan di satu tempat.
  */
 
