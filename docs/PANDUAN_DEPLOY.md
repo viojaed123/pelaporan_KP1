@@ -17,7 +17,8 @@ baru. Untuk pemakaian sehari-hari lihat [PANDUAN_PENGGUNA.md](PANDUAN_PENGGUNA.m
 | MariaDB/MySQL | 10.4+ |
 | Composer | untuk `phpmailer`, `dompdf`, `phpspreadsheet` |
 | Python | 3.10+ (hanya bila memakai layanan AI) |
-| Ollama | model `qwen2.5:7b` (opsional; CPU 8–16 GB) |
+| Kunci API Google Gemini | (opsional; utama untuk AI) dari https://aistudio.google.com/apikey |
+| Ollama | model `qwen2.5:7b` (opsional; cadangan lokal, CPU 8–16 GB) |
 
 ---
 

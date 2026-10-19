@@ -7,7 +7,7 @@ Ringkasan tugas rutin untuk pengelola sistem. Lihat juga
 
 ## 1. Menyalakan / mematikan layanan AI
 
-Layanan AI (FastAPI + Ollama) berjalan di `http://127.0.0.1:8000`.
+Layanan AI (FastAPI + Gemini/Ollama) berjalan di `http://127.0.0.1:8000`.
 
 | Aksi | Cara |
 |---|---|

@@ -1,12 +1,19 @@
 # Menyiapkan SearXNG untuk `web_search`
 
-Alat AI `web_search` memakai **SearXNG** sebagai sumber utama dan
-**DuckDuckGo Lite** sebagai cadangan. SearXNG adalah mesin meta-pencari
-yang dihosting sendiri, ramah privasi, dan stabil untuk pemakaian internal.
+Alat AI `web_search` memakai urutan penyedia berikut (lihat
+`ai-service/app/tools/search.py`):
 
-DuckDuckGo Lite hanya *best-effort* (sering memblokir pengambilan otomatis
-dan tidak tahan terhadap proxy TLS korporat), jadi untuk produksi
-**sangat disarankan** menjalankan SearXNG sendiri.
+1. **Google Search grounding bawaan Gemini** (utama, otomatis aktif bila
+   `AI_GEMINI_API_KEY` terisi) — tanpa konfigurasi tambahan, hasil disertai
+   kutipan/tautan dari Google.
+2. **SearXNG** (cadangan pertama) — instans meta-pencari yang dihosting
+   sendiri, ramah privasi, dan stabil untuk pemakaian internal.
+3. **DuckDuckGo Lite** (cadangan terakhir) — *best-effort* (sering memblokir
+   pengambilan otomatis dan tidak tahan terhadap proxy TLS korporat).
+
+Dokumen ini menjelaskan langkah 2 (SearXNG), yang **sangat disarankan**
+sebagai cadangan bila Gemini Search dibatasi kuota (galat 429) atau jaringan
+keluar diblokir.
 
 ---
 
@@ -58,7 +65,7 @@ Respons harus JSON dengan larik `results`.
 
 ## 4. Hubungkan ke layanan AI
 
-Di `ai-service/.env`:
+Di `ai-service/.env` (SearXNG dipakai otomatis setelah Gemini Search):
 
 ```env
 AI_WEB_SEARCH_AKTIF=true

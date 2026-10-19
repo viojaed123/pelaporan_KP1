@@ -1,8 +1,8 @@
 # Integrasi AI
 
-Arsitektur: **PHP → gateway FastAPI (`ai-service`) → Hermes Agent → Ollama
-(`qwen2.5:7b`)**. PHP tidak pernah bicara langsung dengan model; semua pemanggilan
-melewati satu gateway yang memiliki kunci layanan.
+Arsitektur: **PHP → gateway FastAPI (`ai-service`) → Gemini (`gemini-3.8-flash`,
+utama) dengan cadangan Ollama (`qwen2.5:7b`)**. PHP tidak pernah bicara langsung
+dengan model; semua pemanggilan melewati satu gateway yang memiliki kunci layanan.
 
 ```
 Browser ──> api_chat.php / ringkasan.php ──> includes/ai_client.php
@@ -10,9 +10,10 @@ Browser ──> api_chat.php / ringkasan.php ──> includes/ai_client.php
                                                 ▼
                                     http://127.0.0.1:8000   (FastAPI)
                                                 │
-                                     Hermes Agent (tool calling)
-                                                │
-                                          Ollama qwen2.5:7b
+                                   rantai model (app/llm.py)
+                                     │             └──► Ollama qwen2.5 (cadangan)
+                                     └──► Google Gemini (utama)
+                                          gemini-3.8-flash → gemini-3.5-flash-lite
 ```
 
 ---
@@ -22,15 +23,20 @@ Browser ──> api_chat.php / ringkasan.php ──> includes/ai_client.php
 | Sisi | Berkas | Nilai |
 |---|---|---|
 | PHP | `includes/config.php` | `AI_BASE_URL`, `AI_SERVICE_KEY`, `AI_AKTIF`, `AI_TIMEOUT_DETIK`, `AI_TIMEOUT_PANJANG` |
-| Python | `ai-service/.env` | `AI_SERVICE_KEY` **harus identik** |
+| Python | `ai-service/.env` | `AI_SERVICE_KEY` **harus identik**, `AI_GEMINI_API_KEY` (kunci AI Studio) |
+| Laravel | `.env` | `LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai`, `LLM_API_KEY`, `LLM_MODEL` (untuk SPA & APK Android) |
 
-Bila keduanya tidak sama, setiap permintaan dibalas **401**.
+Bila kunci layanan tidak sama, setiap permintaan dibalas **401**.
+
+Rantai model (`app/llm.py`): `gemini-3.8-flash` → `gemini-3.5-flash-lite` →
+Ollama `qwen2.5:7b` → `qwen2.5:3b` → (opsional) jawaban deterministik.
+Kosongkan `AI_GEMINI_API_KEY` untuk kembali ke pola Ollama-saja.
 
 Cek kesehatan (satunya-satunya endpoint tanpa kunci):
 
 ```bat
 curl http://127.0.0.1:8000/health
-{"ok":true,"model":"qwen2.5:7b","ollama":true,"database":true,"versi":"1.0.0",...}
+{"ok":true,"model":"gemini-3.8-flash","gemini":true,"ollama":true,"database":true,"versi":"1.0.0",...}
 ```
 
 ---
@@ -78,8 +84,9 @@ Laporan model dikembalikan dalam bentuk `mode`:
   `ubah_jadwal`, `hapus_jadwal`, `ingatkan_jadwal` (tulis, *approval-gated*:
   bawaan hanya pratinjau, terapkan dengan `konfirmasi=true`). Hanya menyentuh
   agenda **milik pemanggil**.
-* **Pencarian web** — `web_search` untuk berita/peraturan/istilah mutakhir
-  (SearXNG; cadangan DuckDuckGo). Bukan sumber data internal; selalu sebut
+* **Pencarian web** — `web_search` untuk berita/peraturan/istilah mutakhir:
+  **Google Search grounding bawaan Gemini** (utama; butuh `AI_GEMINI_API_KEY`),
+  cadangan SearXNG lalu DuckDuckGo. Bukan sumber data internal; selalu sebut
   tautan sumber. Diatur lewat `AI_WEB_SEARCH_AKTIF`, `AI_SEARXNG_URL`, dan
   (opsional) `AI_HTTP_CA_BUNDLE` untuk TLS di balik proxy korporat.
 
@@ -109,20 +116,23 @@ Melalui UI:
 2. `ringkasan.php` → **Buat narasi** → blok `.narasi-hasil` terisi ±2–3 detik.
 3. `asisten.php` → tanyakan sesuatu → balasan menyebut `sumber`/alat yang
    dipakai.
-4. Matikan Ollama → endpoint tetap menjawab dengan `mode=deterministik`
-   (atau 503 bila fallback deterministik dimatikan), tidak pernah error tak
-   terduga.
+4. Kosongkan `AI_GEMINI_API_KEY` dan hentikan Ollama → endpoint tetap menjawab
+   dengan `mode=deterministik` (atau 503 bila fallback deterministik
+   dimatikan), tidak pernah error tak terduga.
 
 ---
 
 ## 5. Perangkat keras
 
-Direkomendasikan **CPU-only, 8–16 GB RAM**:
+**Gemini (utama)** berjalan di cloud Google — tidak memerlukan GPU/RAM apa pun;
+cukup koneksi internet keluar ke `generativelanguage.googleapis.com`.
+
+**Ollama (cadangan lokal)** opsional: **CPU-only, 8–16 GB RAM**:
 
 | Model | Catatan |
 |---|---|
-| `qwen2.5:7b` Q4 | bawaan, `num_ctx=8192` |
-| `qwen2.5:3b` | fallback bila RAM terbatas |
+| `qwen2.5:7b` Q4 | cadangan utama, `num_ctx=8192` |
+| `qwen2.5:3b` | cadangan bila RAM terbatas |
 
 Tugas berat berjalan di antrean asinkron sehingga antarmuka tidak pernah
 menunggu model lebih dari `AI_TIMEOUT_DETIK`.
@@ -132,7 +142,9 @@ menunggu model lebih dari `AI_TIMEOUT_DETIK`.
 ## 6. Berkas terkait
 
 ```
-ai-service/            FastAPI, Hermes, Ollama, pengujian (40 uji lulus)
+ai-service/            FastAPI, klien Gemini/Ollama, pengujian (78 uji lulus)
+ai-service/app/gemini_client.py  klien REST Gemini (function calling + Google Search)
+ai-service/app/llm.py  rantai klien: Gemini utama → Ollama cadangan
 ai-service/README.md   panduan lengkap layanan Python
 includes/ai_client.php ai_hidup, ai_panggil, ai_ringkas, ai_narasi, ai_validasi,
                        ai_antrian_buat, ai_antrian_status

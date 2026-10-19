@@ -123,7 +123,7 @@ Pemulihan memerlukan konfirmasi eksplisit `konfirmasi_pulihkan=PULIHKAN`.
 
 * Seluruh endpoint layanan AI (kecuali `GET /health`) memerlukan header
   `X-Service-Key` yang sama dengan `AI_SERVICE_KEY` di `includes/config.php`.
-  Kunci salah/kosong → **401**; Ollama tidak siap → **503** (atau fallback
+  Kunci salah/kosong → **401**; seluruh rantai model tidak siap → **503** (atau fallback
   deterministik bila `AI_DEGRADE_DETERMINISTIC=true`).
 * Pengiriman surel/WhatsApp dari AI **hanya berupa usulan** (`approve` +
   konfirmasi), bukan tindakan nyata.
