@@ -177,10 +177,143 @@ $tautanDasar = ['q' => $cari, 'status' => $statusFilter];
 
 $jumlahNotifikasi = jumlah_notifikasi($conn, $user_id);
 
+/* ---------------------------------------------------------------
+ * Data grafik (Chart.js vendor lokal: assets/js/vendor + grafik.js).
+ * ------------------------------------------------------------- */
+
+/* Tren 14 hari laporan masuk (seluruh status terkirim). */
+$tren14 = [];
+$res = $conn->query(
+    "SELECT DATE(tanggal) AS tgl, status, COUNT(*) AS jumlah
+       FROM laporan_harian
+      WHERE status IN ('dikirim', 'diperiksa', 'perlu_revisi')
+        AND tanggal >= CURDATE() - INTERVAL 13 DAY
+      GROUP BY DATE(tanggal), status"
+);
+while ($res && ($r = $res->fetch_assoc())) {
+    $tren14[(string) $r['tgl']][(string) $r['status']] = (int) $r['jumlah'];
+}
+
+$labelTren   = [];
+$trenKirim   = [];
+$trenPeriksa = [];
+$trenRevisi  = [];
+for ($i = 13; $i >= 0; $i--) {
+    $tgl           = date('Y-m-d', strtotime("-{$i} days"));
+    $baris         = $tren14[$tgl] ?? [];
+    $labelTren[]   = tanggal_id($tgl, 'd M');
+    $trenKirim[]   = $baris['dikirim'] ?? 0;
+    $trenPeriksa[] = $baris['diperiksa'] ?? 0;
+    $trenRevisi[]  = $baris['perlu_revisi'] ?? 0;
+}
+
+/* Laporan terkirim per divisi (8 teratas). */
+$perDivisi = [];
+$res = $conn->query(
+    "SELECT COALESCE(NULLIF(TRIM(u.divisi), ''), '(Tanpa Divisi)') AS divisi,
+            COUNT(*) AS jumlah
+       FROM laporan_harian l
+       JOIN users u ON u.id = l.user_id
+      WHERE l.status IN ('dikirim', 'diperiksa', 'perlu_revisi')
+      GROUP BY COALESCE(NULLIF(TRIM(u.divisi), ''), '(Tanpa Divisi)')
+      ORDER BY jumlah DESC
+      LIMIT 8"
+);
+while ($res && ($r = $res->fetch_assoc())) {
+    $perDivisi[] = ['divisi' => (string) $r['divisi'], 'jumlah' => (int) $r['jumlah']];
+}
+
+$flagsJson    = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
+$labelTrenJson  = json_encode($labelTren, $flagsJson) ?: '[]';
+$trenKirimJson  = json_encode($trenKirim) ?: '[]';
+$trenPeriksaJson = json_encode($trenPeriksa) ?: '[]';
+$trenRevisiJson = json_encode($trenRevisi) ?: '[]';
+$labelDivisiJson = json_encode(array_column($perDivisi, 'divisi'), $flagsJson) ?: '[]';
+$jumlahDivisiJson = json_encode(array_column($perDivisi, 'jumlah')) ?: '[]';
+
+/* ---------------------------------------------------------------
+ * Grafik lanjutan: per karyawan, absensi tim, komentar.
+ * ------------------------------------------------------------- */
+
+/* Laporan terkirim per karyawan (8 teratas). */
+$perKaryawan = [];
+$res = $conn->query(
+    "SELECT u.nama AS nama, COUNT(*) AS jumlah
+       FROM laporan_harian l
+       JOIN users u ON u.id = l.user_id
+      WHERE l.status IN ('dikirim', 'diperiksa', 'perlu_revisi')
+      GROUP BY u.nama
+      ORDER BY jumlah DESC
+      LIMIT 8"
+);
+while ($res && ($r = $res->fetch_assoc())) {
+    $perKaryawan[] = ['nama' => (string) $r['nama'], 'jumlah' => (int) $r['jumlah']];
+}
+
+/* Absensi tim 30 hari terakhir per status. */
+$absensiTim = ['hadir' => 0, 'izin' => 0, 'sakit' => 0, 'alpa' => 0];
+$res = $conn->query(
+    "SELECT status, COUNT(*) AS jumlah FROM absensi
+      WHERE tanggal >= CURDATE() - INTERVAL 29 DAY GROUP BY status"
+);
+while ($res && ($r = $res->fetch_assoc())) {
+    $k = strtolower((string) ($r['status'] ?? ''));
+    if (array_key_exists($k, $absensiTim)) {
+        $absensiTim[$k] = (int) $r['jumlah'];
+    }
+}
+
+/* Kehadiran per divisi 30 hari (hadir vs tidak hadir). */
+$divisiAbsensi = [];
+$res = $conn->query(
+    "SELECT COALESCE(NULLIF(TRIM(u.divisi), ''), '(Tanpa Divisi)') AS divisi,
+            SUM(a.status = 'hadir') AS hadir, COUNT(*) AS total
+       FROM absensi a JOIN users u ON u.id = a.user_id
+      WHERE a.tanggal >= CURDATE() - INTERVAL 29 DAY
+      GROUP BY 1 ORDER BY total DESC LIMIT 8"
+);
+while ($res && ($r = $res->fetch_assoc())) {
+    $hadir = (int) $r['hadir'];
+    $divisiAbsensi[] = [
+        'label' => (string) $r['divisi'],
+        'hadir' => $hadir,
+        'tidak' => (int) $r['total'] - $hadir,
+    ];
+}
+
+/* Komentar pemeriksaan 30 hari (per hari). */
+$komentar30 = [];
+$res = $conn->query(
+    'SELECT DATE(dibuat_pada) AS tgl, COUNT(*) AS jumlah FROM komentar_laporan
+      WHERE dibuat_pada >= CURDATE() - INTERVAL 29 DAY GROUP BY DATE(dibuat_pada)'
+);
+while ($res && ($r = $res->fetch_assoc())) {
+    $komentar30[(string) $r['tgl']] = (int) $r['jumlah'];
+}
+$labelKomentar = [];
+$angkaKomentar = [];
+for ($i = 29; $i >= 0; $i--) {
+    $tgl            = date('Y-m-d', strtotime("-{$i} days"));
+    $labelKomentar[] = tanggal_id($tgl, 'd M');
+    $angkaKomentar[] = $komentar30[$tgl] ?? 0;
+}
+
+$labelKaryawanJson  = json_encode(array_column($perKaryawan, 'nama'), $flagsJson) ?: '[]';
+$jumlahKaryawanJson = json_encode(array_column($perKaryawan, 'jumlah')) ?: '[]';
+$labelDivAbsJson    = json_encode(array_column($divisiAbsensi, 'label'), $flagsJson) ?: '[]';
+$hadirDivAbsJson    = json_encode(array_column($divisiAbsensi, 'hadir')) ?: '[]';
+$tidakDivAbsJson    = json_encode(array_column($divisiAbsensi, 'tidak')) ?: '[]';
+$labelKomentarJson  = json_encode($labelKomentar, $flagsJson) ?: '[]';
+$angkaKomentarJson  = json_encode($angkaKomentar) ?: '[]';
+
+$mentorHead = '<script src="assets/js/vendor/chart.umd.min.js" defer></script>'
+    . '<script src="assets/js/grafik.js" defer></script>';
+
 $opsi = [
     'judul' => 'Dashboard Mentor',
     'crumb' => 'Mentor',
     'aksi'  => '<a class="tombol tombol-utama tombol-kecil" href="rekap_laporan.php">Rekap Laporan</a>',
+    'head'  => $mentorHead,
 ];
 
 mulai_halaman($opsi);
@@ -244,6 +377,112 @@ mulai_halaman($opsi);
             <div class="nilai"><?= (int) $stat['perlu_revisi'] ?></div>
             <div class="keterangan">Perlu Revisi</div>
             <div class="tambahan">Menunggu perbaikan karyawan</div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= GRAFIK ================= -->
+<h2 class="bagian-judul">Analitik Visual</h2>
+
+<section class="grid grid-2">
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Status Laporan Terkirim</h3>
+                <span class="text-redup text-kecil">Proporsi laporan menunggu, diperiksa, dan revisi.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:250px">
+                <canvas id="grafikStatusMentor" aria-label="Status laporan terkirim" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Tren Laporan Masuk 14 Hari</h3>
+                <span class="text-redup text-kecil">Jumlah laporan karyawan per tanggal.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:250px">
+                <canvas id="grafikTrenMentor" aria-label="Tren laporan masuk 14 hari" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0;grid-column:1/-1">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Laporan per Divisi (8 Teratas)</h3>
+                <span class="text-redup text-kecil">Distribusi laporan terkirim berdasarkan divisi karyawan.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:260px">
+                <canvas id="grafikDivisiMentor" aria-label="Laporan per divisi" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= GRAFIK LANJUTAN ================= -->
+<section class="grid grid-2" style="margin-top:20px">
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Laporan per Karyawan (8 Teratas)</h3>
+                <span class="text-redup text-kecil">Karyawan dengan laporan terkirim terbanyak.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:280px">
+                <canvas id="grafikKaryawanMentor" aria-label="Laporan per karyawan" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Absensi Tim 30 Hari</h3>
+                <span class="text-redup text-kecil">Status kehadiran seluruh karyawan bulan berjalan.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:280px">
+                <canvas id="grafikAbsensiMentor" aria-label="Absensi tim 30 hari" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0;grid-column:1/-1">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Kehadiran per Divisi 30 Hari</h3>
+                <span class="text-redup text-kecil">Catatan hadir vs tidak hadir (izin, sakit, alpa) per divisi.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:270px">
+                <canvas id="grafikDivAbsMentor" aria-label="Kehadiran per divisi" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0;grid-column:1/-1">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Komentar Pemeriksaan 30 Hari</h3>
+                <span class="text-redup text-kecil">Jumlah komentar yang Anda berikan pada laporan per hari.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:250px">
+                <canvas id="grafikKomentarMentor" aria-label="Komentar pemeriksaan 30 hari" role="img"></canvas>
+            </div>
         </div>
     </div>
 </section>
@@ -454,6 +693,220 @@ $chipStatus = [
 
     perbarui();
 })();
+</script>
+
+<!-- ================= JAVASCRIPT GRAFIK ================= -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof grafikSiap === 'undefined') return;
+
+    var W = window.WARNA_GRAFIK;
+
+    grafikSiap(function (Chart) {
+        /* Donut status laporan terkirim. */
+        var cStatus = document.getElementById('grafikStatusMentor');
+        if (cStatus) {
+            new Chart(cStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Menunggu', 'Diperiksa', 'Perlu Revisi'],
+                    datasets: [{
+                        data: <?= json_encode([$stat['dikirim'], $stat['diperiksa'], $stat['perlu_revisi']]) ?: '[]' ?>,
+                        backgroundColor: [W.kuning, W.hijau, W.merah],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: { legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true } } }
+                }
+            });
+        }
+
+        /* Tren 14 hari (garis bertumpuk per status). */
+        var cTren = document.getElementById('grafikTrenMentor');
+        if (cTren) {
+            new Chart(cTren, {
+                type: 'line',
+                data: {
+                    labels: <?= $labelTrenJson ?>,
+                    datasets: [
+                        { label: 'Menunggu', data: <?= $trenKirimJson ?>, borderColor: W.kuning, backgroundColor: 'rgba(214,158,46,.10)', fill: true, tension: .35, pointRadius: 2.5 },
+                        { label: 'Diperiksa', data: <?= $trenPeriksaJson ?>, borderColor: W.hijau, backgroundColor: 'rgba(21,148,71,.10)', fill: true, tension: .35, pointRadius: 2.5 },
+                        { label: 'Perlu Revisi', data: <?= $trenRevisiJson ?>, borderColor: W.merah, backgroundColor: 'rgba(235,28,36,.08)', fill: true, tension: .35, pointRadius: 2.5 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    },
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14 } } }
+                }
+            });
+        }
+
+        /* Bar per divisi. */
+        var cDivisi = document.getElementById('grafikDivisiMentor');
+        if (cDivisi) {
+            if (!window.grafikAdaData(<?= $jumlahDivisiJson ?>)) {
+                window.grafikKosong('grafikDivisiMentor', 'Belum ada laporan terkirim.');
+            } else {
+                new Chart(cDivisi, {
+                    type: 'bar',
+                    data: {
+                        labels: <?= $labelDivisiJson ?>,
+                        datasets: [{
+                            label: 'Laporan',
+                            data: <?= $jumlahDivisiJson ?>,
+                            backgroundColor: W.biru,
+                            borderRadius: 6,
+                            maxBarThickness: 48
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { beginAtZero: true, ticks: { precision: 0 } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        /* Laporan per karyawan (batang horizontal). */
+        var cKaryawan = document.getElementById('grafikKaryawanMentor');
+        if (cKaryawan) {
+            if (!window.grafikAdaData(<?= $jumlahKaryawanJson ?>)) {
+                window.grafikKosong('grafikKaryawanMentor', 'Belum ada laporan terkirim.');
+            } else {
+                new Chart(cKaryawan, {
+                    type: 'bar',
+                    data: {
+                        labels: <?= $labelKaryawanJson ?>,
+                        datasets: [{
+                            label: 'Laporan',
+                            data: <?= $jumlahKaryawanJson ?>,
+                            backgroundColor: W.navy,
+                            borderRadius: 6,
+                            maxBarThickness: 26
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: {
+                            x: { beginAtZero: true, ticks: { precision: 0 } },
+                            y: { grid: { display: false } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        /* Absensi tim 30 hari (donat). */
+        var cAbsTim = document.getElementById('grafikAbsensiMentor');
+        if (cAbsTim) {
+            var dataAbsTim = <?= json_encode([$absensiTim['hadir'], $absensiTim['izin'], $absensiTim['sakit'], $absensiTim['alpa']]) ?: '[]' ?>;
+            if (!window.grafikAdaData(dataAbsTim)) {
+                window.grafikKosong('grafikAbsensiMentor', 'Belum ada catatan absensi 30 hari terakhir.');
+            } else {
+                new Chart(cAbsTim, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Hadir', 'Izin', 'Sakit', 'Alpa'],
+                        datasets: [{
+                            data: dataAbsTim,
+                            backgroundColor: window.WARNA_ABSENSI,
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: { legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true } } }
+                    }
+                });
+            }
+        }
+
+        /* Kehadiran per divisi 30 hari (batang bertumpuk). */
+        var cDivAbs = document.getElementById('grafikDivAbsMentor');
+        if (cDivAbs) {
+            var dataDivAbs = <?= json_encode(array_map(static fn (array $d): int => $d['hadir'] + $d['tidak'], $divisiAbsensi)) ?: '[]' ?>;
+            if (!window.grafikAdaData(dataDivAbs)) {
+                window.grafikKosong('grafikDivAbsMentor', 'Belum ada catatan absensi 30 hari terakhir.');
+            } else {
+                new Chart(cDivAbs, {
+                    type: 'bar',
+                    data: {
+                        labels: <?= $labelDivAbsJson ?>,
+                        datasets: [
+                            { label: 'Hadir', data: <?= $hadirDivAbsJson ?>, backgroundColor: W.hijau, borderRadius: 4 },
+                            { label: 'Tidak Hadir', data: <?= $tidakDivAbsJson ?>, backgroundColor: W.merah, borderRadius: 4 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true, grid: { display: false } },
+                            y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+                        },
+                        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14 } } }
+                    }
+                });
+            }
+        }
+
+        /* Komentar pemeriksaan 30 hari (garis). */
+        var cKomentar = document.getElementById('grafikKomentarMentor');
+        if (cKomentar) {
+            if (!window.grafikAdaData(<?= $angkaKomentarJson ?>)) {
+                window.grafikKosong('grafikKomentarMentor', 'Belum ada komentar pemeriksaan 30 hari terakhir.');
+            } else {
+                new Chart(cKomentar, {
+                    type: 'line',
+                    data: {
+                        labels: <?= $labelKomentarJson ?>,
+                        datasets: [{
+                            label: 'Komentar',
+                            data: <?= $angkaKomentarJson ?>,
+                            borderColor: W.kuning,
+                            backgroundColor: 'rgba(214,158,46,.12)',
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 2.5,
+                            pointBackgroundColor: W.kuning
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { beginAtZero: true, ticks: { precision: 0 } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+    });
+});
 </script>
 
 <?php akhiri_halaman(); ?>

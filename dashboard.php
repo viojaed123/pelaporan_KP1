@@ -118,6 +118,155 @@ $dataGrafik = [
 $labelsGrafik = array_keys($dataGrafik);
 $angkaGrafik  = array_values($dataGrafik);
 
+/* Tren 14 hari laporan pribadi (untuk grafik). */
+$tren14 = [];
+try {
+    $stmt = $conn->prepare(
+        'SELECT DATE(tanggal) AS tgl, COUNT(*) AS jumlah
+           FROM laporan_harian
+          WHERE user_id = ? AND tanggal >= CURDATE() - INTERVAL 13 DAY
+          GROUP BY DATE(tanggal)'
+    );
+    if ($stmt) {
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($b = $res->fetch_assoc()) {
+            $tren14[(string) $b['tgl']] = (int) $b['jumlah'];
+        }
+        $stmt->close();
+    }
+} catch (Throwable $t) {
+    error_log('Dashboard tren: ' . $t->getMessage());
+}
+
+$labelTren = [];
+$angkaTren = [];
+for ($i = 13; $i >= 0; $i--) {
+    $tgl         = date('Y-m-d', strtotime("-{$i} days"));
+    $labelTren[] = tanggal_id($tgl, 'd M');
+    $angkaTren[] = $tren14[$tgl] ?? 0;
+}
+
+/* ---------------------------------------------------------------
+ * Grafik lanjutan: durasi kerja, kesehatan, jadwal, asisten AI.
+ * ------------------------------------------------------------- */
+
+/* Durasi kerja 14 hari (menit) dari absensi pribadi. */
+$durasi14 = [];
+$sehatBulan = ['sehat' => 0, 'kurang_sehat' => 0, 'sakit' => 0, 'pemulihan' => 0];
+try {
+    $stmt = $conn->prepare(
+        'SELECT DATE(tanggal) AS tgl, jam_masuk, jam_pulang
+           FROM absensi
+          WHERE user_id = ? AND tanggal >= CURDATE() - INTERVAL 13 DAY
+          ORDER BY tanggal'
+    );
+    if ($stmt) {
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($b = $res->fetch_assoc()) {
+            $menit = 0;
+            if ($b['jam_masuk'] !== null && $b['jam_pulang'] !== null) {
+                [$h1, $m1] = array_map('intval', explode(':', (string) $b['jam_masuk']));
+                [$h2, $m2] = array_map('intval', explode(':', (string) $b['jam_pulang']));
+                $menit = ($h2 * 60 + $m2) - ($h1 * 60 + $m1);
+                if ($menit < 0) {
+                    $menit = 0;
+                }
+            }
+            $durasi14[(string) $b['tgl']] = $menit;
+        }
+        $stmt->close();
+    }
+} catch (Throwable $t) {
+    error_log('Dashboard durasi kerja: ' . $t->getMessage());
+}
+
+$labelDurasi = [];
+$angkaDurasi = [];
+for ($i = 13; $i >= 0; $i--) {
+    $tgl           = date('Y-m-d', strtotime("-{$i} days"));
+    $labelDurasi[] = tanggal_id($tgl, 'd M');
+    $angkaDurasi[] = $durasi14[$tgl] ?? 0;
+}
+
+/* Kondisi kesehatan bulan berjalan. */
+try {
+    $stmt = $conn->prepare(
+        'SELECT kondisi_kesehatan, COUNT(*) AS jumlah FROM absensi
+          WHERE user_id = ? AND tanggal >= ? GROUP BY kondisi_kesehatan'
+    );
+    if ($stmt) {
+        $stmt->bind_param('is', $user_id, $awal_bulan);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($b = $res->fetch_assoc()) {
+            $k = (string) $b['kondisi_kesehatan'];
+            if (array_key_exists($k, $sehatBulan)) {
+                $sehatBulan[$k] = (int) $b['jumlah'];
+            }
+        }
+        $stmt->close();
+    }
+} catch (Throwable $t) {
+    error_log('Dashboard kesehatan: ' . $t->getMessage());
+}
+
+/* Jadwal pribadi per status. */
+$jdwStatus = ['rencana' => 0, 'selesai' => 0, 'batal' => 0];
+try {
+    $stmt = $conn->prepare('SELECT status, COUNT(*) AS jumlah FROM jadwal WHERE user_id = ? GROUP BY status');
+    if ($stmt) {
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($b = $res->fetch_assoc()) {
+            $k = (string) $b['status'];
+            if (array_key_exists($k, $jdwStatus)) {
+                $jdwStatus[$k] = (int) $b['jumlah'];
+            }
+        }
+        $stmt->close();
+    }
+} catch (Throwable $t) {
+    error_log('Dashboard jadwal: ' . $t->getMessage());
+}
+
+/* Penggunaan asisten AI pribadi 30 hari (pertanyaan pengguna). */
+$chat30 = [];
+try {
+    $stmt = $conn->prepare(
+        'SELECT DATE(cm.dibuat_pada) AS tgl, COUNT(*) AS jumlah
+           FROM chat_messages cm
+           JOIN chat_sessions cs ON cs.id = cm.session_id
+          WHERE cs.user_id = ? AND cm.peran = ?
+            AND cm.dibuat_pada >= CURDATE() - INTERVAL 29 DAY
+          GROUP BY DATE(cm.dibuat_pada)'
+    );
+    if ($stmt) {
+        $peranUser = 'user';
+        $stmt->bind_param('is', $user_id, $peranUser);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($b = $res->fetch_assoc()) {
+            $chat30[(string) $b['tgl']] = (int) $b['jumlah'];
+        }
+        $stmt->close();
+    }
+} catch (Throwable $t) {
+    error_log('Dashboard chat AI: ' . $t->getMessage());
+}
+
+$labelChat30   = [];
+$angkaChat30   = [];
+for ($i = 29; $i >= 0; $i--) {
+    $tgl          = date('Y-m-d', strtotime("-{$i} days"));
+    $labelChat30[] = tanggal_id($tgl, 'd M');
+    $angkaChat30[] = $chat30[$tgl] ?? 0;
+}
+
 /* Cek ketersediaan layanan AI */
 $aiHidup = false;
 if (AI_AKTIF) {
@@ -128,7 +277,8 @@ $opsi = [
     'judul' => 'Dashboard',
     'crumb' => 'Karyawan',
     'aksi'  => '<a class="tombol tombol-utama tombol-kecil" href="buat_laporan.php">+ Buat Laporan</a>',
-    'head'  => '<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>',
+    'head'  => '<script src="assets/js/vendor/chart.umd.min.js" defer></script>'
+             . '<script src="assets/js/grafik.js" defer></script>',
 ];
 
 mulai_halaman($opsi);
@@ -336,6 +486,101 @@ mulai_halaman($opsi);
     </div>
 </section>
 
+<!-- ================= TREN + ABSENSI GRAFIK ================= -->
+<section class="grid grid-2" style="margin-top:20px">
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div>
+                <h3>Tren Laporan 14 Hari Terakhir</h3>
+                <span class="text-redup text-kecil">Jumlah laporan yang Anda catat tiap hari.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:240px">
+                <canvas id="grafikTren14" aria-label="Tren laporan 14 hari" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <?php if ($absensi_ada): ?>
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Diagram Absensi Bulan Ini</h3>
+                <span class="text-redup text-kecil">Proporsi kehadiran dari total catatan absensi.</span>
+            </div>
+            <a class="tombol tombol-kecil" href="absensi.php">Kelola</a>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:240px">
+                <canvas id="grafikAbsensi" aria-label="Diagram absensi bulan ini" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+</section>
+
+<!-- ================= GRAFIK LANJUTAN ================= -->
+<section class="grid grid-2" style="margin-top:20px">
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div>
+                <h3>Durasi Kerja 14 Hari</h3>
+                <span class="text-redup text-kecil">Lama kerja (menit) dari jam masuk–pulang absensi Anda.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:240px">
+                <canvas id="grafikDurasi" aria-label="Durasi kerja 14 hari" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Kondisi Kesehatan Bulan Ini</h3>
+                <span class="text-redup text-kecil">Laporan kondisi kesehatan pada absensi bulan berjalan.</span>
+            </div>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:240px">
+                <canvas id="grafikSehat" aria-label="Kondisi kesehatan bulan ini" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Jadwal Saya</h3>
+                <span class="text-redup text-kecil">Jumlah jadwal pribadi per status.</span>
+            </div>
+            <a class="tombol tombol-kecil" href="jadwal.php">Kelola</a>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:240px">
+                <canvas id="grafikJadwal" aria-label="Jadwal pribadi per status" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-header">
+            <div class="flex-1">
+                <h3>Pertanyaan ke Asisten AI 30 Hari</h3>
+                <span class="text-redup text-kecil">Jumlah pertanyaan Anda kepada asisten tiap hari.</span>
+            </div>
+            <a class="tombol tombol-kecil" href="asisten.php">Buka</a>
+        </div>
+        <div class="kartu-tubuh">
+            <div style="position:relative;height:240px">
+                <canvas id="grafikChat" aria-label="Penggunaan asisten AI 30 hari" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- ================= ABSENSI ================= -->
 <?php if ($absensi_ada): ?>
 <section class="kartu" style="margin-top:20px">
@@ -420,34 +665,225 @@ mulai_halaman($opsi);
 </section>
 
 <?php
-$labelsJson = json_encode(
-    $labelsGrafik,
-    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-);
-$angkaJson = json_encode($angkaGrafik);
+$flagsJson = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
+$labelsJson = json_encode($labelsGrafik, $flagsJson) ?: '[]';
+$angkaJson  = json_encode($angkaGrafik) ?: '[]';
+$trenLabelJson = json_encode($labelTren, $flagsJson) ?: '[]';
+$trenDataJson  = json_encode($angkaTren) ?: '[]';
+$labelDurasiJson = json_encode($labelDurasi, $flagsJson) ?: '[]';
+$labelChatJson   = json_encode($labelChat30, $flagsJson) ?: '[]';
+$absensiJson = json_encode(
+    [$absensi_bulan['hadir'], $absensi_bulan['izin'], $absensi_bulan['sakit'], $absensi_bulan['alpa']]
+) ?: '[]';
 ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    var canvas = document.getElementById('grafikStatus');
-    if (!canvas || typeof Chart === 'undefined') return;
+    if (typeof grafikSiap === 'undefined') return;
 
-    new Chart(canvas, {
-        type: 'doughnut',
-        data: {
-            labels: <?= $labelsJson ?>,
-            datasets: [{
-                data: <?= $angkaJson ?>,
-                backgroundColor: ['#94a3b8', '#d69e2e', '#159447', '#EB1C24'],
-                borderWidth: 2,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '62%',
-            plugins: {
-                legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+    var W = window.WARNA_GRAFIK;
+
+    grafikSiap(function (Chart) {
+        var canvas = document.getElementById('grafikStatus');
+        if (canvas) {
+            new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: <?= $labelsJson ?>,
+                    datasets: [{
+                        data: <?= $angkaJson ?>,
+                        backgroundColor: window.WARNA_STATUS,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+                    }
+                }
+            });
+        }
+
+        /* Tren 14 hari. */
+        var cTren = document.getElementById('grafikTren14');
+        if (cTren) {
+            new Chart(cTren, {
+                type: 'line',
+                data: {
+                    labels: <?= $trenLabelJson ?>,
+                    datasets: [{
+                        label: 'Laporan',
+                        data: <?= $trenDataJson ?>,
+                        borderColor: W.biru,
+                        backgroundColor: 'rgba(0,94,184,.12)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 2.5,
+                        pointBackgroundColor: W.biru
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        /* Donut absensi bulan berjalan. */
+        var cAbsensi = document.getElementById('grafikAbsensi');
+        if (cAbsensi) {
+            new Chart(cAbsensi, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hadir', 'Izin', 'Sakit', 'Alpa'],
+                    datasets: [{
+                        data: <?= $absensiJson ?>,
+                        backgroundColor: window.WARNA_ABSENSI,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+                    }
+                }
+            });
+        }
+
+        /* Durasi kerja 14 hari (batang). */
+        var cDurasi = document.getElementById('grafikDurasi');
+        if (cDurasi) {
+            if (!window.grafikAdaData(<?= json_encode($angkaDurasi) ?: '[]' ?>)) {
+                window.grafikKosong('grafikDurasi', 'Belum ada absensi dengan jam masuk–pulang.');
+            } else {
+                new Chart(cDurasi, {
+                    type: 'bar',
+                    data: {
+                        labels: <?= $labelDurasiJson ?>,
+                        datasets: [{
+                            label: 'Menit',
+                            data: <?= json_encode($angkaDurasi) ?: '[]' ?>,
+                            backgroundColor: W.biruMuda,
+                            borderRadius: 5,
+                            maxBarThickness: 34
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { beginAtZero: true }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        /* Kondisi kesehatan bulan ini (donat). */
+        var cSehat = document.getElementById('grafikSehat');
+        if (cSehat) {
+            var dataSehat = <?= json_encode([$sehatBulan['sehat'], $sehatBulan['kurang_sehat'], $sehatBulan['sakit'], $sehatBulan['pemulihan']]) ?: '[]' ?>;
+            if (!window.grafikAdaData(dataSehat)) {
+                window.grafikKosong('grafikSehat', 'Belum ada laporan kondisi kesehatan bulan ini.');
+            } else {
+                new Chart(cSehat, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sehat', 'Kurang Sehat', 'Sakit', 'Pemulihan'],
+                        datasets: [{
+                            data: dataSehat,
+                            backgroundColor: [W.hijau, W.kuning, W.merah, W.biruMuda],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true } }
+                        }
+                    }
+                });
+            }
+        }
+
+        /* Jadwal pribadi per status (donat). */
+        var cJadwal = document.getElementById('grafikJadwal');
+        if (cJadwal) {
+            var dataJadwal = <?= json_encode([$jdwStatus['rencana'], $jdwStatus['selesai'], $jdwStatus['batal']]) ?: '[]' ?>;
+            if (!window.grafikAdaData(dataJadwal)) {
+                window.grafikKosong('grafikJadwal', 'Belum ada jadwal pribadi.');
+            } else {
+                new Chart(cJadwal, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Rencana', 'Selesai', 'Batal'],
+                        datasets: [{
+                            data: dataJadwal,
+                            backgroundColor: [W.biru, W.hijau, W.abu],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true } }
+                        }
+                    }
+                });
+            }
+        }
+
+        /* Pertanyaan ke asisten AI 30 hari (garis). */
+        var cChat = document.getElementById('grafikChat');
+        if (cChat) {
+            if (!window.grafikAdaData(<?= json_encode($angkaChat30) ?: '[]' ?>)) {
+                window.grafikKosong('grafikChat', 'Anda belum bertanya kepada asisten AI.');
+            } else {
+                new Chart(cChat, {
+                    type: 'line',
+                    data: {
+                        labels: <?= $labelChatJson ?>,
+                        datasets: [{
+                            label: 'Pertanyaan',
+                            data: <?= json_encode($angkaChat30) ?: '[]' ?>,
+                            borderColor: W.hijau,
+                            backgroundColor: 'rgba(21,148,71,.12)',
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 2.5,
+                            pointBackgroundColor: W.hijau
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { beginAtZero: true, ticks: { precision: 0 } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
             }
         }
     });

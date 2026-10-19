@@ -113,6 +113,136 @@ if ($result_urgensi) {
 }
 
 /* ==========================================
+ * 2b. KATEGORI KASUS & TREN 30 HARI
+ * ========================================== */
+
+$jumlah_kategori = [];
+$kat_vis = $kasus_vis !== '' ? "WHERE {$kasus_vis}" : '';
+$res = $conn->query(
+    "SELECT kategori, COUNT(*) AS jumlah FROM kasus k {$kat_vis} GROUP BY kategori ORDER BY jumlah DESC LIMIT 6"
+);
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        $kategori = trim((string) ($row['kategori'] ?? ''));
+        $jumlah_kategori[($kategori !== '' ? $kategori : 'Lainnya')] = (int) $row['jumlah'];
+    }
+    $res->free();
+}
+if ($jumlah_kategori === []) {
+    $jumlah_kategori = ['Belum ada' => 0];
+}
+
+$tren_kasus = [];
+$tr_vis = $kasus_vis !== '' ? "WHERE {$kasus_vis} AND" : 'WHERE';
+$res = $conn->query(
+    "SELECT DATE(k.dibuat_pada) AS tgl, COUNT(*) AS jumlah
+       FROM kasus k {$tr_vis} k.dibuat_pada >= CURDATE() - INTERVAL 29 DAY
+      GROUP BY DATE(k.dibuat_pada)"
+);
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        $tren_kasus[(string) $row['tgl']] = (int) $row['jumlah'];
+    }
+    $res->free();
+}
+
+$label_tren_kasus = [];
+$angka_tren_kasus = [];
+for ($i = 29; $i >= 0; $i--) {
+    $tgl_tren           = date('Y-m-d', strtotime("-{$i} days"));
+    $label_tren_kasus[] = tanggal_id($tgl_tren, 'd M');
+    $angka_tren_kasus[] = $tren_kasus[$tgl_tren] ?? 0;
+}
+
+/* ==========================================
+ * 2c. PROGRES, URGENSI x STATUS, KASUS PER BULAN
+ * (mengikuti visibilitas yang sama dengan daftar)
+ * ========================================== */
+
+$progres_kasus = [];
+$res = $conn->query(
+    "SELECT k.kode_kasus, k.progres FROM kasus k
+      {$kat_vis}
+      ORDER BY k.diperbarui_pada DESC LIMIT 8"
+);
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        $progres_kasus[] = [
+            'label'   => (string) $row['kode_kasus'],
+            'progres' => (int) $row['progres'],
+        ];
+    }
+    $res->free();
+}
+
+$urgensi_status = [];
+foreach (['Rendah', 'Sedang', 'Tinggi', 'Kritis'] as $u) {
+    $urgensi_status[$u] = ['Terbuka' => 0, 'Dalam Proses' => 0, 'Selesai' => 0];
+}
+$res = $conn->query(
+    "SELECT k.tingkat_urgensi, k.status_kasus, COUNT(*) AS jumlah
+       FROM kasus k {$kat_vis}
+      GROUP BY k.tingkat_urgensi, k.status_kasus"
+);
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        $u = (string) ($row['tingkat_urgensi'] ?? '');
+        $s = (string) ($row['status_kasus'] ?? '');
+        if (isset($urgensi_status[$u][$s])) {
+            $urgensi_status[$u][$s] = (int) $row['jumlah'];
+        }
+    }
+    $res->free();
+}
+
+$kasus_per_bulan = [];
+$kb_vis = $kasus_vis !== '' ? "WHERE {$kasus_vis} AND" : 'WHERE';
+$res = $conn->query(
+    "SELECT DATE_FORMAT(k.dibuat_pada, '%Y-%m') AS bulan, COUNT(*) AS jumlah
+       FROM kasus k {$kb_vis} k.dibuat_pada >= DATE_FORMAT(CURDATE(), '%Y-%m-01') - INTERVAL 5 MONTH
+      GROUP BY DATE_FORMAT(k.dibuat_pada, '%Y-%m')
+      ORDER BY bulan"
+);
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        $kasus_per_bulan[(string) $row['bulan']] = (int) $row['jumlah'];
+    }
+    $res->free();
+}
+
+$nama_bulan_id = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+$label_bulan_kasus = [];
+$angka_bulan_kasus = [];
+for ($i = 5; $i >= 0; $i--) {
+    $bulan_ts            = strtotime("-{$i} months");
+    $kunci               = date('Y-m', $bulan_ts);
+    $label_bulan_kasus[] = ($nama_bulan_id[(int) date('n', $bulan_ts)] ?? '') . ' ' . date('y', $bulan_ts);
+    $angka_bulan_kasus[] = $kasus_per_bulan[$kunci] ?? 0;
+}
+
+/* Encode data grafik lanjutan (aman untuk <script>). */
+$json_progres_kasus = json_encode(
+    ['label' => array_column($progres_kasus, 'label'), 'nilai' => array_column($progres_kasus, 'progres')],
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+) ?: '{"label":[],"nilai":[]}';
+
+$json_urgensi_status = json_encode(
+    [
+        'Terbuka'     => array_map(static fn (array $v): int => $v['Terbuka'], $urgensi_status),
+        'DalamProses' => array_map(static fn (array $v): int => $v['Dalam Proses'], $urgensi_status),
+        'Selesai'     => array_map(static fn (array $v): int => $v['Selesai'], $urgensi_status),
+    ],
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+) ?: '{"Terbuka":[],"DalamProses":[],"Selesai":[]}';
+
+$json_label_bulan_kasus = json_encode(
+    $label_bulan_kasus,
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+) ?: '[]';
+$json_data_bulan_kasus = json_encode($angka_bulan_kasus) ?: '[]';
+
+/* ==========================================
  * 3. EMPAT KARTU RINGKASAN
  * ========================================== */
 
@@ -445,6 +575,24 @@ $json_data_urgensi = json_encode(
     array_values($jumlah_urgensi)
 );
 
+$json_kategori = json_encode(
+    array_keys($jumlah_kategori),
+    JSON_HEX_TAG | JSON_HEX_APOS |
+    JSON_HEX_QUOT | JSON_HEX_AMP
+);
+
+$json_data_kategori = json_encode(
+    array_values($jumlah_kategori)
+);
+
+$json_label_tren_kasus = json_encode(
+    $label_tren_kasus,
+    JSON_HEX_TAG | JSON_HEX_APOS |
+    JSON_HEX_QUOT | JSON_HEX_AMP
+);
+
+$json_data_tren_kasus = json_encode($angka_tren_kasus);
+
 /* ==========================================
  * 8. TAMPILAN
  * ========================================== */
@@ -457,7 +605,8 @@ $opsi = [
                 . ikon_sp('tambah') . ' Buat Kasus</a>'
                 . '<a class="tombol tombol-garis tombol-kecil" href="'
                 . e(halaman_default_peran($role_login)) . '">← Dashboard</a>',
-    'head'  => '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>'
+    'head'  => '<script src="assets/js/vendor/chart.umd.min.js"></script>'
+                . '<script src="assets/js/grafik.js"></script>'
                 . '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">'
                 . '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>',
 ];
@@ -557,6 +706,79 @@ mulai_halaman($opsi);
         <div class="kartu-badan">
             <div style="position:relative;height:300px">
                 <canvas id="grafikUrgensiKasus" aria-label="Distribusi tingkat urgensi" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-kepala">
+            <div class="flex-1">
+                <h3>Tren Pembukaan Kasus 30 Hari</h3>
+                <span class="text-redup text-kecil">Jumlah kasus baru per tanggal.</span>
+            </div>
+        </div>
+        <div class="kartu-badan">
+            <div style="position:relative;height:300px">
+                <canvas id="grafikTrenKasus" aria-label="Tren pembukaan kasus 30 hari" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-kepala">
+            <div class="flex-1">
+                <h3>Kategori Kasus</h3>
+                <span class="text-redup text-kecil">Jumlah kasus per kategori (6 teratas).</span>
+            </div>
+        </div>
+        <div class="kartu-badan">
+            <div style="position:relative;height:300px">
+                <canvas id="grafikKategoriKasus" aria-label="Kategori kasus" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= GRAFIK LANJUTAN ================= -->
+<section class="grid grid-2" style="margin-top:20px">
+    <div class="kartu" style="margin-bottom:0;grid-column:1/-1">
+        <div class="kartu-kepala">
+            <div class="flex-1">
+                <h3>Progres Kasus Terbaru</h3>
+                <span class="text-redup text-kecil">Persentase progres delapan kasus yang terakhir diperbarui.</span>
+            </div>
+        </div>
+        <div class="kartu-badan">
+            <div style="position:relative;height:300px">
+                <canvas id="grafikProgresKasus" aria-label="Progres kasus terbaru" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-kepala">
+            <div class="flex-1">
+                <h3>Urgensi per Status</h3>
+                <span class="text-redup text-kecil">Kasus per tingkat urgensi, dielompokkan menurut status penanganan.</span>
+            </div>
+        </div>
+        <div class="kartu-badan">
+            <div style="position:relative;height:300px">
+                <canvas id="grafikUrgensiStatusKasus" aria-label="Urgensi per status" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="kartu" style="margin-bottom:0">
+        <div class="kartu-kepala">
+            <div class="flex-1">
+                <h3>Kasus per Bulan (6 Bulan Terakhir)</h3>
+                <span class="text-redup text-kecil">Jumlah kasus baru yang dibuka tiap bulan.</span>
+            </div>
+        </div>
+        <div class="kartu-badan">
+            <div style="position:relative;height:300px">
+                <canvas id="grafikBulanKasus" aria-label="Kasus per bulan" role="img"></canvas>
             </div>
         </div>
     </div>
@@ -754,10 +976,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const labelUrgensi = <?= $json_urgensi ?: '[]' ?>;
     const dataUrgensi = <?= $json_data_urgensi ?: '[]' ?>;
 
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js gagal dimuat. Periksa koneksi internet atau CDN.');
+    const labelKategori = <?= $json_kategori ?: '[]' ?>;
+    const dataKategori = <?= $json_data_kategori ?: '[]' ?>;
+
+    const labelTrenKasus = <?= $json_label_tren_kasus ?: '[]' ?>;
+    const dataTrenKasus = <?= $json_data_tren_kasus ?: '[]' ?>;
+
+    if (typeof grafikSiap === 'undefined') {
+        console.error('Chart.js / grafik.js gagal dimuat. Periksa berkas vendor lokal.');
         return;
     }
+
+    const W = window.WARNA_GRAFIK;
+
+    grafikSiap(function (Chart) {
 
     const canvasStatus = document.getElementById('grafikStatusKasus');
 
@@ -812,6 +1044,181 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    /* Tren pembukaan kasus 30 hari (garis). */
+    const canvasTren = document.getElementById('grafikTrenKasus');
+
+    if (canvasTren) {
+        if (!window.grafikAdaData(dataTrenKasus)) {
+            window.grafikKosong('grafikTrenKasus', 'Belum ada kasus baru dalam 30 hari terakhir.');
+        } else {
+            new Chart(canvasTren, {
+                type: 'line',
+                data: {
+                    labels: labelTrenKasus,
+                    datasets: [{
+                        label: 'Kasus Baru',
+                        data: dataTrenKasus,
+                        borderColor: W.biru,
+                        backgroundColor: 'rgba(0,94,184,.12)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 2.5,
+                        pointBackgroundColor: W.biru
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    /* Kategori kasus (bar horizontal). */
+    const canvasKategori = document.getElementById('grafikKategoriKasus');
+
+    if (canvasKategori) {
+        if (!window.grafikAdaData(dataKategori)) {
+            window.grafikKosong('grafikKategoriKasus', 'Belum ada data kategori kasus.');
+        } else {
+            new Chart(canvasKategori, {
+                type: 'bar',
+                data: {
+                    labels: labelKategori,
+                    datasets: [{
+                        label: 'Jumlah Kasus',
+                        data: dataKategori,
+                        backgroundColor: [W.biru, W.navy, W.hijau, W.kuning, W.merah, W.biruMuda],
+                        borderRadius: 6,
+                        maxBarThickness: 28
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true, ticks: { precision: 0 } },
+                        y: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    /* Progres kasus terbaru (batang horizontal). */
+    const canvasProgres = document.getElementById('grafikProgresKasus');
+
+    if (canvasProgres) {
+        const progresKasus = <?= $json_progres_kasus ?>;
+
+        if (!window.grafikAdaData(progresKasus.nilai)) {
+            window.grafikKosong('grafikProgresKasus', 'Belum ada data progres kasus.');
+        } else {
+            new Chart(canvasProgres, {
+                type: 'bar',
+                data: {
+                    labels: progresKasus.label,
+                    datasets: [{
+                        label: 'Progres (%)',
+                        data: progresKasus.nilai,
+                        backgroundColor: W.biruMuda,
+                        borderRadius: 6,
+                        maxBarThickness: 26
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true, max: 100 },
+                        y: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    /* Urgensi per status (batang bertumpuk). */
+    const canvasUrgStatus = document.getElementById('grafikUrgensiStatusKasus');
+
+    if (canvasUrgStatus) {
+        const urgensiStatus = <?= $json_urgensi_status ?>;
+
+        if (!window.grafikAdaData([].concat(
+                urgensiStatus.Terbuka, urgensiStatus.DalamProses, urgensiStatus.Selesai))) {
+            window.grafikKosong('grafikUrgensiStatusKasus', 'Belum ada data urgensi dan status kasus.');
+        } else {
+            new Chart(canvasUrgStatus, {
+                type: 'bar',
+                data: {
+                    labels: ['Rendah', 'Sedang', 'Tinggi', 'Kritis'],
+                    datasets: [
+                        { label: 'Terbuka', data: urgensiStatus.Terbuka, backgroundColor: '#d69e2e', borderRadius: 4 },
+                        { label: 'Dalam Proses', data: urgensiStatus.DalamProses, backgroundColor: '#0072BC', borderRadius: 4 },
+                        { label: 'Selesai', data: urgensiStatus.Selesai, backgroundColor: '#159447', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { precision: 0, stepSize: 1 } }
+                    },
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14 } } }
+                }
+            });
+        }
+    }
+
+    /* Kasus per bulan (6 bulan terakhir, garis). */
+    const canvasBulan = document.getElementById('grafikBulanKasus');
+
+    if (canvasBulan) {
+        const dataBulanKasus = <?= $json_data_bulan_kasus ?>;
+
+        if (!window.grafikAdaData(dataBulanKasus)) {
+            window.grafikKosong('grafikBulanKasus', 'Belum ada kasus baru dalam 6 bulan terakhir.');
+        } else {
+            new Chart(canvasBulan, {
+                type: 'line',
+                data: {
+                    labels: <?= $json_label_bulan_kasus ?>,
+                    datasets: [{
+                        label: 'Kasus Baru',
+                        data: dataBulanKasus,
+                        borderColor: W.navy,
+                        backgroundColor: 'rgba(0,61,125,.12)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointBackgroundColor: W.navy
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    }); /* grafikSiap */
 });
 </script>
 
