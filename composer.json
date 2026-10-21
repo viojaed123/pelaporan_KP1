@@ -59,6 +59,8 @@
             "@php artisan test",
             "@php vendor/phpunit/phpunit/phpunit -c phpunit-legacy.xml"
         ],
+        "aset:periksa": "@php scripts/sinkron_aset.php --periksa",
+        "aset:selaraskan": "@php scripts/sinkron_aset.php",
         "lint": "@php -l app/Http/Controllers/",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

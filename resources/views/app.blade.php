@@ -14,6 +14,8 @@
   <title>{{ config('keamanan.aplikasi_singkat') }} — Sistem Pelaporan Kegiatan Harian</title>
   <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
   <link rel="icon" href="{{ asset('assets/img/favicon.png') }}" type="image/png">
+  {{-- Tema diterapkan di <head> agar tidak ada kedip terang->gelap saat SPA dimuat. --}}
+  <script src="{{ asset('assets/js/toggle.js') }}"></script>
   @vite(['resources/js/app.js'])
   <style>
     :root {

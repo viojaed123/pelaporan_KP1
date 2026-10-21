@@ -76,6 +76,707 @@
     --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
+/* ---------- 1b. Tema Gelap ---------------------------------------- */
+:root[data-tema="gelap"], html[data-tema="gelap"], body[data-tema="gelap"], html.dark, body.dark {
+    --phr-latar: #0b1120;
+
+    --biru-600: #1d4ed8;
+    --biru-500: #2563eb;
+    --biru-400: #60a5fa;
+    --biru-100: #1e3a8a33;
+    --biru-50:  #0f172a;
+
+    --navy-700: #020617;
+    --navy-600: #0f172a;
+    --navy-500: #1e293b;
+
+    --merah-50: #7f1d1d33;
+    --merah-500: #f87171;
+    --merah-700: #ef4444;
+
+    --hijau-50: #14532d33;
+    --hijau-500: #22c55e;
+    --hijau-700: #16a34a;
+
+    --kuning-50: #78350f33;
+    --kuning-600: #f59e0b;
+    --kuning-500: #fbbf24;
+
+    --ungu-50: #312e8133;
+    --ungu-600: #a78bfa;
+
+    --abu-50:  #0f172a;
+    --abu-100: #111827;
+    --abu-200: #1f2937;
+    --abu-300: #334155;
+    --abu-400: #475569;
+    --abu-500: #64748b;
+    --abu-600: #94a3b8;
+    --abu-700: #cbd5e1;
+    --abu-800: #e5e7eb;
+    --abu-900: #f8fafc;
+
+    --teks: #e5e7eb;
+    --teks-redup: #94a3b8;
+    --garis: #1e293b;
+
+    /* Teks aksen biru: --phr-biru-tua dipakai sebagai warna angka/judul
+       di banyak halaman (SRM, CID, peta, jadwal). Di mode malam nilainya
+       dinaikkan agar tetap terbaca di atas permukaan gelap. */
+    --phr-biru-tua: #93c5fd;
+
+    --bayangan-sm: 0 1px 2px rgba(2, 6, 23, .6);
+    --bayangan: 0 6px 18px rgba(2, 6, 23, .5);
+    --bayangan-lg: 0 18px 48px rgba(2, 6, 23, .6);
+}
+
+html[data-tema="gelap"] body,
+html[data-tema="gelap"],
+html[data-tema="gelap"] body {
+    color-scheme: dark;
+}
+
+html[data-tema="gelap"] body {
+    background-color: #0b1120 !important;
+    color: #e5e7eb !important;
+}
+
+html[data-tema="gelap"] .app,
+html[data-tema="gelap"] .area-utama {
+    background-color: #0b1120 !important;
+}
+
+:root[data-tema="gelap"] .sidebar {
+    background: radial-gradient(1200px 600px at -20% -10%, rgba(37, 99, 235, .18), transparent 60%), linear-gradient(180deg, #0f172a 0%, #020617 100%);
+    border-right: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .sidebar-brand,
+:root[data-tema="gelap"] .sidebar-footer {
+    border-color: var(--garis);
+}
+
+:root[data-tema="gelap"] .brand-teks .nama,
+:root[data-tema="gelap"] .brand-teks .sub,
+:root[data-tema="gelap"] .sidebar-footer {
+    color: var(--teks-redup);
+}
+
+:root[data-tema="gelap"] .nav-item {
+    color: var(--teks-redup);
+}
+
+:root[data-tema="gelap"] .nav-item:hover {
+    background: rgba(148, 163, 184, .12);
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .nav-item.aktif {
+    background: linear-gradient(90deg, rgba(37, 99, 235, .35) 0%, transparent 100%);
+    color: #fff;
+}
+
+:root[data-tema="gelap"] .nav-judul {
+    color: var(--teks-redup);
+}
+
+:root[data-tema="gelap"] .topbar {
+    background: rgba(15, 23, 42, .9);
+    border-bottom: 1px solid var(--garis);
+    backdrop-filter: blur(10px);
+}
+
+:root[data-tema="gelap"] .judul-halaman {
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .kartu {
+    background: linear-gradient(180deg, rgba(30, 41, 59, .6) 0%, rgba(15, 23, 42, .9) 100%);
+    border: 1px solid var(--garis);
+    box-shadow: var(--bayangan);
+}
+
+:root[data-tema="gelap"] .kartu-kepala {
+    border-bottom: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .kartu-kepala h3 {
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .tombol-lonceng,
+:root[data-tema="gelap"] .tombol-mini,
+:root[data-tema="gelap"] .tombol-burger {
+    background: transparent;
+    color: var(--teks-redup);
+}
+
+:root[data-tema="gelap"] .tombol-lonceng:hover,
+:root[data-tema="gelap"] .tombol-mini:hover,
+:root[data-tema="gelap"] .tombol-burger:hover {
+    background: rgba(148, 163, 184, .12);
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .dropdown-tombol {
+    background: transparent;
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .dropdown-menu {
+    background: #0f172a;
+    border: 1px solid var(--garis);
+    box-shadow: var(--bayangan-lg);
+}
+
+:root[data-tema="gelap"] .dropdown-menu a {
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .dropdown-menu a:hover {
+    background: rgba(148, 163, 184, .12);
+}
+
+:root[data-tema="gelap"] .label-menu {
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .pisah {
+    background: var(--garis);
+}
+
+:root[data-tema="gelap"] .tabel {
+    background: transparent;
+}
+
+:root[data-tema="gelap"] .tabel thead th {
+    background: rgba(15, 23, 42, .9);
+    color: var(--teks-redup);
+    border-bottom: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .tabel tbody td {
+    border-bottom: 1px solid var(--garis);
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .tabel tbody tr:hover td {
+    background: rgba(148, 163, 184, .08);
+}
+
+:root[data-tema="gelap"] input,
+:root[data-tema="gelap"] select,
+:root[data-tema="gelap"] textarea {
+    background: rgba(15, 23, 42, .8);
+    color: var(--teks);
+    border: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] input::placeholder,
+:root[data-tema="gelap"] textarea::placeholder {
+    color: var(--teks-redup);
+}
+
+:root[data-tema="gelap"] .tombol-garis {
+    background: transparent;
+    color: var(--teks);
+    border: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .tombol-garis:hover {
+    background: rgba(148, 163, 184, .12);
+}
+
+:root[data-tema="gelap"] .alert {
+    background: rgba(30, 41, 59, .8);
+    border: 1px solid var(--garis);
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .alert-info {
+    border-color: rgba(96, 165, 250, .6);
+}
+
+:root[data-tema="gelap"] .alert-sukses {
+    border-color: rgba(34, 197, 94, .6);
+}
+
+:root[data-tema="gelap"] .alert-gagal {
+    border-color: rgba(248, 113, 113, .6);
+}
+
+:root[data-tema="gelap"] .alert-peringatan {
+    border-color: rgba(251, 191, 36, .6);
+}
+
+:root[data-tema="gelap"] .kotak-ringkas,
+:root[data-tema="gelap"] .kotak-info {
+    background: rgba(30, 41, 59, .7);
+    border: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .rincian .baris {
+    border-bottom: 1px dashed var(--garis);
+}
+
+:root[data-tema="gelap"] .rincian .kunci {
+    color: var(--teks-redup);
+}
+
+:root[data-tema="gelap"] .rincian .nilai {
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .panel-chat {
+    background: #0f172a;
+    border: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .panel-chat .kepala {
+    background: linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+:root[data-tema="gelap"] .panel-chat .badan {
+    background: #020617;
+}
+
+:root[data-tema="gelap"] .panel-chat .kaki {
+    background: #0f172a;
+    border-top: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .panel-chat textarea {
+    background: rgba(15, 23, 42, .9);
+}
+
+:root[data-tema="gelap"] .pesan-chat.bot {
+    background: rgba(30, 41, 59, .9);
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .pesan-chat.user {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+}
+
+:root[data-tema="gelap"] .saran-chat button {
+    background: rgba(30, 41, 59, .9);
+    color: var(--teks-redup);
+    border: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .saran-chat button:hover {
+    color: var(--teks);
+}
+
+:root[data-tema="gelap"] .pencarian-menu input {
+    background: rgba(15, 23, 42, .8);
+    color: var(--teks);
+    border: 1px solid var(--garis);
+}
+
+:root[data-tema="gelap"] .nav-grup + .nav-grup {
+    border-top: 1px solid var(--garis);
+}
+
+/* ---------- 1c. Tema Gelap — komponen halaman --------------------- */
+/* Kartu/KPI/tab/panel yang ditulis langsung di <style> halaman
+   ditata ulang agar menyatu dengan mode malam (bukan putih menyilaukan). */
+
+html[data-tema="gelap"] .kpi,
+html[data-tema="gelap"] .card,
+html[data-tema="gelap"] .srm-kotak,
+html[data-tema="gelap"] .cid-kotak,
+html[data-tema="gelap"] .peta-kotak,
+html[data-tema="gelap"] .peta-item,
+html[data-tema="gelap"] .langkah-butir,
+html[data-tema="gelap"] .jadwal-butir,
+html[data-tema="gelap"] .riwayat-item,
+html[data-tema="gelap"] .kotak-ringkas,
+html[data-tema="gelap"] .kotak-info {
+    background: rgba(30, 41, 59, .6);
+    border-color: var(--garis);
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .kpi .l,
+html[data-tema="gelap"] .srm-kotak .ket,
+html[data-tema="gelap"] .cid-kotak .ket,
+html[data-tema="gelap"] .peta-kotak .ket,
+html[data-tema="gelap"] .riwayat-item .meta,
+html[data-tema="gelap"] .langkah-butir {
+    color: var(--teks-redup);
+}
+
+html[data-tema="gelap"] .tab {
+    background: rgba(30, 41, 59, .6);
+    border-color: var(--garis);
+    color: var(--teks-redup);
+}
+
+html[data-tema="gelap"] .tab.active {
+    background: var(--phr-biru);
+    border-color: var(--phr-biru);
+    color: #fff;
+}
+
+html[data-tema="gelap"] .srm-penyaring label,
+html[data-tema="gelap"] .cid-penyaring label,
+html[data-tema="gelap"] .peta-penyaring label {
+    color: var(--teks-redup);
+}
+
+/* Tabel data halaman (header terang, hover terang). */
+html[data-tema="gelap"] .tabel-data th {
+    background: rgba(15, 23, 42, .95);
+    color: var(--teks-redup);
+}
+
+html[data-tema="gelap"] .tabel-data th,
+html[data-tema="gelap"] .tabel-data td {
+    border-bottom-color: var(--garis);
+}
+
+html[data-tema="gelap"] .tabel-data td {
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .tabel-data tr:hover td {
+    background: rgba(148, 163, 184, .08);
+}
+
+html[data-tema="gelap"] .tabel-data .kolom-koord {
+    color: var(--teks-redup);
+}
+
+/* Label sumber & badge peta memakai warna pastel tetap; di mode malam
+   diganti versi transparan gelap agar tetap terbaca dan tidak menyilaukan. */
+html[data-tema="gelap"] .label-sumber.kasus   { background: rgba(239, 68, 68, .22);  color: #fca5a5; }
+html[data-tema="gelap"] .label-sumber.srm     { background: rgba(59, 130, 246, .22); color: #93c5fd; }
+html[data-tema="gelap"] .label-sumber.cid     { background: rgba(34, 197, 94, .22);  color: #86efac; }
+html[data-tema="gelap"] .label-sumber.laporan { background: rgba(249, 115, 22, .22); color: #fdba74; }
+html[data-tema="gelap"] .label-sumber.absensi { background: rgba(139, 92, 246, .22); color: #c4b5fd; }
+html[data-tema="gelap"] .label-sumber.jadwal  { background: rgba(20, 184, 166, .22); color: #5eead4; }
+
+html[data-tema="gelap"] .badge-peta.ada   { background: rgba(34, 197, 94, .22);  color: #86efac; }
+html[data-tema="gelap"] .badge-peta.belum { background: rgba(239, 68, 68, .22);  color: #fca5a5; }
+
+/* Banner info kekuningan dan sukses hijau. */
+html[data-tema="gelap"] .geo-banner {
+    background: rgba(120, 53, 15, .25);
+    border-color: rgba(217, 119, 6, .45);
+}
+
+html[data-tema="gelap"] .geo-banner .judul { color: #fdba74; }
+html[data-tema="gelap"] .geo-banner .ket { color: #fdba74; opacity: .85; }
+
+html[data-tema="gelap"] .geo-banner.sukses {
+    background: rgba(20, 83, 45, .3);
+    border-color: rgba(34, 197, 94, .4);
+}
+
+html[data-tema="gelap"] .geo-banner.sukses .judul { color: #86efac; }
+html[data-tema="gelap"] .geo-banner.sukses .ket { color: #86efac; opacity: .85; }
+
+/* Status langkah impor: selesai hijau muda → hijau transparan. */
+html[data-tema="gelap"] .langkah-butir.selesai {
+    border-color: rgba(34, 197, 94, .4);
+    color: #86efac;
+    background: rgba(20, 83, 45, .3);
+}
+
+html[data-tema="gelap"] .langkah-butir.aktif {
+    color: var(--biru-400);
+    background: rgba(37, 99, 235, .18);
+}
+
+/* Baris pratinjau impor. */
+html[data-tema="gelap"] .baris-gagal { background: rgba(127, 29, 29, .35); }
+html[data-tema="gelap"] .baris-lewat { background: rgba(120, 53, 15, .3); }
+
+/* Bungkus pratinjau & peta mini. */
+html[data-tema="gelap"] .pratinjau-bungkus,
+html[data-tema="gelap"] #petaLokasi {
+    border-color: var(--garis);
+}
+
+/* Tombol hapus merah muda terang di jadwal. */
+html[data-tema="gelap"] .jadwal-butir .jam { color: var(--biru-400); }
+html[data-tema="gelap"] .jadwal-kapan { color: var(--biru-400); }
+
+/* Sorot data baru di peta. */
+html[data-tema="gelap"] .sorot-banner {
+    background: rgba(20, 83, 45, .25);
+    border-color: rgba(34, 197, 94, .4);
+}
+
+/* Kartu di halaman analisis sosial memakai .card-h/.card-b. */
+html[data-tema="gelap"] .card-h {
+    border-bottom-color: var(--garis);
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .card-b {
+    color: var(--teks-redup);
+}
+
+/* Kotak catatan (kuning muda) dan tombol kemampuan asisten
+   yang memakai gaya inline, ditimpa dengan !important. */
+html[data-tema="gelap"] .kotak-catatan {
+    background: rgba(120, 53, 15, .28);
+    border-color: rgba(217, 119, 6, .4);
+    border-left-color: var(--kuning-600);
+    color: #fcd9a8;
+}
+
+html[data-tema="gelap"] .kotak-catatan.kosong {
+    background: var(--abu-100);
+    border-color: var(--garis);
+    border-left-color: var(--abu-400);
+    color: var(--teks-redup);
+}
+
+html[data-tema="gelap"] button.kotak-catatan[style] {
+    background: rgba(30, 41, 59, .7) !important;
+    border-color: var(--garis) !important;
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .sorot-banner .sorot-ket { color: #86efac; }
+
+/* --- Permukaan kartu/panel bawaan app.css yang masih putih --- */
+html[data-tema="gelap"] .kartu-kepala,
+html[data-tema="gelap"] .kartu-header {
+    background: linear-gradient(180deg, rgba(30, 41, 59, .7) 0%, rgba(15, 23, 42, .9) 100%);
+    border-bottom-color: var(--garis);
+}
+
+html[data-tema="gelap"] .kartu-kaki {
+    background: rgba(15, 23, 42, .9);
+    border-top-color: var(--garis);
+}
+
+html[data-tema="gelap"] .stat,
+html[data-tema="gelap"] .kartu-stat,
+html[data-tema="gelap"] .grafik-kotak,
+html[data-tema="gelap"] .filter-bar,
+html[data-tema="gelap"] .modal {
+    background: rgba(30, 41, 59, .6);
+    border-color: var(--garis);
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .grafik-kotak h4 { color: var(--teks); }
+
+html[data-tema="gelap"] .tombol {
+    background: rgba(30, 41, 59, .7);
+    color: var(--teks);
+    border-color: var(--garis);
+}
+
+html[data-tema="gelap"] .tombol:hover {
+    background: rgba(148, 163, 184, .18);
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .tombol-utama { background: var(--phr-biru); border-color: var(--phr-biru); color: #fff; }
+html[data-tema="gelap"] .tombol-utama:hover { background: var(--biru-600); border-color: var(--biru-600); }
+html[data-tema="gelap"] .tombol-sukses { background: var(--phr-hijau); border-color: var(--phr-hijau); color: #fff; }
+html[data-tema="gelap"] .tombol-bahaya { background: var(--phr-merah); border-color: var(--phr-merah); color: #fff; }
+html[data-tema="gelap"] .tombol-gelap { background: var(--navy-500); border-color: var(--navy-500); color: #fff; }
+
+html[data-tema="gelap"] .chip {
+    background: rgba(30, 41, 59, .7);
+    color: var(--teks-redup);
+}
+
+html[data-tema="gelap"] .chip.aktif {
+    background: var(--phr-biru);
+    border-color: var(--phr-biru);
+    color: #fff;
+}
+
+html[data-tema="gelap"] .paginasi a,
+html[data-tema="gelap"] .paginasi span,
+html[data-tema="gelap"] .aksi-cepat a {
+    background: rgba(30, 41, 59, .7);
+    border-color: var(--garis);
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .aksi-cepat a:hover {
+    color: var(--biru-400);
+}
+
+html[data-tema="gelap"] .isian-massal {
+    background: rgba(15, 23, 42, .8);
+    border-color: var(--garis);
+    color: var(--teks);
+}
+
+/* Kalender aktivitas. */
+html[data-tema="gelap"] .kalender-sel {
+    background: rgba(30, 41, 59, .55);
+}
+
+html[data-tema="gelap"] .kalender-sel.kosong {
+    background: rgba(15, 23, 42, .6);
+}
+
+html[data-tema="gelap"] .kalender-sel.akhir-pekan {
+    background: rgba(30, 41, 59, .35);
+}
+
+html[data-tema="gelap"] .kalender-sel.ada-laporan {
+    background: rgba(37, 99, 235, .16);
+}
+
+html[data-tema="gelap"] .kalender-sel.sekarang {
+    background: rgba(37, 99, 235, .22);
+}
+
+html[data-tema="gelap"] .kalender-tanggal { color: var(--teks); }
+
+html[data-tema="gelap"] .kalender-filter select,
+html[data-tema="gelap"] .kalender-hari-sel {
+    background: rgba(15, 23, 42, .8);
+    color: var(--teks-redup);
+}
+
+/* Modal gelap. */
+html[data-tema="gelap"] .modal-kepala { border-bottom-color: var(--garis); }
+
+/* Saran chat lama (pesan-assistant) di halaman tertentu. */
+html[data-tema="gelap"] .pesan-chat.pesan-assistant {
+    background: rgba(30, 41, 59, .9);
+    color: var(--teks);
+}
+
+/* Input galat di latar gelap. */
+html[data-tema="gelap"] input.galat,
+html[data-tema="gelap"] select.galat,
+html[data-tema="gelap"] textarea.galat {
+    background: rgba(127, 29, 29, .25);
+}
+
+/* Judul (h1..h5) dan teks yang memakai --navy-600: di mode malam
+   --navy-600 menjadi gelap, jadi dinaikkan ke warna teks terang. */
+html[data-tema="gelap"] h1,
+html[data-tema="gelap"] h2,
+html[data-tema="gelap"] h3,
+html[data-tema="gelap"] h4,
+html[data-tema="gelap"] h5 {
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .judul-halaman,
+html[data-tema="gelap"] .kartu-stat .nilai,
+html[data-tema="gelap"] .kartu-stat .angka,
+html[data-tema="gelap"] .empty-judul,
+html[data-tema="gelap"] .kalender-judul strong,
+html[data-tema="gelap"] .ringkas-butir .angka,
+html[data-tema="gelap"] .kalender-tanggal,
+html[data-tema="gelap"] .pilih-semua,
+html[data-tema="gelap"] .pesan-chat.bot strong,
+html[data-tema="gelap"] .pesan-chat.pesan-assistant strong {
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] .badge-navy {
+    background: rgba(148, 163, 184, .18);
+    color: var(--teks);
+}
+
+html[data-tema="gelap"] legend {
+    color: var(--teks);
+}
+
+/* Popup & kontrol peta Leaflet agar menyatu di mode malam. */
+html[data-tema="gelap"] .leaflet-popup-content-wrapper,
+html[data-tema="gelap"] .leaflet-popup-tip {
+    background: #0f172a;
+    color: var(--teks);
+    border: 1px solid var(--garis);
+    box-shadow: var(--bayangan-lg);
+}
+
+html[data-tema="gelap"] .leaflet-popup-content { color: var(--teks); }
+
+html[data-tema="gelap"] .leaflet-bar a {
+    background: #1e293b;
+    color: var(--teks);
+    border-bottom-color: var(--garis);
+}
+
+html[data-tema="gelap"] .leaflet-bar a:hover {
+    background: #334155;
+}
+
+html[data-tema="gelap"] .leaflet-control-attribution {
+    background: rgba(15, 23, 42, .8);
+    color: var(--teks-redup);
+}
+
+html[data-tema="gelap"] .leaflet-control-attribution a { color: var(--biru-400); }
+
+/* ---------- Tabel SRM/CID (.tabel, bukan .tabel-data) ------------- */
+/* Kelas .tabel punya gradien --navy-600 → --navy-700 yang di mode malam
+   jadi nyaris sewarna latar, dan hover baris memakai --biru-50 yang juga
+   gelap. Ditimpa agar kepala tabel & hover tetap terbaca. */
+html[data-tema="gelap"] .tabel {
+    box-shadow: inset 0 0 0 1px var(--garis);
+}
+
+html[data-tema="gelap"] .tabel thead th {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    color: #cbd5e1;
+    border-bottom: 1px solid var(--garis);
+}
+
+html[data-tema="gelap"] .tabel tbody tr:hover {
+    background: rgba(148, 163, 184, .08);
+}
+
+html[data-tema="gelap"] .tabel tbody td {
+    color: var(--teks);
+    border-bottom-color: var(--garis);
+}
+
+html[data-tema="gelap"] .bungkus-tabel { position: relative; }
+
+/* Badan kartu rapat (daftar SRM/CID) selalu memakai latar kartu. */
+html[data-tema="gelap"] .kartu-badan.padat {
+    background: transparent;
+    color: var(--teks);
+}
+
+/* Ringkasan angka SRM/CID/peta — angka memakai --phr-biru-tua yang kini
+   sudah terang, namun border kotak tetap perlu disesuaikan. */
+html[data-tema="gelap"] .srm-ringkas,
+html[data-tema="gelap"] .cid-ringkas,
+html[data-tema="gelap"] .peta-ringkas {
+    color: var(--teks);
+}
+
+/* Detail rincian (details/summary) di daftar SRM. */
+html[data-tema="gelap"] .srm-detail summary,
+html[data-tema="gelap"] details summary {
+    color: var(--biru-400);
+}
+
+html[data-tema="gelap"] details > p,
+html[data-tema="gelap"] details > div {
+    color: var(--teks-redup);
+}
+
+/* --- badge status yang memakai --navy-600 sebagai teks --- */
+html[data-tema="gelap"] .badge-draft,
+html[data-tema="gelap"] .badge-sakit {
+    background: rgba(37, 99, 235, .2);
+    color: #bfdbfe;
+    border-color: rgba(96, 165, 250, .35);
+}
+
 /* ---------- 2. Reset -------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -2279,6 +2980,17 @@ h3 .sp-ikon, h4 .sp-ikon { width: 18px; height: 18px; }
     margin: 0 0 12px;
 }
 .grafik-kanvas { position: relative; height: 230px; }
+/* Pesan pengganti saat kartu grafik belum punya data. */
+.grafik-kosong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    padding: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--teks-redup);
+}
 
 /* --- Sorotan data yang baru diunggah (peta) --- */
 @keyframes denyut-sorot {
@@ -2297,6 +3009,38 @@ h3 .sp-ikon, h4 .sp-ikon { width: 18px; height: 18px; }
     border-radius: 50%;
     border: 3px solid var(--phr-merah);
     animation: denyut-sorot 1.8s ease-out infinite;
+}
+
+/* --- Titik peta berkelip saat ditekan --- */
+@keyframes kelip-titik {
+    0%, 100% { opacity: .85; transform: scale(.6); }
+    50%      { opacity: 0;   transform: scale(1.9); }
+}
+@keyframes kedip-titik {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: .25; }
+}
+.penanda-kelip { position: relative; }
+.penanda-kelip > .kelip {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border-radius: 50%;
+    border: 3px solid currentColor;
+    animation: kelip-titik 1.1s ease-out infinite;
+}
+.penanda-kelip > .kelip.kelip-2 { animation-delay: .35s; }
+.penanda-kelip > .kelip.kelip-3 { animation-delay: .7s; }
+/* Titik yang sedang aktif ikut berkedip lembut. */
+circle.titik-kelip {
+    animation: kedip-titik 1.1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+    .penanda-kelip > .kelip,
+    circle.titik-kelip { animation: none; }
 }
 .sorot-banner {
     display: flex;

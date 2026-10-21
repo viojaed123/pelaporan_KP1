@@ -119,4 +119,67 @@ final class StrukturTest extends TestCase
         $this->assertStringContainsString("cfg('DB_PASS', 'GANTI_SANDI_DB')", $cfg);
         $this->assertStringNotContainsString('Pkcd1b4dea6b019a97eec6f33a14fd5cf54b47087fb7a3c8f4', $cfg);
     }
+
+    /* ----------------------------------------------------------------
+     * Aset bersama: dua pohon (assets/ & public/assets/) tidak boleh
+     * menyimpang. Jalankan `php scripts/sinkron_aset.php` untuk
+     * menyelaraskan.
+     * -------------------------------------------------------------- */
+
+    public function testAsetJsBersamaIdentik(): void
+    {
+        // Catatan: jalur Chart.js berbeda antar pohon (legacy: js/vendor/,
+        // SPA: vendor/) — jadi dipetakan eksplisit, bukan disamakan.
+        $peta = [
+            'js/grafik.js'            => 'js/grafik.js',
+            'js/toggle.js'            => 'js/toggle.js',
+            'js/vendor/chart.umd.min.js' => 'vendor/chart.umd.min.js',
+            'img/favicon.png'         => 'img/favicon.png',
+        ];
+        foreach ($peta as $relLegacy => $relSpa) {
+            $legacy = $this->root . '/assets/' . $relLegacy;
+            $publik = $this->root . '/public/assets/' . $relSpa;
+            $this->assertFileExists($legacy, "assets/{$relLegacy} seharusnya ada.");
+            $this->assertFileExists($publik, "public/assets/{$relSpa} seharusnya ada.");
+            $this->assertSame(
+                md5_file($legacy),
+                md5_file($publik),
+                "Aset {$relLegacy} menyimpang antara assets/ dan public/assets/. " .
+                'Jalankan: php scripts/sinkron_aset.php'
+            );
+        }
+    }
+
+    public function testSelektorCssLegacyAdaDiCssSpa(): void
+    {
+        // public/assets/css/app.css adalah SUPERSET: setiap selektor yang
+        // dipakai halaman legacy harus ada juga di sana, agar mode gelap
+        // dan gaya bersama berlaku di kedua aplikasi.
+        $sel = static function (string $teks): array {
+            $teks = preg_replace('~/\*.*?\*/~s', '', $teks) ?? $teks;
+            $hasil = [];
+            if (preg_match_all('/([^{}]+)\{/', $teks, $m)) {
+                foreach ($m[1] as $blok) {
+                    $blok = trim($blok);
+                    if ($blok === '' || $blok[0] === '@') { continue; }
+                    foreach (explode(',', $blok) as $s) {
+                        $s = trim(preg_replace('~\s+~', ' ', $s) ?? $s);
+                        if ($s !== '') { $hasil[$s] = true; }
+                    }
+                }
+            }
+            return $hasil;
+        };
+
+        $legacy = $sel((string) file_get_contents($this->root . '/assets/css/app.css'));
+        $spa    = $sel((string) file_get_contents($this->root . '/public/assets/css/app.css'));
+
+        $hilang = array_keys(array_diff_key($legacy, $spa));
+        $this->assertSame(
+            [],
+            $hilang,
+            "Selektor CSS berikut ada di assets/ tetapi hilang di public/assets/:\n  - "
+            . implode("\n  - ", array_slice($hilang, 0, 20))
+        );
+    }
 }

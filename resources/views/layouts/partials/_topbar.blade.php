@@ -20,7 +20,11 @@
   
   <div class="topbar-kanan">
     {!! $opsi['aksi'] !!}
-    
+
+    <button type="button" id="tombolTema" class="tombol-lonceng" aria-label="Ganti tema"
+            title="Ganti tema terang/gelap"
+            style="border:0;background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:6px;">&#127769;</button>
+
     <a class="tombol-lonceng" href="{{ Route::has('notifikasi.index') ? route('notifikasi.index') : 'notifikasi.php' }}"
        title="Notifikasi{{ $unread > 0 ? ' (' . $unread . ' baru)' : '' }}">
       {!! ikon_sp('lonceng') !!}

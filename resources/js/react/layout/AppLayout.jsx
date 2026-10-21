@@ -1,7 +1,33 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Ikon from '../components/Ikon';
+
+/** Baca preferensi tema tersimpan (kunci sama dengan assets/js/toggle.js). */
+function temaGelapTersimpan() {
+    try {
+        return localStorage.getItem('phr_tema') === 'gelap';
+    } catch (e) {
+        return false;
+    }
+}
+
+/** Terapkan tema ke <html> — sinkron dengan atribut yang dipakai CSS. */
+function terapkanTema(gelap) {
+    const r = document.documentElement;
+    if (gelap) {
+        r.setAttribute('data-tema', 'gelap');
+        r.classList.add('dark');
+    } else {
+        r.removeAttribute('data-tema');
+        r.classList.remove('dark');
+    }
+    try {
+        localStorage.setItem('phr_tema', gelap ? 'gelap' : 'terang');
+    } catch (e) {
+        /* localStorage bisa diblokir; tema tetap berlaku untuk sesi ini. */
+    }
+}
 
 /*
  * Tata letak SPA: sidebar + topbar -- meniru struktur & kelas CSS
@@ -48,6 +74,15 @@ export default function AppLayout() {
     const navigasi = useNavigate();
     const [sidebarTampil, setSidebarTampil] = useState(false);
     const [menuUser, setMenuUser] = useState(false);
+    const [gelap, setGelap] = useState(temaGelapTersimpan);
+
+    // Sinkronkan atribut <html> dengan state (toggle.js di <head> sudah
+    // menerapkan preferensi awal sebelum React dimuat).
+    useEffect(() => {
+        terapkanTema(gelap);
+    }, [gelap]);
+
+    const gantiTema = useCallback(() => setGelap((v) => !v), []);
 
     const peran = pengguna?.role ?? 'karyawan';
     const daftar = MENU[peran] ?? MENU.karyawan;
@@ -101,6 +136,25 @@ export default function AppLayout() {
                     </button>
                     <h1 className="judul-halaman">Sistem Pelaporan Kegiatan Harian</h1>
                     <div className="topbar-kanan">
+                        <button
+                            type="button"
+                            id="tombolTema"
+                            className="tombol-lonceng"
+                            aria-label="Ganti tema"
+                            title="Ganti tema terang/gelap"
+                            onClick={gantiTema}
+                            style={{
+                                border: 0,
+                                background: 'transparent',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: 6,
+                            }}
+                        >
+                            {gelap ? '\u2600\uFE0F' : '\uD83C\uDF19'}
+                        </button>
                         <NavLink className="tombol-lonceng" to="/notifikasi" title="Notifikasi">
                             <Ikon nama="lonceng" />
                         </NavLink>

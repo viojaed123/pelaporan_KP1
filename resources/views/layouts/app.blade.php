@@ -21,6 +21,9 @@
   <title>{{ $opsi['judul'] }} - {{ config('keamanan.aplikasi_singkat') }}</title>
   <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
   <link rel="icon" href="{{ asset('assets/img/favicon.png') }}" type="image/png">
+  {{-- Dimuat di <head> agar tema tersimpan diterapkan sebelum halaman dicat
+       (mencegah kedip terang->gelap) dan tetap hidup walau skrip lain gagal. --}}
+  <script src="{{ asset('assets/js/toggle.js') }}"></script>
   @stack('kepala')
   <style>
     :root {
