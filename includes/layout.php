@@ -115,6 +115,7 @@ function menu_tersedia(): array
             ['key' => 'peta',        'ikon' => 'peta', 'label' => 'Peta Lokasi', 'url' => 'peta.php'],
 
             ['grup' => 'Administrasi'],
+            ['key' => 'pengguna',    'ikon' => 'grup', 'label' => 'Kelola Pengguna', 'url' => 'pengguna.php'],
             ['key' => 'kasus',       'ikon' => 'folder', 'label' => 'Pelacakan Kasus', 'url' => 'dashboard_kasus.php'],
             ['key' => 'audit',       'ikon' => 'perisai', 'label' => 'Riwayat Perubahan', 'url' => 'riwayat_audit.php'],
             ['key' => 'backup',      'ikon' => 'database', 'label' => 'Cadangan Data', 'url' => 'backup.php'],
@@ -175,6 +176,7 @@ function menu_aktif_otomatis(): string
         'asisten.php'                           => 'asisten',
         'profil.php', 'dua_faktor.php'          => 'profil',
         'riwayat_audit.php'                     => 'audit',
+        'pengguna.php'                          => 'pengguna',
         'backup.php'                            => 'backup',
         'status.php'                            => 'status',
         default                                 => 'dashboard',

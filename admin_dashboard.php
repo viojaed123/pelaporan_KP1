@@ -1138,6 +1138,10 @@ mulai_halaman([
         <span class="ikon"><?= ikon_sp('peta') ?></span>
         <span>Peta Lokasi</span>
     </a>
+    <a href="pengguna.php">
+        <span class="ikon"><?= ikon_sp('grup') ?></span>
+        <span>Kelola Pengguna</span>
+    </a>
     <a href="riwayat_audit.php">
         <span class="ikon"><?= ikon_sp('perisai') ?></span>
         <span>Riwayat Perubahan</span>

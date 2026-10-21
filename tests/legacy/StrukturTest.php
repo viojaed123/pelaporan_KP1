@@ -182,4 +182,70 @@ final class StrukturTest extends TestCase
             . implode("\n  - ", array_slice($hilang, 0, 20))
         );
     }
+
+    /**
+     * Halaman kelola pengguna (promosi peran) harus ada dan hanya untuk admin.
+     */
+    public function testHalamanKelolaPenggunaAdaDanTerbatasAdmin(): void
+    {
+        $berkas = $this->root . '/pengguna.php';
+        $this->assertFileExists($berkas, 'Halaman pengguna.php seharusnya ada.');
+
+        $isi = (string) file_get_contents($berkas);
+        $this->assertStringContainsString(
+            "wajib_role(['admin'], null, \$conn)",
+            $isi,
+            'pengguna.php harus dibatasi hanya untuk peran admin.'
+        );
+    }
+
+    /**
+     * register.php TIDAK boleh mengekspos pemilih peran (celah eskalasi hak akses).
+     * Peran wajib dikunci ke 'karyawan'.
+     */
+    public function testPendaftaranTidakMengeksposPemilihPeran(): void
+    {
+        $isi = (string) file_get_contents($this->root . '/register.php');
+
+        $this->assertStringContainsString(
+            "\$role = 'karyawan'",
+            $isi,
+            "register.php harus mengunci peran ke 'karyawan'."
+        );
+        $this->assertStringNotContainsString(
+            'name="role"',
+            $isi,
+            'register.php tidak boleh menyediakan field pemilih peran (role) dari input pengguna.'
+        );
+    }
+
+    /**
+     * pengguna.php harus memakai whitelist peran/status dan token CSRF per-aksi.
+     * Ini menjaga agar input pengguna tidak pernah langsung dipercaya.
+     */
+    public function testKelolaPenggunaMemakaiWhitelistDanCsrf(): void
+    {
+        $isi = (string) file_get_contents($this->root . '/pengguna.php');
+
+        $this->assertStringContainsString(
+            "['karyawan', 'mentor', 'admin']",
+            $isi,
+            'pengguna.php harus mendefinisikan whitelist peran yang sah.'
+        );
+        $this->assertStringContainsString(
+            "['aktif', 'menunggu', 'nonaktif']",
+            $isi,
+            'pengguna.php harus mendefinisikan whitelist status yang sah.'
+        );
+        $this->assertStringContainsString(
+            'csrf_cek_atau_matikan',
+            $isi,
+            'pengguna.php harus memverifikasi token CSRF pada aksi tulis.'
+        );
+        $this->assertStringContainsString(
+            'catat_audit',
+            $isi,
+            'pengguna.php harus mencatat perubahan peran/status ke audit_log.'
+        );
+    }
 }
