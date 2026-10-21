@@ -1,4 +1,4 @@
-@echo off
+serta@echo off
 REM ==========================================================================
 REM Menambahkan  127.0.0.1 pelaporan.local  ke file hosts Windows.
 REM

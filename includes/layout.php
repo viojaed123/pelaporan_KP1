@@ -59,8 +59,8 @@ function menu_tersedia(): array
             ['key' => 'jadwal',      'ikon' => 'dokumen', 'label' => 'Jadwal & Pengingat', 'url' => 'jadwal.php'],
 
             ['grup' => 'Data Sosial'],
-            ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM (Relations)', 'url' => 'srm.php'],
-            ['key' => 'cid',         'ikon' => 'koin', 'label' => 'CID (Pemberdayaan)', 'url' => 'cid.php'],
+            ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM', 'url' => 'srm.php'],
+            ['key' => 'cid',         'ikon' => 'koin', 'label' => 'CID', 'url' => 'cid.php'],
             ['key' => 'peta',        'ikon' => 'peta', 'label' => 'Peta Lokasi', 'url' => 'peta.php'],
 
             ['grup' => 'Lainnya'],
@@ -84,8 +84,8 @@ function menu_tersedia(): array
             ['key' => 'impor',       'ikon' => 'unggah',  'label' => 'Impor Data',   'url' => 'impor_laporan.php'],
 
             ['grup' => 'Data Sosial'],
-            ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM (Relations)', 'url' => 'srm.php'],
-            ['key' => 'cid',         'ikon' => 'koin', 'label' => 'CID (Pemberdayaan)', 'url' => 'cid.php'],
+            ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM', 'url' => 'srm.php'],
+            ['key' => 'cid',         'ikon' => 'koin', 'label' => 'CID', 'url' => 'cid.php'],
             ['key' => 'peta',        'ikon' => 'peta', 'label' => 'Peta Lokasi', 'url' => 'peta.php'],
 
             ['grup' => 'Lainnya'],
@@ -110,8 +110,8 @@ function menu_tersedia(): array
             ['key' => 'impor',       'ikon' => 'unggah',  'label' => 'Impor Data',   'url' => 'impor_laporan.php'],
 
             ['grup' => 'Data Sosial'],
-            ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM (Relations)', 'url' => 'srm.php'],
-            ['key' => 'cid',         'ikon' => 'koin', 'label' => 'CID (Pemberdayaan)', 'url' => 'cid.php'],
+            ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM', 'url' => 'srm.php'],
+            ['key' => 'cid',         'ikon' => 'koin', 'label' => 'CID', 'url' => 'cid.php'],
             ['key' => 'peta',        'ikon' => 'peta', 'label' => 'Peta Lokasi', 'url' => 'peta.php'],
 
             ['grup' => 'Administrasi'],
@@ -281,6 +281,10 @@ function mulai_halaman(array $opsi = []): void
     <title><?= e($judulPenuh) ?></title>
     <link rel="stylesheet" href="assets/css/app.css">
     <link rel="icon" href="assets/img/favicon.png" type="image/png">
+    <!-- Tema gelap dimuat di <head> supaya preferensi tersimpan langsung
+         diterapkan sebelum halaman digambar (tanpa kedip), dan tetap
+         bekerja walau isi halaman berhenti di tengah jalan. -->
+    <script src="assets/js/toggle.js"></script>
     <?= $opsi['head'] ?>
 </head>
 <body>
@@ -366,6 +370,8 @@ function mulai_halaman(array $opsi = []): void
 
             <div class="topbar-kanan">
                 <?= $opsi['aksi'] ?>
+
+                <button type="button" id="tombolTema" class="tombol-lonceng" aria-label="Ganti tema" title="Ganti tema terang/gelap" style="border:0;background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:6px;">🌙</button>
 
                 <a class="tombol-lonceng" href="notifikasi.php"
                    title="Notifikasi<?= $unread > 0 ? ' (' . $unread . ' baru)' : '' ?>">

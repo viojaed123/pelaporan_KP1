@@ -119,6 +119,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/impor/simpan', [App\Http\Controllers\ImporController::class, 'simpan'])->name('impor.simpan');
     Route::post('/impor/profil', [App\Http\Controllers\ImporController::class, 'simpanProfil'])->name('impor.profil.simpan');
+    Route::get('/analisis-sosial', function(){ return redirect('/analisis_sosial.php'); })->name('analisis.sosial');
 
 
     // Modul Penugasan Tugas (mentor/admin -> karyawan)

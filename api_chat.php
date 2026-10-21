@@ -127,6 +127,69 @@ if ($stmt) {
     $stmt->close();
 }
 
+// Tambah konteks absensi 30 hari terakhir
+$stmt = $conn->prepare(
+    'SELECT COUNT(*) total,
+            SUM(status="hadir") hadir,
+            SUM(status="izin") izin,
+            SUM(status="sakit") sakit,
+            SUM(status="alpa") alpa
+     FROM absensi WHERE user_id = ? AND tanggal >= ?'
+);
+if ($stmt) {
+    $stmt->bind_param('is', $uid, $batas);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $baris = $res ? $res->fetch_assoc() : null;
+    if ($baris) {
+        $konteks['ringkas_absensi_30_hari'] = $baris;
+    }
+    $stmt->close();
+}
+
+// Tambah konteks kasus yang ditugaskan (untuk mentor/admin) atau dibuat
+if ($role === 'mentor' || $role === 'admin') {
+    $stmt = $conn->prepare("SELECT COUNT(*) total, SUM(status='terbuka') terbuka, SUM(status='dalam_proses') dalam_proses FROM kasus WHERE mentor_id = ? AND DATE(dibuat_pada) >= ?");
+    if ($stmt) {
+        $stmt->bind_param('is', $uid, $batas);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $baris = $res ? $res->fetch_assoc() : null;
+        if ($baris) {
+            $konteks['ringkas_kasus'] = $baris;
+        }
+        $stmt->close();
+    }
+} else {
+    $stmt = $conn->prepare("SELECT COUNT(*) total, SUM(status='terbuka') terbuka, SUM(status='dalam_proses') dalam_proses FROM kasus WHERE user_id = ? AND DATE(dibuat_pada) >= ?");
+    if ($stmt) {
+        $stmt->bind_param('is', $uid, $batas);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $baris = $res ? $res->fetch_assoc() : null;
+        if ($baris) {
+            $konteks['ringkas_kasus'] = $baris;
+        }
+        $stmt->close();
+    }
+}
+
+// Tambah jadwal mendatang
+$stmt = $conn->prepare("SELECT judul, tanggal_mulai, lokasi FROM jadwal WHERE user_id = ? AND tanggal_mulai >= CURDATE() ORDER BY tanggal_mulai ASC LIMIT 5");
+if ($stmt) {
+    $stmt->bind_param('i', $uid);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $jadwal = [];
+    while ($row = $res->fetch_assoc()) {
+        $jadwal[] = $row;
+    }
+    if ($jadwal) {
+        $konteks['jadwal_mendatang'] = $jadwal;
+    }
+    $stmt->close();
+}
+
 // --- Panggil layanan AI ---
 $hasil = ai_panggil('/chat', [
     'pesan'    => $pesan,
@@ -140,7 +203,7 @@ $hasil = ai_panggil('/chat', [
 if (!$hasil['ok']) {
     balas_json([
         'ok'   => false,
-        'balasan' => 'Layanan AI sedang tidak tersedia. Silakan coba lagi nanti.',
+        'balasan' => 'Layanan AI sedang tidak tersedia. Silakan coba lagi nanti. (' . ($hasil['galat'] ?? 'koneksi gagal') . ')',
         'galat' => $hasil['galat'],
     ], 503);
 }
@@ -167,9 +230,11 @@ if ($sid > 0) {
     }
 }
 
+$sumber = $hasil['data']['sumber'] ?? ($hasil['data']['meta']['sumber'] ?? null);
+
 balas_json([
     'ok'       => true,
     'balasan'  => $balasan,
     'session'  => $sid,
-    'sumber'   => $hasil['data']['sumber'] ?? null,
+    'sumber'   => $sumber,
 ]);

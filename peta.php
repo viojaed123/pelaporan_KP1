@@ -647,7 +647,11 @@ mulai_halaman([
     'crumb' => 'Data Sosial',
     'aktif' => 'peta',
     'head'  => '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">'
+             . '<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">'
+             . '<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">'
              . '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>'
+             . '<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>'
+             . '<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>'
              . '<script src="assets/js/vendor/chart.umd.min.js" defer></script>'
              . '<script src="assets/js/grafik.js" defer></script>',
 ]);
@@ -1037,6 +1041,46 @@ document.addEventListener('DOMContentLoaded', function () {
         marker.bindPopup(isi);
         lapis[t.sumber].addLayer(marker);
         batas.push([t.lat, t.lng]);
+
+        /* Berkelip saat titik ditekan: tiga cincin berdenyut + titik berkedip,
+         * berhenti otomatis saat popup ditutup atau setelah 6 detik. */
+        let penandaKelip = null;
+        let kelipTimeout = null;
+
+        function elemenTitik() {
+            return marker.getElement ? marker.getElement() : null;
+        }
+
+        function mulaiKelip() {
+            if (penandaKelip) { return; }
+            penandaKelip = L.marker([t.lat, t.lng], {
+                interactive: false,
+                zIndexOffset: 1000,
+                icon: L.divIcon({
+                    className: 'penanda-kelip',
+                    html: '<span class="kelip" style="color:' + w + '"></span>'
+                        + '<span class="kelip kelip-2" style="color:' + w + '"></span>'
+                        + '<span class="kelip kelip-3" style="color:' + w + '"></span>',
+                    iconSize: [0, 0]
+                })
+            }).addTo(lapis[t.sumber]);
+            const el = elemenTitik();
+            if (el) { L.DomUtil.addClass(el, 'titik-kelip'); }
+            kelipTimeout = window.setTimeout(hentiKelip, 6000);
+        }
+
+        function hentiKelip() {
+            if (kelipTimeout) { window.clearTimeout(kelipTimeout); kelipTimeout = null; }
+            const el = elemenTitik();
+            if (el) { L.DomUtil.removeClass(el, 'titik-kelip'); }
+            if (penandaKelip) {
+                lapis[t.sumber].removeLayer(penandaKelip);
+                penandaKelip = null;
+            }
+        }
+
+        marker.on('click', mulaiKelip);
+        marker.on('popupclose', hentiKelip);
 
         if (disorot) {
             batasSorot.push([t.lat, t.lng]);

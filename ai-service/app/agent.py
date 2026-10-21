@@ -91,7 +91,10 @@ async def jalankan_agen(
     model_terpakai = ""
     terakhir: ChatResult | None = None
 
-    for iterasi in range(1, max(1, max_iterasi) + 1):
+    if max_iterasi is None:
+        max_iterasi = 4
+    max_iterasi = max(1, min(int(max_iterasi), 4))
+    for iterasi in range(1, max_iterasi + 1):
         hasil = await client.chat(messages, tools=skema or None)
         terakhir = hasil
         model_terpakai = hasil.model or model_terpakai

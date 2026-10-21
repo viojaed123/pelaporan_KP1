@@ -12,6 +12,24 @@ require_once __DIR__ . '/includes/bootstrap.php';
 
 wajib_login();
 
+/* ---------------- Hapus semua data CID ---------------- */
+$aksi = (string) ($_POST['aksi'] ?? $_GET['aksi'] ?? '');
+if ($aksi === 'hapus_semua_cid') {
+    csrf_cek_atau_matikan('cid');
+    if (!boleh_akses('cid.hapus')) {
+        flash_set('gagal', 'Anda tidak berhak menghapus data CID.');
+        header('Location: cid.php');
+        exit;
+    }
+    if (isset($conn) && $conn instanceof mysqli) {
+        $conn->query('TRUNCATE TABLE cid_program');
+        catat_audit($conn, 'hapus_cid_semua', null, null, 'Hapus semua data CID', null, null);
+    }
+    flash_set('sukses', 'Semua data CID berhasil dihapus.');
+    header('Location: cid.php');
+    exit;
+}
+
 /* ---------------- Penyaring (GET) ---------------- */
 $fTahun = (string) ($_GET['tahun'] ?? '');
 $fPilar = (string) ($_GET['pilar'] ?? '');
@@ -162,12 +180,24 @@ mulai_halaman([
 </style>
 
 <div class="kartu">
-    <div class="kartu-kepala">
-        <h2>Community Involvement / Development (CID)</h2>
-        <p class="text-redup" style="margin:6px 0 0;font-size:13px">
-            Program pemberdayaan masyarakat / TJSL. Data berasal dari impor Excel dan
-            tersedia untuk Power BI.
-        </p>
+    <div class="kartu-kepala" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:flex-start">
+        <div>
+            <h2>Community Involvement / Development (CID)</h2>
+            <p class="text-redup" style="margin:6px 0 0;font-size:13px">
+                Program pemberdayaan masyarakat / TJSL. Data berasal dari impor Excel dan
+                tersedia untuk Power BI.
+            </p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+            <a href="analisis_sosial.php?tab=cid" class="tombol tombol-garis tombol-kecil">Analisis Sosial</a>
+            <?php if (boleh_akses('cid.hapus')): ?>
+            <form method="post" action="cid.php" onsubmit="return confirm('Hapus SEMUA data CID? Tindakan ini tidak bisa dibatalkan.');" style="display:inline">
+                <?= csrf_field('cid') ?>
+                <input type="hidden" name="aksi" value="hapus_semua_cid">
+                <button type="submit" class="tombol tombol-bahaya tombol-kecil">Hapus Semua Data CID</button>
+            </form>
+            <?php endif; ?>
+        </div>
     </div>
     <div class="kartu-badan">
         <div class="cid-ringkas">
@@ -236,12 +266,13 @@ mulai_halaman([
                     <th style="width:180px">Desa / Kecamatan</th>
                     <th style="width:110px" class="text-kanan">Penerima</th>
                     <th style="width:130px" class="text-kanan">Anggaran</th>
+                    <th style="width:150px" class="text-kanan">Cost Avoidance</th>
                     <th style="width:90px">Bulan</th>
                 </tr>
             </thead>
             <tbody>
             <?php if ($baris === []): ?>
-                <tr><td colspan="7" class="text-redup" style="text-align:center;padding:22px">
+                <tr><td colspan="8" class="text-redup" style="text-align:center;padding:22px">
                     Tidak ada data yang cocok.
                 </td></tr>
             <?php else: ?>
@@ -275,6 +306,7 @@ mulai_halaman([
                         </td>
                         <td class="text-kanan"><?= e(srm_cid_angka_id($b['total_penerima_manfaat'])) ?></td>
                         <td class="text-kanan"><?= e(srm_cid_rupiah($b['anggaran'])) ?></td>
+                        <td class="text-kanan"><?= (isset($b['cost_avoidance']) && $b['cost_avoidance'] !== null && $b['cost_avoidance'] !== '') ? e(srm_cid_rupiah($b['cost_avoidance'])) : '-' ?></td>
                         <td class="text-redup">
                             <?= e($namaBulan[(int) ($b['bulan_angka'] ?? 0)] ?? (string) ($b['bulan'] ?? '-')) ?>
                         </td>

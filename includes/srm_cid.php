@@ -335,6 +335,35 @@ if (!function_exists('srm_cid_rupiah')) {
     }
 }
 
+if (!function_exists('srm_persen')) {
+    /** Persentase status ternormalisasi (0..100); null -> '-'. */
+    function srm_persen(?string $nilai): string
+    {
+        if ($nilai === null || $nilai === '') {
+            return '-';
+        }
+        $n = (float) $nilai;
+        if ($n > 0 && $n <= 1) {
+            $n *= 100;
+        }
+        return number_format($n, 0, ',', '.') . '%';
+    }
+}
+
+if (!function_exists('srm_kelas_status')) {
+    /** Kelas badge untuk status SRM (High/Med/Low). */
+    function srm_kelas_status(?string $status): string
+    {
+        $s = strtolower(trim((string) $status));
+        return match (true) {
+            str_starts_with($s, 'high') => 'badge-merah',
+            str_starts_with($s, 'med')  => 'badge-kuning',
+            str_starts_with($s, 'low')  => 'badge-hijau',
+            default                     => 'badge-navy',
+        };
+    }
+}
+
 /* ===============================================================
  * 4. IMPOR UTAMA
  * ============================================================= */
@@ -633,3 +662,4 @@ if (!function_exists('srm_cid_impor')) {
         return $hasil;
     }
 }
+

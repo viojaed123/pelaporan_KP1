@@ -1,13 +1,4 @@
 <?php
-/**
- * mentor_absensi.php — pemantauan absensi peserta (mentor/admin).
- *
- * Pembaruan dari versi lama:
- *   · bootstrap + penjaga peran terpusat: wajib_role(['mentor','admin'])
- *   · layout terpusat — <style> inline dihapus
- *   · verifikasi CSRF untuk permintaan POST
- *   · filter periode/pencarian & ringkasan tetap dipertahankan
- */
 
 declare(strict_types=1);
 

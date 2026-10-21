@@ -12,29 +12,22 @@ require_once __DIR__ . '/includes/bootstrap.php';
 
 wajib_login();
 
-/** Kelas badge untuk status SRM (High/Med/Low). */
-function srm_kelas_status(?string $status): string
-{
-    $s = strtolower(trim((string) $status));
-    return match (true) {
-        str_starts_with($s, 'high') => 'badge-merah',
-        str_starts_with($s, 'med')  => 'badge-kuning',
-        str_starts_with($s, 'low')  => 'badge-hijau',
-        default                     => 'badge-navy',
-    };
-}
-
-/** Persentase status ternormalisasi (0..100); null -> '-'. */
-function srm_persen(?string $nilai): string
-{
-    if ($nilai === null || $nilai === '') {
-        return '-';
+/* ---------------- Hapus semua data SRM ---------------- */
+$aksi = (string) ($_POST['aksi'] ?? $_GET['aksi'] ?? '');
+if ($aksi === 'hapus_semua_srm') {
+    csrf_cek_atau_matikan('srm');
+    if (!boleh_akses('srm.hapus')) {
+        flash_set('gagal', 'Anda tidak berhak menghapus data SRM.');
+        header('Location: srm.php');
+        exit;
     }
-    $n = (float) $nilai;
-    if ($n > 0 && $n <= 1) {
-        $n *= 100;
+    if (isset($conn) && $conn instanceof mysqli) {
+        $conn->query('TRUNCATE TABLE srm_kegiatan');
+        catat_audit($conn, 'hapus_srm_semua', null, null, 'Hapus semua data SRM', null, null);
     }
-    return number_format($n, 0, ',', '.') . '%';
+    flash_set('sukses', 'Semua data SRM berhasil dihapus.');
+    header('Location: srm.php');
+    exit;
 }
 
 /* ---------------- Penyaring (GET) ---------------- */
@@ -203,12 +196,24 @@ mulai_halaman([
 </style>
 
 <div class="kartu">
-    <div class="kartu-kepala">
-        <h2>Social Relations Management (SRM)</h2>
-        <p class="text-redup" style="margin:6px 0 0;font-size:13px">
-            Catatan kegiatan hubungan sosial &amp; penanganan isu. Data berasal dari impor Excel
-            dan tersedia untuk Power BI.
-        </p>
+    <div class="kartu-kepala" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:flex-start">
+        <div>
+            <h2>Social Relations Management (SRM)</h2>
+            <p class="text-redup" style="margin:6px 0 0;font-size:13px">
+                Catatan kegiatan hubungan sosial &amp; penanganan isu. Data berasal dari impor Excel
+                dan tersedia untuk Power BI.
+            </p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+            <a href="analisis_sosial.php?tab=srm" class="tombol tombol-garis tombol-kecil">Analisis Sosial</a>
+            <?php if (boleh_akses('srm.hapus')): ?>
+            <form method="post" action="srm.php" onsubmit="return confirm('Hapus SEMUA data SRM? Tindakan ini tidak bisa dibatalkan.');" style="display:inline">
+                <?= csrf_field('srm') ?>
+                <input type="hidden" name="aksi" value="hapus_semua_srm">
+                <button type="submit" class="tombol tombol-bahaya tombol-kecil">Hapus Semua Data SRM</button>
+            </form>
+            <?php endif; ?>
+        </div>
     </div>
     <div class="kartu-badan">
         <div class="srm-ringkas">
@@ -282,16 +287,17 @@ mulai_halaman([
                     <th style="width:96px">Tanggal</th>
                     <th style="width:110px">Area</th>
                     <th>Judul Issue</th>
-                    <th style="width:130px">Kategori</th>
+                    <th style="width:150px">Kategori</th>
                     <th style="width:130px">Stakeholder</th>
                     <th style="width:120px">PIC</th>
+                    <th style="width:150px" class="text-kanan">Cost Avoidance</th>
                     <th style="width:70px">Status</th>
                     <th style="width:70px" class="text-kanan">%</th>
                 </tr>
             </thead>
             <tbody>
             <?php if ($baris === []): ?>
-                <tr><td colspan="8" class="text-redup" style="text-align:center;padding:22px">
+                <tr><td colspan="9" class="text-redup" style="text-align:center;padding:22px">
                     Tidak ada data yang cocok.
                 </td></tr>
             <?php else: ?>
@@ -334,12 +340,19 @@ mulai_halaman([
                                     <?php if (!empty($b['tim_phr'])): ?>
                                         <p style="margin:4px 0 0;font-size:12.5px"><strong>Tim PHR:</strong> <?= e((string) $b['tim_phr']) ?></p>
                                     <?php endif; ?>
+                                    <?php if (!empty($b['kategori_kegiatan'])): ?>
+                                        <p style="margin:4px 0 0;font-size:12.5px"><strong>Kategori:</strong> <?= e((string) $b['kategori_kegiatan']) ?></p>
+                                    <?php endif; ?>
+                                    <?php if (isset($b['cost_avoidance']) && $b['cost_avoidance'] !== null && $b['cost_avoidance'] !== ''): ?>
+                                        <p style="margin:4px 0 0;font-size:12.5px"><strong>Cost Avoidance:</strong> <?= e(srm_cid_rupiah($b['cost_avoidance'])) ?></p>
+                                    <?php endif; ?>
                                 </details>
                             <?php endif; ?>
                         </td>
                         <td class="text-redup"><?= e((string) ($b['kategori_kegiatan'] ?? '-')) ?></td>
                         <td class="text-redup"><?= e((string) ($b['jenis_stakeholder'] ?? '-')) ?></td>
                         <td class="text-redup"><?= e((string) ($b['pic'] ?? '-')) ?></td>
+                        <td class="text-kanan text-redup"><?= (isset($b['cost_avoidance']) && $b['cost_avoidance'] !== null && $b['cost_avoidance'] !== '') ? e(srm_cid_rupiah($b['cost_avoidance'])) : '-' ?></td>
                         <td>
                             <?php if (!empty($b['status'])): ?>
                                 <span class="badge <?= srm_kelas_status((string) $b['status']) ?> badge-tanpa-titik"><?= e((string) $b['status']) ?></span>

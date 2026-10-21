@@ -853,4 +853,47 @@ class AnalitikController extends Controller
             'daftar_karyawan' => $daftarKaryawan,
         ]);
     }
+
+    public function analitikSrm(Request $r): JsonResponse
+    {
+        $tahun = $r->query('tahun');
+        $kab = $r->query('kabupaten');
+        $area = $r->query('area');
+        $status = $r->query('status');
+        $q = trim((string)$r->query('q',''));
+        $w = []; $t = ''; $p = [];
+        if ($tahun !== null && $tahun !== '') { $w[]='tahun_intervensi=?'; $t.='i'; $p[]=(int)$tahun; }
+        if ($kab !== null && $kab !== '') { $w[]='kabupaten_kota=?'; $t.='s'; $p[]=$kab; }
+        if ($area !== null && $area !== '') { $w[]='area_field=?'; $t.='s'; $p[]=$area; }
+        if ($status !== null && $status !== '') { $w[]='status=?'; $t.='s'; $p[]=$status; }
+        if ($q !== '') { $w[]='(judul_issue LIKE ? OR detail_issue LIKE ? OR pic LIKE ?)'; $t.='sss'; $lk='%'.$q.'%'; $p[]=$lk;$p[]=$lk;$p[]=$lk; }
+        $cl = $w ? ('WHERE '.implode(' AND ',$w)) : '';
+        $sql = "SELECT COUNT(*) total, SUM(status='High') high, SUM(status='Med') med, SUM(status='Low') low, COUNT(DISTINCT area_field) area, COUNT(DISTINCT kabupaten_kota) kab FROM srm_kegiatan $cl";
+        $st = DB::select($sql, $p);
+        $kpi = (array)($st[0] ?? []);
+        $topKab = DB::select("SELECT kabupaten_kota k, COUNT(*) c FROM srm_kegiatan ".($tahun?"WHERE tahun_intervensi=".intval($tahun):'')." GROUP BY kabupaten_kota ORDER BY c DESC LIMIT 10");
+        $stStat = DB::select("SELECT status s, COUNT(*) c FROM srm_kegiatan GROUP BY status");
+        return response()->json(['sukses'=>true,'kpi'=>$kpi,'top_kabupaten'=>$topKab,'status'=>$stStat]);
+    }
+
+    public function analitikCid(Request $r): JsonResponse
+    {
+        $tahun = $r->query('tahun');
+        $kab = $r->query('kabupaten');
+        $pilar = $r->query('pilar');
+        $q = trim((string)$r->query('q',''));
+        $w = []; $t = ''; $p = [];
+        if ($tahun !== null && $tahun !== '') { $w[]='tahun_intervensi=?'; $t.='i'; $p[]=(int)$tahun; }
+        if ($kab !== null && $kab !== '') { $w[]='kabupaten_kota=?'; $t.='s'; $p[]=$kab; }
+        if ($pilar !== null && $pilar !== '') { $w[]='pilar_program=?'; $t.='s'; $p[]=$pilar; }
+        if ($q !== '') { $w[]='(judul_program LIKE ? OR desa LIKE ? OR kelompok_diberdayakan LIKE ?)'; $t.='sss'; $lk='%'.$q.'%'; $p[]=$lk;$p[]=$lk;$p[]=$lk; }
+        $cl = $w ? ('WHERE '.implode(' AND ',$w)) : '';
+        $sql = "SELECT COUNT(*) total, COALESCE(SUM(total_penerima_manfaat),0) manfaat, COALESCE(SUM(anggaran),0) anggaran, COUNT(DISTINCT desa) desa, COUNT(DISTINCT kecamatan) kec, COUNT(DISTINCT pilar_program) pilar FROM cid_program $cl";
+        $st = DB::select($sql, $p);
+        $kpi = (array)($st[0] ?? []);
+        $topKab = DB::select("SELECT kabupaten_kota k, COUNT(*) c FROM cid_program ".($tahun?"WHERE tahun_intervensi=".intval($tahun):'')." GROUP BY kabupaten_kota ORDER BY c DESC LIMIT 10");
+        $stPilar = DB::select("SELECT pilar_program p, COUNT(*) c FROM cid_program WHERE pilar_program IS NOT NULL GROUP BY pilar_program ORDER BY c DESC");
+        return response()->json(['sukses'=>true,'kpi'=>$kpi,'top_kabupaten'=>$topKab,'pilar'=>$stPilar]);
+    }
 }
+

@@ -84,6 +84,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pesan = 'Impor SRM/CID selesai. ' . implode(' | ', $ringkas);
 
+        // Catat ke riwayat impor agar konsisten dengan jalur impor_laporan.php.
+        // `$uid` baru diisi layout.php setelah blok POST ini, jadi ambil
+        // langsung dari sesi agar tidak undefined saat impor diproses.
+        impor_catat_sejarah(
+            $conn, (int) sesi_user_id(), 'srm_cid', (string) $unggah['nama_asli'],
+            (int) ($hasil['srm']['masuk'] ?? 0) + (int) ($hasil['cid']['masuk'] ?? 0)
+                + (int) ($hasil['srm']['gagal'] ?? 0) + (int) ($hasil['cid']['gagal'] ?? 0),
+            (int) ($hasil['srm']['masuk'] ?? 0) + (int) ($hasil['cid']['masuk'] ?? 0),
+            0,
+            (int) ($hasil['srm']['gagal'] ?? 0) + (int) ($hasil['cid']['gagal'] ?? 0),
+            'srm=' . (int) ($hasil['srm']['masuk'] ?? 0) . ' cid=' . (int) ($hasil['cid']['masuk'] ?? 0),
+            [],
+            'srm,cid'
+        );
+
         catat_audit(
             $conn, 'impor_srm_cid', null, null,
             'Impor SRM/CID (' . $jenis . ') dari ' . (string) $unggah['nama_asli'] . ': ' . implode(' | ', $ringkas),

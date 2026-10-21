@@ -15,21 +15,7 @@ use App\Http\Controllers\Api\TugasController;
 use App\Http\Controllers\AsistenController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Rute API (Power BI / external BI + Aplikasi Mobile)
-|--------------------------------------------------------------------------
-|
-| DUA kelompok di bawah prefix v1:
-|
-|   1. Token statis (Power BI) -- endpoint ringkas untuk konektor "Web"
-|      Power BI. Autentikasi via X-Api-Token / Bearer / ?token=
-|      (TOKEN diatur di .env: POWERBI_API_TOKEN).
-|
-|   2. Token per pengguna (Sanctum) -- untuk aplikasi mobile (APK) dan
-|      klien lain yang mewakili pengguna nyata. Login: POST /v1/auth/login.
-|
-*/
+
 
 Route::prefix('v1')->group(function () {
     /* --- 1. Power BI (token statis) --- */
@@ -104,5 +90,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/ringkasan-kegiatan', [AnalitikController::class, 'ringkasan']);
         Route::get('/kalender', [AnalitikController::class, 'kalender']);
+        Route::get('/analitik/srm', [AnalitikController::class, 'analitikSrm']);
+        Route::get('/analitik/cid', [AnalitikController::class, 'analitikCid']);
     });
 });

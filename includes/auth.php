@@ -112,6 +112,48 @@ if (!function_exists('hanya_role')) {
     }
 }
 
+if (!function_exists('boleh_akses')) {
+    /**
+     * Peta kemampuan (capability) -> peran yang diizinkan.
+     *
+     * Dipakai halaman seperti srm.php / cid.php untuk menyembunyikan
+     * tindakan destruktif. Tindakan yang tidak terdaftar hanya boleh
+     * dilakukan admin (default aman).
+     *
+     * @var array<string, string[]>
+     */
+    function peta_akses(): array
+    {
+        return [
+            // Data sosial: impor & hapus khusus admin (lihat impor_srm_cid.php).
+            'srm.hapus'    => ['admin'],
+            'cid.hapus'    => ['admin'],
+            'srm.impor'    => ['admin'],
+            'cid.impor'    => ['admin'],
+            'srm.lihat'    => ['karyawan', 'mentor', 'admin'],
+            'cid.lihat'    => ['karyawan', 'mentor', 'admin'],
+            // Tindakan umum.
+            'laporan.periksa' => ['mentor', 'admin'],
+            'laporan.hapus'   => ['admin'],
+            'impor.data'      => ['mentor', 'admin'],
+            'audit.lihat'     => ['admin'],
+            'backup.kelola'   => ['admin'],
+        ];
+    }
+
+    /**
+     * true bila sesi saat ini punya kemampuan yang diminta.
+     * Kemampuan yang tidak dikenal hanya untuk admin.
+     */
+    function boleh_akses(string $kemampuan): bool
+    {
+        $peta = peta_akses();
+        $peran = $peta[$kemampuan] ?? ['admin'];
+
+        return in_array(sesi_role(), $peran, true);
+    }
+}
+
 /* ---------------------------------------------------------------
  * Data pengguna dari database
  * ------------------------------------------------------------- */
