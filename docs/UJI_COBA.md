@@ -289,8 +289,8 @@ dipasang berdampingan (`192.168.56.1` / `pelaporan.local`) tanpa
 - [x] `pengguna:hapus {id} --yakin [--paksakan]` (transaksi + catat `audit_log`):
       akun ganda #46/#47/#48 dihapus, #1 dipertahankan -> `pengguna:audit`
       "Nama karyawan duplikat: **0**" (basis data produksi, disertai cadangan
-      `backups/pelaporan-20261019-062821.sql`).
-- [x] `scripts/backup_db.ps1`/`.cmd` (mysqldump + rotasi) dan `scripts/jalankan_penjadwal.cmd`.
+      `C:\pelaporan-cadangan\pelaporan-20261019-062821.sql`).
+- [x] `tools/backup_db.php` (mysqldump + rotasi, kredensial via `MYSQL_PWD`) dan `scripts/jalankan_penjadwal.cmd`.
 - [x] Template vhost HTTPS `scripts/vhost_https.conf.example`.
 - [ ] **UAT (tanda tangan pemilik proses):** jalankan skenario harian karyawan di web `/app` **dan** APK; skenario mentor/admin (rekap, verifikasi, kasus PIC bebas).
 - [ ] HTTPS, SMTP organisasi, cadangan terjadwal, dan pembersihan akun uji — lihat `docs/GO_LIVE.md`.

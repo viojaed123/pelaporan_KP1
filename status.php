@@ -99,6 +99,8 @@ foreach ([
     'backups/db'       => BACKUP_DIR,
     'backups/mail-log' => MAIL_LOG_DIR,
     'uploads'          => UPLOAD_DIR,
+    // Dump terjadwal disimpan DI LUAR webroot (lihat tools/backup_db.php).
+    'cadangan (luar webroot)' => getenv('PHR_BACKUP_DIR') ?: 'C:\\pelaporan-cadangan',
 ] as $label => $dir) {
     if (!is_dir($dir)) {
         $tambah('Penyimpanan', $label, 'tidak ada', 'peringatan');

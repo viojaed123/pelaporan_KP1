@@ -31,10 +31,10 @@ Android. Tandai `[x]` bila sudah beres.
 ## 2. Pencadangan basis data terjadwal
 
 - [x] Skrip dump harian `mysqldump` (semua tabel; DB `pelaporan`) —
-      `scripts\backup_db.cmd`/`.ps1`, sudah diuji19 Okt 2026
-      (46 tabel +22 view,0,48 MB).
-- [ ] Simpan ke `backups/` **dan** salin ke lokasi lain (NAS/luar server).
-      (*Skrip mendukung `-Tujuan <path>`; penyalinan efektif menunggu
+      `tools\backup_db.php` (kanonik), sudah diuji 19 Okt 2026
+      (46 tabel + 22 view, 0,48 MB).
+- [ ] Simpan ke `C:\pelaporan-cadangan` **dan** salin ke lokasi lain (NAS/luar
+      server). (*Skrip mendukung `--dir=<path>`; penyalinan efektif menunggu
       kredensial akses NAS.*)
 - [ ] `schtasks` harian, mis. 23:30, `mysqldump --single-transaction`.
       (*Butuh izin admin Windows; jalankan `scripts\jalankan_penjadwal.cmd`
@@ -45,22 +45,24 @@ Android. Tandai `[x]` bila sudah beres.
       selisih hanya7 tabel yang memang berubah SETelah jam cadangan
       (pembersihan akun ganda),39 tabel identik,22 view =22.
       DB sementara dihapus kembali.)*
-- [x] Simpan cadangan minimal30 hari (rotasi) — default
-      `backup_db.ps1 -HariSimpan 30` menghapus cadangan lebih tua.
+- [x] Simpan cadangan minimal 30 hari (rotasi) — `--simpan=30` pada
+      `tools\backup_db.php` menghapus cadangan lebih tua dari batas itu.
 
 Contoh (sesuaikan user/sandi):
 ```bat
 mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\pelaporan-%DATE%.sql
 ```
 
-> **Sudah tersedia:** `scripts\backup_db.ps1` (+ `scripts\backup_db.cmd`)
-> membuat dump `mysqldump --single-transaction` ke
-> `backups\pelaporan-YYYYMMDD-HHmmss.sql`, mencatat ke `backups\backup.log`,
-> dan merotasi berkas > 30 hari. Kredensial dibaca dari `.env`.
+> **Sudah tersedia:** `tools\backup_db.php` (kanonik) membuat dump
+> `mysqldump --single-transaction` ke `C:\pelaporan-cadangan\pelaporan_YYYYmmdd_HHMMSS.sql`
+> (**di luar webroot** — data pribadi tidak ditaruh di pohon yang disajikan
+> Apache), dan dapat mencatat ke `backup.log` (`--log=`) serta merotasi berkas
+> (`--simpan=N`). Kredensial dibaca dari `includes/config.php`; tambahkan
+> `--sumber=env` untuk membacanya dari `.env`.
 > Pasang harian 23:30 (Administrator):
 > ```bat
 > schtasks /Create /SC DAILY /ST 23:30 /TN "PHR Backup DB" ^
->   /TR "powershell -NoProfile -ExecutionPolicy Bypass -File C:\xampp\htdocs\pelaporan\scripts\backup_db.ps1"
+>   /TR "C:\xampp\php\php.exe C:\xampp\htdocs\pelaporan\tools\backup_db.php --simpan=30 --sumber=env --log=backup.log"
 > ```
 > (Uji pemulihan: lihat `docs/OPERASIONAL.md` §3.1.)
 
@@ -115,8 +117,8 @@ mysqldump --single-transaction -u pelaporan_app -p"***" pelaporan > D:\backups\p
 > `php artisan pengguna:hapus <id> --yakin`. Akun yang masih memiliki data
 > bisnis ditolak kecuali `--paksakan`; kasus di mana akun sekadar PIC tidak
 > ikut terhapus (hanya `penanggung_jawab_id` dikosongkan, nama ketikan tetap).
-> Seluruh operasi satu transaksi, tercatat pada `audit_log`, dan ada
-> `scripts\backup_db.cmd` untuk cadangan sebelum eksekusi.
+> Seluruh operasi satu transaksi, tercatat pada `audit_log`, dan
+> `tools\backup_db.php` tersedia untuk cadangan sebelum eksekusi.
 
 ## 6. UAT (User Acceptance Test)
 

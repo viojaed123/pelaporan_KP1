@@ -47,6 +47,9 @@ uploads/**
 ai-service/exports/
 ai-service/hermes/
 
+# Cadangan basis data kini DI LUAR webroot (C:\pelaporan-cadangan) sehingga
+# tidak pernah masuk pohon git. Jalur dapat diubah via PHR_BACKUP_DIR.
+
 # === Berkas sistem ===
 *.log
 *.sql.gz

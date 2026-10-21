@@ -275,24 +275,30 @@ schtasks /Create /SC MINUTE /MO 1 /TN "PHR Penjadwal" ^
 php tools\backup_db.php --simpan=30
 ```
 
-Hasil disimpan di `backups/pelaporan_YYYYmmdd_HHMMSS.sql` (direktori
-dilindungi `.htaccess` → 403, dan diabaikan Git). Kata sandi dilewatkan lewat
-`MYSQL_PWD` agar tidak tampak di daftar proses. Pulihkan dengan:
+Hasil disimpan di `C:\pelaporan-cadangan\pelaporan_YYYYmmdd_HHMMSS.sql` —
+**di luar webroot**, karena dump memuat data pribadi karyawan (tidak pernah
+masuk pohon yang disajikan Apache maupun git). Kata sandi dilewatkan lewat
+`MYSQL_PWD` agar tidak tampak di daftar proses. Ubah lokasi dengan
+`--dir=PATH` atau variabel lingkungan `PHR_BACKUP_DIR`. Pulihkan dengan:
 
 ```bat
-mysql -u pelaporan_app -p pelaporan < backups\pelaporan_20261016_013000.sql
+mysql -u pelaporan_app -p pelaporan < C:\pelaporan-cadangan\pelaporan_20261016_013000.sql
 ```
 
-Untuk lingkungan Laravel tersedia `scripts\backup_db.ps1` (+ `backup_db.cmd`)
-yang membaca kredensial dari `.env`, menjalankan
-`mysqldump --single-transaction`, menyimpan ke
-`backups\pelaporan-YYYYMMDD-HHmmss.sql`, mencatat ke `backups\backup.log`, dan
-merotasi berkas lebih tua dari 30 hari:
+Kredensial dibaca dari `includes/config.php` (+ `config_lokal.php`). Bila
+dijadwalkan dari sisi Laravel, gunakan `--sumber=env` agar membaca `.env`
+(`DB_HOST`/`DB_PORT`/`DB_DATABASE`/`DB_USERNAME`/`DB_PASSWORD`), dan
+`--log=` untuk mencatat ringkasan tiap eksekusi:
 
 ```bat
-scripts\backup_db.cmd                 REM simpan 30 hari
-scripts\backup_db.cmd -HariSimpan 14 -Tujuan D:\backups
+php tools\backup_db.php --simpan=30                        REM kredensial config.php
+php tools\backup_db.php --simpan=30 --sumber=env --log=backup.log
+php tools\backup_db.php --simpan=14 --dir=D:\backups
 ```
+
+> Catatan: padanan PowerShell lama (`scripts\backup_db.ps1` + `backup_db.cmd`)
+> sudah dihapus — kemampuannya (baca `.env`, tulis log) kini menyatu di
+> `tools\backup_db.php`. Skrip ini adalah **satu-satunya** pencadang kanonik.
 
 ### 5.3. Layanan AI (opsional)
 

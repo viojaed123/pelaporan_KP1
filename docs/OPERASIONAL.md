@@ -99,38 +99,51 @@ Hal yang perlu diketahui:
 
 ### 3.1 Pencadangan terjadwal (lingkungan Laravel)
 
-Skrip `scripts\backup_db.ps1` menjalankan `mysqldump --single-transaction`
+Skrip `tools\backup_db.php` (kanonik) menjalankan `mysqldump --single-transaction`
 (aman saat basis data live), menyimpan ke
-`backups\pelaporan-YYYYMMDD-HHmmss.sql`, mencatat ke `backups\backup.log`, dan
-merotasi berkas lebih tua dari 30 hari. Kredensial dibaca dari `.env`
-(tidak ada sandi di dalam skrip).
+`C:\pelaporan-cadangan\pelaporan_YYYYmmdd_HHMMSS.sql`, dan merotasi berkas lebih
+tua dari batas `--simpan`. Tambahkan `--log=` untuk mencatat, dan
+`--sumber=env` untuk membaca kredensial dari `.env` (tidak ada sandi di dalam
+skrip).
+
+**Lokasi cadangan berada DI LUAR webroot** (`C:\pelaporan-cadangan`), karena
+dump memuat data pribadi karyawan dan tidak boleh berada di pohon yang
+disajikan Apache. Ubah lewat `--dir=PATH` atau variabel lingkungan
+`PHR_BACKUP_DIR`.
 
 ```bat
-REM manual (pembungkus .cmd)
-scripts\backup_db.cmd
+REM manual (kredensial includes\config.php)
+php tools\backup_db.php --simpan=30
+
+REM dari sisi Laravel: kredensial .env + catat ke backup.log
+php tools\backup_db.php --simpan=30 --sumber=env --log=backup.log
 
 REM ke lokasi lain, simpan 14 hari
-scripts\backup_db.cmd -HariSimpan 14 -Tujuan D:\backups
+php tools\backup_db.php --simpan=14 --dir=D:\backups
 ```
 
 Pemasangan harian pukul 23:30 (jalankan sebagai Administrator):
 
 ```bat
 schtasks /Create /SC DAILY /ST 23:30 /TN "PHR Backup DB" ^
-  /TR "powershell -NoProfile -ExecutionPolicy Bypass -File C:\xampp\htdocs\pelaporan\scripts\backup_db.ps1"
+  /TR "C:\xampp\php\php.exe C:\xampp\htdocs\pelaporan\tools\backup_db.php --simpan=30 --sumber=env --log=backup.log"
 ```
 
 Uji pemulihan ke basis data sementara — wajib minimal sekali (lihat
 checklist `GO_LIVE.md` §2):
 
-> **AWAS.** Dump dibuat dengan `--databases`, sehingga berkasnya memuat
-> `CREATE DATABASE` **dan dua baris** `USE \`pelaporan\``. Bila dimasukkan
-> apa adanya, isi dump akan mengalir ke basis data **ASLI** `pelaporan`
-> (menimpa data), bukan ke basis data sementara. Saring dulu baris itu:
+> **Catatan.** `tools\backup_db.php` menyebut nama basis data sebagai argumen
+> posisi (bukan `--databases`), sehingga dump **tidak** memuat
+> `CREATE DATABASE`/`USE`. Pulihkan langsung ke basis data tujuan:
+> `mysql -u root pelaporan_uji < berkas.sql`.
+>
+> Sebagian dump lama (dari skrip `.ps1` yang sudah dihapus) **memuat** baris
+> `CREATE DATABASE` dan `USE \`pelaporan\``; bila memakai berkas seperti itu,
+> saring dulu baris tersebut agar tidak menimpa basis data **ASLI**:
 
 ```powershell
 $mysql  = 'C:\xampp\mysql\bin\mysql.exe'
-$src    = 'C:\xampp\htdocs\pelaporan\backups\pelaporan-20261019-062821.sql'
+$src    = 'C:\pelaporan-cadangan\pelaporan-20261019-062821.sql'
 $saring = "$env:TEMP\pelaporan_uji.sql"
 
 & $mysql -u root -e "CREATE DATABASE `pelaporan_uji` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
