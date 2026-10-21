@@ -1315,6 +1315,96 @@ if (!function_exists('impor_catat_sejarah')) {
     }
 }
 
+if (!function_exists('impor_hapus_batch')) {
+    /**
+     * Hapus SATU batch impor beserta baris data yang dibuatnya.
+     *
+     * Batas aman:
+     *   - hanya pemilik riwayat (atau admin) yang boleh menghapus,
+     *   - hanya jenis `laporan`/`absensi` (jalur SRM/CID mengganti seluruh
+     *     tabel, jadi tidak punya id per-batch),
+     *   - hanya id pada kolom `id_semua` yang dibuat batch itu,
+     *   - tabel data ditentukan dari jenis, bukan dari masukan pengguna.
+     *
+     * @return array{ok: bool, pesan: string, dihapus: int}
+     */
+    function impor_hapus_batch(mysqli $conn, int $sejarahId, int $userId, bool $admin = false): array
+    {
+        $gagal = static fn (string $p): array => ['ok' => false, 'pesan' => $p, 'dihapus' => 0];
+
+        if ($sejarahId < 1) {
+            return $gagal('Riwayat impor tidak sah.');
+        }
+
+        $stmt = $conn->prepare(
+            'SELECT user_id, jenis, nama_berkas, id_semua FROM impor_sejarah WHERE id = ? LIMIT 1'
+        );
+        if (!$stmt) {
+            return $gagal('Gagal membaca riwayat impor.');
+        }
+        $stmt->bind_param('i', $sejarahId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$row) {
+            return $gagal('Riwayat impor tidak ditemukan.');
+        }
+        if (!$admin && (int) $row['user_id'] !== $userId) {
+            return $gagal('Anda hanya dapat menghapus riwayat impor milik sendiri.');
+        }
+
+        $jenis = (string) $row['jenis'];
+        if (!in_array($jenis, ['laporan', 'absensi'], true)) {
+            return $gagal('Impor jenis ini mengganti seluruh tabel sehingga tidak dapat dihapus per-batch.');
+        }
+
+        $ids = json_decode((string) ($row['id_semua'] ?? ''), true);
+        if (!is_array($ids) || $ids === []) {
+            return $gagal('Batch ini tidak menyimpan daftar baris (impor lama sebelum pencatatan id).');
+        }
+        $ids = array_values(array_filter(array_map('intval', $ids), static fn ($v) => $v > 0));
+        if ($ids === []) {
+            return $gagal('Daftar baris batch kosong.');
+        }
+
+        $tabel = $jenis === 'absensi' ? 'absensi' : 'laporan_harian';
+        $placeholder = implode(',', array_fill(0, count($ids), '?'));
+        $tipe = str_repeat('i', count($ids));
+
+        $conn->begin_transaction();
+        try {
+            $del = $conn->prepare("DELETE FROM `{$tabel}` WHERE id IN ({$placeholder})");
+            if (!$del) {
+                throw new \RuntimeException('Gagal menyiapkan perintah hapus.');
+            }
+            $del->bind_param($tipe, ...$ids);
+            $del->execute();
+            $dihapus = (int) $del->affected_rows;
+            $del->close();
+
+            $delR = $conn->prepare('DELETE FROM impor_sejarah WHERE id = ?');
+            if (!$delR) {
+                throw new \RuntimeException('Gagal menyiapkan perintah hapus riwayat.');
+            }
+            $delR->bind_param('i', $sejarahId);
+            $delR->execute();
+            $delR->close();
+
+            $conn->commit();
+        } catch (\Throwable $t) {
+            $conn->rollback();
+            return $gagal('Gagal menghapus batch: ' . $t->getMessage());
+        }
+
+        return [
+            'ok' => true,
+            'pesan' => sprintf('Batch "%s" dihapus: %d baris data dibatalkan.', (string) $row['nama_berkas'], $dihapus),
+            'dihapus' => $dihapus,
+        ];
+    }
+}
+
 if (!function_exists('impor_daftar_profil')) {
     /** @return list<array<string,mixed>> */
     function impor_daftar_profil(mysqli $conn, int $userId, string $jenis): array

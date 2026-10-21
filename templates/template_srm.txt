@@ -1,0 +1,3 @@
+Template SRM (contoh header)
+Tahun Intervensi	Area Field	Tanggal	Waktu	PIC	Kategori Kegiatan	Klasifikasi Issue	Judul Issue	Detail Issue	Kelurahan/Desa	Kecamatan	Kabupaten/Kota	Jenis Stakeholder	Stakeholder Yang Menghadiri	Action Plan	Tim PHR	Value Creation	Status	Status (%)	Dokumentasi
+2025	Operasi	2025-01-15	10:00	Contoh PIC	Komunikasi	Low	Contoh Judul Issue	Contoh Detail Issue	Desa Contoh	Kecamatan Contoh	Kabupaten Contoh	Masyarakat	Peserta	Contoh Action Plan	Tim PHR	Nilai Tambah	Low	25	-

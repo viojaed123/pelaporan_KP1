@@ -321,8 +321,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($terisi > 0) {
                 $pesan .= sprintf(' %d lokasi ditempatkan di peta.', $terisi);
             }
+            $pesan .= ' <a href="analisis_sosial.php?tab=srm&highlight=baru">Lihat Hasil Analisis &rarr;</a>';
             flash_set('sukses', $pesan);
-            header('Location: peta.php?sorot=1');
+            header('Location: analisis_sosial.php?tab=srm&highlight=baru');
         } else {
             flash_set('gagal', (string) ($hasilImp['pesan'] ?? 'Impor SRM & CID gagal.'));
             header('Location: impor_laporan.php');
@@ -340,6 +341,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         impor_reset($berkas);
         flash_set('info', 'Impor dibatalkan.');
+        header('Location: impor_laporan.php');
+        exit;
+    }
+
+    if ($aksi === 'hapus_batch') {
+        csrf_cek_atau_matikan('impor');
+        $sejarahId = (int) ($_POST['sejarah_id'] ?? 0);
+        $hasilHapus = impor_hapus_batch($conn, $sejarahId, $uid, sesi_role() === 'admin');
+        if ($hasilHapus['ok']) {
+            catat_audit($conn, 'impor_hapus_batch', 'impor_sejarah', $sejarahId,
+                $hasilHapus['pesan'], null, null);
+            flash_set('sukses', $hasilHapus['pesan']);
+        } else {
+            flash_set('gagal', $hasilHapus['pesan']);
+        }
         header('Location: impor_laporan.php');
         exit;
     }
@@ -415,7 +431,7 @@ $daftarProfil = impor_daftar_profil($conn, $uid, $jenis);
 // Riwayat impor terakhir.
 $riwayat = [];
 $stmtR = $conn->prepare(
-    'SELECT jenis, nama_berkas, jumlah_baris, jumlah_masuk, jumlah_dilewati, jumlah_gagal, dibuat_pada
+    'SELECT id, jenis, nama_berkas, jumlah_baris, jumlah_masuk, jumlah_dilewati, jumlah_gagal, dibuat_pada, id_semua
        FROM impor_sejarah WHERE user_id = ? ORDER BY id DESC LIMIT 8'
 );
 if ($stmtR) {
@@ -489,7 +505,7 @@ mulai_halaman([
             <input type="hidden" name="aksi" value="unggah">
             <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
                 <label style="min-width:200px">Jenis data
-                    <select name="jenis" required>
+                    <select name="jenis" id="jenis-impor" required>
                         <?php foreach ($jenisBoleh as $k => $label): ?>
                             <option value="<?= e($k) ?>"><?= e($label) ?></option>
                         <?php endforeach; ?>
@@ -500,6 +516,19 @@ mulai_halaman([
                 </label>
                 <button class="tombol tombol-utama" type="submit">Unggah &amp; lanjut</button>
             </div>
+            <div id="template-srmcid" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;align-items:center">
+                <span class="text-redup" style="font-size:13px">Template standar:</span>
+                <a class="tombol tombol-garis tombol-kecil" href="templates/template_srm.txt" download>Unduh Template SRM</a>
+                <a class="tombol tombol-garis tombol-kecil" href="templates/template_cid.txt" download>Unduh Template CID</a>
+            </div>
+            <script>
+            (function(){
+                var sel=document.getElementById('jenis-impor');
+                var box=document.getElementById('template-srmcid');
+                function t(){ if(!sel||!box)return; if(sel.value==='srm_cid'){box.style.display='flex';}else{box.style.display='none';}}
+                if(sel){sel.addEventListener('change',t); t();}
+            })();
+            </script>
             <p class="text-redup" style="margin-top:10px;font-size:13px">
                 Maksimal <?= number_format(impor_maks_bytes() / 1048576, 1) ?> MB.
                 Baris pertama dianggap <strong>judul kolom</strong>. Berkas disimpan sementara di server
@@ -600,12 +629,14 @@ mulai_halaman([
             <?php endif; ?>
         </p>
 
-        <form method="post" action="impor_laporan.php" style="margin-top:16px"
-              onsubmit="return confirm('Impor ini akan mengganti seluruh data SRM &amp; CID. Lanjutkan?');">
-            <?= csrf_field('impor') ?>
-            <input type="hidden" name="aksi" value="simpan_srmcid">
-            <button class="tombol tombol-utama" type="submit">Impor SRM &amp; CID sekarang</button>
-        </form>
+        <div style="margin-top:16px">
+            <form method="post" action="impor_laporan.php"
+                  onsubmit="return confirm('Impor ini akan mengganti seluruh data SRM &amp; CID. Lanjutkan?');">
+                <?= csrf_field('impor') ?>
+                <input type="hidden" name="aksi" value="simpan_srmcid">
+                <button class="tombol tombol-utama" type="submit">Impor SRM &amp; CID sekarang</button>
+            </form>
+        </div>
 
         <?php else: ?>
         <h3 style="margin:20px 0 4px;font-size:15px">Pemetaan kolom</h3>
@@ -793,10 +824,18 @@ mulai_halaman([
                     <th class="text-kanan">Masuk</th>
                     <th class="text-kanan">Dilewati</th>
                     <th class="text-kanan">Gagal</th>
+                    <th class="text-kanan">Aksi</th>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($riwayat as $r): ?>
+                <?php
+                    // Batch dapat dihapus hanya bila id barisnya tercatat dan
+                    // jenisnya menyimpan id per-baris (laporan/absensi).
+                    $idBatch = json_decode((string) ($r['id_semua'] ?? ''), true);
+                    $bolehHapus = in_array((string) $r['jenis'], ['laporan', 'absensi'], true)
+                        && is_array($idBatch) && $idBatch !== [];
+                ?>
                 <tr>
                     <td class="text-redup"><?= e((string) $r['dibuat_pada']) ?></td>
                     <td><?= e((string) $r['nama_berkas']) ?></td>
@@ -805,6 +844,21 @@ mulai_halaman([
                     <td class="text-kanan"><span class="badge badge-hijau badge-tanpa-titik"><?= (int) $r['jumlah_masuk'] ?></span></td>
                     <td class="text-kanan"><?= (int) $r['jumlah_dilewati'] ?></td>
                     <td class="text-kanan"><?= (int) $r['jumlah_gagal'] ?></td>
+                    <td class="text-kanan">
+                        <?php if ($bolehHapus): ?>
+                        <form method="post" style="display:inline"
+                              onsubmit="return confirm('Hapus batch ini beserta <?= (int) $r['jumlah_masuk'] ?> baris data yang dibuatnya? Tindakan ini tidak dapat dibatalkan.');">
+                            <?= csrf_field('impor') ?>
+                            <input type="hidden" name="aksi" value="hapus_batch">
+                            <input type="hidden" name="sejarah_id" value="<?= (int) $r['id'] ?>">
+                            <button type="submit" class="tombol tombol-bahaya tombol-kecil" title="Hapus batch impor ini">
+                                <?= ikon_sp('silang') ?> Hapus
+                            </button>
+                        </form>
+                        <?php else: ?>
+                        <span class="text-redup" title="Batch ini tidak menyimpan daftar baris (impor SRM/CID atau impor lama)">&mdash;</span>
+                        <?php endif; ?>
+                    </td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
