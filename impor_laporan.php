@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'paksa_user_id' => $paksaUser,
         ];
 
-        $validasi = impor_validasi($baca['baris'], (array) $impor['pemetaan'], $jenis, $petaPengguna, $opsi);
+        $validasi = impor_validasi($baca['baris'], (array) $impor['pemetaan'], $jenis, $petaPengguna, $opsi, (array) $baca['header']);
         if (!$validasi['ok']) {
             flash_set('gagal', implode(' ', $validasi['galat']));
             header('Location: impor_laporan.php?langkah=pemetaan');
@@ -423,7 +423,7 @@ if ($baca !== null && $langkah === 'pemetaan') {
 // Pratinjau: jalankan validasi (tanpa menyimpan).
 if ($baca !== null && $langkah === 'pratinjau') {
     $petaPengguna = impor_peta_pengguna($conn);
-    $validasi = impor_validasi($baca['baris'], $pemetaanTerpilih, $jenis, $petaPengguna, $opsiTerpilih);
+    $validasi = impor_validasi($baca['baris'], $pemetaanTerpilih, $jenis, $petaPengguna, $opsiTerpilih, (array) $baca['header']);
 }
 
 $daftarProfil = impor_daftar_profil($conn, $uid, $jenis);
@@ -641,14 +641,22 @@ mulai_halaman([
         <?php else: ?>
         <h3 style="margin:20px 0 4px;font-size:15px">Pemetaan kolom</h3>
         <p class="text-redup" style="margin:0 0 12px;font-size:13px">
-            Pilih kolom berkas untuk setiap medan. Medan bertanda
+            Ketik nama kolom berkas untuk setiap medan. Medan bertanda
             <span class="wajib" style="color:var(--phr-merah)">*</span> wajib dipetakan.
+            Kosongkan bila tidak ingin dipakai.
         </p>
 
         <form method="post" action="impor_laporan.php">
             <?= csrf_field('impor') ?>
             <input type="hidden" name="aksi" value="pratinjau">
             <input type="hidden" name="sheet" value="<?= e((string) $baca['sheet']) ?>">
+
+            <datalist id="impor-header-list">
+                <?php foreach ($baca['header'] as $h): ?>
+                    <?php $hTrim = trim((string) $h); if ($hTrim === '') { continue; } ?>
+                    <option value="<?= e($hTrim) ?>"></option>
+                <?php endforeach; ?>
+            </datalist>
 
             <div class="peta-grid">
                 <?php foreach ($field as $kunci => $def): ?>
@@ -657,14 +665,17 @@ mulai_halaman([
                             <?= e($def['label']) ?>
                             <?php if ($def['wajib']): ?><span class="wajib" style="color:var(--phr-merah)">*</span><?php endif; ?>
                         </label>
-                        <select name="peta[<?= e($kunci) ?>]">
-                            <option value="">(tidak dipakai)</option>
-                            <?php foreach ($baca['header'] as $i => $h): ?>
-                                <option value="<?= (int) $i ?>" <?= (($pemetaanTerpilih[$kunci] ?? null) === $i) ? 'selected' : '' ?>>
-                                    <?= e($h) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <?php
+                        $valPeta = $pemetaanTerpilih[$kunci] ?? '';
+                        if (is_int($valPeta) && isset($baca['header'][$valPeta])) {
+                            $valPeta = (string) $baca['header'][$valPeta];
+                        }
+                        $valPeta = is_string($valPeta) ? trim($valPeta) : '';
+                        ?>
+                        <input type="text" name="peta[<?= e($kunci) ?>]" list="impor-header-list"
+                               value="<?= e($valPeta) ?>"
+                               placeholder="Ketik nama kolom di berkas..."
+                               autocomplete="off">
                     </div>
                 <?php endforeach; ?>
             </div>

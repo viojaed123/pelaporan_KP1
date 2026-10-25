@@ -56,6 +56,37 @@ export default function Dashboard() {
                 ))}
             </div>
 
+            <div className="sorotan-ringkas" style={{ marginTop: 16 }}>
+                <Link className="s-chip" to="/laporan/buat">
+                    <span className="s-ikon">&#9998;</span>
+                    <span className="s-teks">
+                        <span className="s-judul">Buat Laporan</span>
+                        <span className="s-ket">Catat kegiatan hari ini</span>
+                    </span>
+                </Link>
+                <Link className="s-chip" to="/laporan/riwayat">
+                    <span className="s-ikon">&#128196;</span>
+                    <span className="s-teks">
+                        <span className="s-judul">Riwayat Laporan</span>
+                        <span className="s-ket">Pantau status pekerjaan</span>
+                    </span>
+                </Link>
+                <Link className="s-chip" to="/absensi">
+                    <span className="s-ikon">&#128197;</span>
+                    <span className="s-teks">
+                        <span className="s-judul">Isi Absensi</span>
+                        <span className="s-ket">Check-in kehadiran</span>
+                    </span>
+                </Link>
+                <Link className="s-chip" to="/kalender">
+                    <span className="s-ikon">&#128197;</span>
+                    <span className="s-teks">
+                        <span className="s-judul">Kalender</span>
+                        <span className="s-ket">Agenda aktivitas</span>
+                    </span>
+                </Link>
+            </div>
+
             <div className="kartu">
                 <div className="kartu-kepala">Tugas Terbaru</div>
                 <div className="kartu-tubuh">

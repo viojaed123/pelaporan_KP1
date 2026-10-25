@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Ikon from '../components/Ikon';
+import api from '../api';
 
 /** Baca preferensi tema tersimpan (kunci sama dengan assets/js/toggle.js). */
 function temaGelapTersimpan() {
@@ -75,6 +76,7 @@ export default function AppLayout() {
     const [sidebarTampil, setSidebarTampil] = useState(false);
     const [menuUser, setMenuUser] = useState(false);
     const [gelap, setGelap] = useState(temaGelapTersimpan);
+    const [jmlBelum, setJmlBelum] = useState(0);
 
     // Sinkronkan atribut <html> dengan state (toggle.js di <head> sudah
     // menerapkan preferensi awal sebelum React dimuat).
@@ -86,6 +88,26 @@ export default function AppLayout() {
 
     const peran = pengguna?.role ?? 'karyawan';
     const daftar = MENU[peran] ?? MENU.karyawan;
+
+    useEffect(() => {
+        let aktif = true;
+        const muat = async () => {
+            try {
+                const res = await api.get('/notifikasi/jumlah');
+                if (aktif) {
+                    setJmlBelum(Number(res.data?.jumlah ?? 0));
+                }
+            } catch (e) {
+                /* diam saja */
+            }
+        };
+        muat();
+        const id = setInterval(muat, 60000);
+        return () => {
+            aktif = false;
+            clearInterval(id);
+        };
+    }, []);
 
     const lakukanKeluar = async () => {
         await keluar();
@@ -157,6 +179,8 @@ export default function AppLayout() {
                         </button>
                         <NavLink className="tombol-lonceng" to="/notifikasi" title="Notifikasi">
                             <Ikon nama="lonceng" />
+                            {jmlBelum > 0 && <span className="badge-lonceng">{jmlBelum > 99 ? '99+' : jmlBelum}</span>}
+                            {jmlBelum > 0 && <span className="badge-lonceng">{jmlBelum > 99 ? '99+' : jmlBelum}</span>}
                         </NavLink>
                         <div className="dropdown">
                             <button

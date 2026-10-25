@@ -82,6 +82,7 @@ function menu_tersedia(): array
             ['key' => 'kalender',    'ikon' => 'kalender', 'label' => 'Kalender Aktivitas', 'url' => 'kalender.php'],
             ['key' => 'distribusi',  'ikon' => 'unggah', 'label' => 'Pengiriman Laporan', 'url' => 'distribusi_laporan.php'],
             ['key' => 'impor',       'ikon' => 'unggah',  'label' => 'Impor Data',   'url' => 'impor_laporan.php'],
+            ['key' => 'dataset',     'ikon' => 'grafik', 'label' => 'Dataset',      'url' => 'analisis_dataset.php'],
 
             ['grup' => 'Data Sosial'],
             ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM', 'url' => 'srm.php'],
@@ -108,6 +109,7 @@ function menu_tersedia(): array
             ['key' => 'kalender',    'ikon' => 'kalender', 'label' => 'Kalender Aktivitas', 'url' => 'kalender.php'],
             ['key' => 'distribusi',  'ikon' => 'unggah', 'label' => 'Pengiriman Laporan', 'url' => 'distribusi_laporan.php'],
             ['key' => 'impor',       'ikon' => 'unggah',  'label' => 'Impor Data',   'url' => 'impor_laporan.php'],
+            ['key' => 'dataset',     'ikon' => 'grafik', 'label' => 'Dataset',      'url' => 'analisis_dataset.php'],
 
             ['grup' => 'Data Sosial'],
             ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM', 'url' => 'srm.php'],
@@ -170,6 +172,7 @@ function menu_aktif_otomatis(): string
         'peta.php'                              => 'peta',
         'impor_srm_cid.php'                     => 'impor_srmcid',
         'impor_laporan.php'                     => 'impor',
+        'impor_dataset.php', 'analisis_dataset.php' => 'dataset',
         'powerbi_ekspor.php'                    => 'powerbi',
         'distribusi_laporan.php'                => 'distribusi',
         'pengingat.php'                         => 'pengingat',
@@ -384,10 +387,10 @@ function mulai_halaman(array $opsi = []): void
                 </a>
 
                 <div class="dropdown">
-                    <button class="dropdown-tombol" type="button" data-dropdown="menu-user">
+                    <button class="dropdown-tombol" type="button" data-dropdown="menu-user" aria-label="Menu pengguna">
                         <?= avatar_tampil($nama, $role, sesi_foto(), 'avatar avatar-kecil') ?>
                         <span class="sembunyi-mobile"><?= e(potong($nama, 18)) ?></span>
-                        <span>&#9662;</span>
+                        <span aria-hidden="true">&#9662;</span>
                     </button>
                     <div class="dropdown-menu" id="menu-user">
                         <div class="label-menu">

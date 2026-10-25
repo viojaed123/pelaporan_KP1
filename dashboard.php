@@ -390,6 +390,40 @@ mulai_halaman($opsi);
     </a>
 </section>
 
+<!-- ================= SOROTAN CEPAT ================= -->
+<section class="sorotan-ringkas" style="margin-top:16px">
+    <a class="s-chip" href="riwayat.php?status=dikirim">
+        <span class="s-ikon">&#9203;</span>
+        <span class="s-teks">
+            <span class="s-judul">Menunggu Pemeriksaan</span>
+            <span class="s-ket"><?= (int) $menunggu ?> laporan dikirim</span>
+        </span>
+    </a>
+    <a class="s-chip" href="riwayat.php?status=diperiksa">
+        <span class="s-ikon">&#10003;</span>
+        <span class="s-teks">
+            <span class="s-judul">Sudah Diperiksa</span>
+            <span class="s-ket"><?= (int) $diperiksa ?> laporan selesai</span>
+        </span>
+    </a>
+    <a class="s-chip" href="riwayat.php?status=perlu_revisi">
+        <span class="s-ikon">&#9998;</span>
+        <span class="s-teks">
+            <span class="s-judul">Perlu Revisi</span>
+            <span class="s-ket"><?= (int) $perlu_revisi ?> laporan perbaikan</span>
+        </span>
+    </a>
+    <a class="s-chip" href="notifikasi.php">
+        <span class="s-ikon">&#128276;</span>
+        <span class="s-teks">
+            <span class="s-judul">Notifikasi</span>
+            <span class="s-ket"><?= (int) $jumlah_notifikasi ?> pesan baru</span>
+        </span>
+    </a>
+</section>
+
+
+
 <!-- ================= PROGRES ================= -->
 <section class="kartu" style="margin-top:20px">
     <div class="kartu-header">

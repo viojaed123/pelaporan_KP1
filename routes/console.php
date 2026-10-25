@@ -12,3 +12,7 @@ Artisan::command('inspire', function () {
 Schedule::command('pengingat:harian')
     ->dailyAt('08:00')
     ->withoutOverlapping();
+
+Schedule::command('pengingat:jadwal')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();

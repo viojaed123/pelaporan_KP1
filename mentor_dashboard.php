@@ -381,6 +381,38 @@ mulai_halaman($opsi);
     </div>
 </section>
 
+<!-- ================= SOROTAN CEPAT ================= -->
+<section class="sorotan-ringkas" style="margin-top:16px">
+    <a class="s-chip" href="mentor_dashboard.php?status=dikirim">
+        <span class="s-ikon">&#9203;</span>
+        <span class="s-teks">
+            <span class="s-judul">Perlu Ditinjau</span>
+            <span class="s-ket"><?= (int) $stat['dikirim'] ?> laporan menunggu</span>
+        </span>
+    </a>
+    <a class="s-chip" href="mentor_dashboard.php?status=diperiksa">
+        <span class="s-ikon">&#10003;</span>
+        <span class="s-teks">
+            <span class="s-judul">Sudah Diperiksa</span>
+            <span class="s-ket"><?= (int) $stat['diperiksa'] ?> laporan selesai</span>
+        </span>
+    </a>
+    <a class="s-chip" href="mentor_dashboard.php?status=perlu_revisi">
+        <span class="s-ikon">&#9998;</span>
+        <span class="s-teks">
+            <span class="s-judul">Perlu Revisi</span>
+            <span class="s-ket"><?= (int) $stat['perlu_revisi'] ?> laporan perbaikan</span>
+        </span>
+    </a>
+    <a class="s-chip" href="rekap_laporan.php">
+        <span class="s-ikon">&#128202;</span>
+        <span class="s-teks">
+            <span class="s-judul">Rekap &amp; Ekspor</span>
+            <span class="s-ket"><?= (int) $totalLaporan ?> laporan terkirim</span>
+        </span>
+    </a>
+</section>
+
 <!-- ================= GRAFIK ================= -->
 <h2 class="bagian-judul">Analitik Visual</h2>
 
@@ -908,5 +940,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+
 
 <?php akhiri_halaman(); ?>

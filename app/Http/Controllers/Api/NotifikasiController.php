@@ -33,6 +33,19 @@ class NotifikasiController extends Controller
         ]);
     }
 
+    /**
+     * Jumlah notifikasi belum dibaca (ringan, dipakai lencana topbar SPA).
+     * Sengaja tidak mengirim daftar agar hemat kuota saat dipanggil berkala.
+     */
+    public function jumlah(Request $request): JsonResponse
+    {
+        $belum = Notifikasi::where('user_id', $request->user()->id)
+            ->where('sudah_dibaca', false)
+            ->count();
+
+        return response()->json(['sukses' => true, 'jumlah' => (int) $belum]);
+    }
+
     public function tandaiDibaca(Request $request, int $id): JsonResponse
     {
         $n = Notifikasi::where('user_id', $request->user()->id)->find($id);

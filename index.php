@@ -40,10 +40,11 @@ if (sudah_masuk()) {
         <div class="hero-visual">
             <div class="logo-bingkai">
                 <span class="hero-cincin"></span>
+                <span class="hero-cincin hero-cincin-2"></span>
                 <img src="assets/img/logo-phr.png" alt="<?= e(APP_ORGANISASI) ?>">
             </div>
         </div>
-        <span class="hero-bunga">Platform Pelaporan Migas Terintegrasi</span>
+        <span class="hero-bunga"><span class="hero-titik"></span>Platform Pelaporan Migas Terintegrasi</span>
         <h1>Sistem <span class="aksen">Pelaporan Kegiatan Harian</span></h1>
         <p>
             Pertamina Hulu Rokan (PHR) berkomitmen mengelola operasional migas secara terintegrasi dan bertanggung jawab. Sistem ini mempermudah pencatatan kegiatan harian, pemantauan, dokumentasi dan pelaporan terpusat untuk mendukung kinerja, akuntabilitas dan tata kelola yang baik.
@@ -56,6 +57,32 @@ if (sudah_masuk()) {
             <div class="pil"><div class="angka">1</div><div class="ket">Satu sumber data kegiatan harian</div></div>
             <div class="pil"><div class="angka">3</div><div class="ket">Alur: catat, periksa, sahkan</div></div>
             <div class="pil"><div class="angka">24/7</div><div class="ket">Diakses aman dari perangkat apa pun</div></div>
+        </div>
+    </section>
+
+    <!-- ================= SOROTAN FITUR ================= -->
+    <section class="bagian" id="sorotan">
+        <div class="sorotan-grid">
+            <article class="sorotan">
+                <span class="sorotan-ikon">&#9203;</span>
+                <h3>Rekap Otomatis</h3>
+                <p>Data laporan, absensi, dan kasus terangkum rapi jadi rekap siap ekspor tanpa olah manual.</p>
+            </article>
+            <article class="sorotan">
+                <span class="sorotan-ikon">&#128202;</span>
+                <h3>Visualisasi Grafis</h3>
+                <p>Tren, distribusi, dan sudut pandang langsung terlihat lewat grafik interaktif yang mudah dipahami.</p>
+            </article>
+            <article class="sorotan">
+                <span class="sorotan-ikon">&#128274;</span>
+                <h3>Akses Terlindungi</h3>
+                <p>Setiap akun punya peran dan akses berbeda, lengkap dengan catatan audit untuk ACCOUNTABILITY.</p>
+            </article>
+            <article class="sorotan">
+                <span class="sorotan-ikon">&#128241;</span>
+                <h3>Bisa Dipakai di Ponsel</h3>
+                <p>Tampilan menyesuaikan layar HP maupun tablet, jadi catat laporan di lapangan tetap nyaman.</p>
+            </article>
         </div>
     </section>
 
@@ -150,6 +177,10 @@ if (sudah_masuk()) {
             <details class="faq">
                 <summary>Apakah data laporan dapat diekspor?</summary>
                 <div class="jawab">Ya. Rekap laporan dapat diekspor ke Excel dan Word, serta divisualisasikan melalui Power BI untuk kebutuhan analisis dan pelaporan lebih lanjut.</div>
+            </details>
+            <details class="faq">
+                <summary>Apakah sistem bisa diakses dari ponsel?</summary>
+                <div class="jawab">Bisa. Seluruh halaman sudah menyesuaikan tampilan untuk layar HP maupun tablet, jadi pencatatan laporan di lapangan tetap ringkas dan nyaman.</div>
             </details>
         </div>
     </section>

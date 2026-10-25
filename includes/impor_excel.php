@@ -882,14 +882,35 @@ if (!function_exists('impor_cari_pengguna')) {
 }
 
 if (!function_exists('impor_ambil_kolom')) {
-    /** Ambil nilai kolom dari satu baris sesuai pemetaan medan. */
-    function impor_ambil_kolom(array $baris, array $pemetaan, string $medan): string
+    /**
+     * Ambil nilai kolom dari satu baris sesuai pemetaan medan.
+     *
+     * Kompatibel dengan dua bentuk pemetaan:
+     *   - lama: medan => indeks kolom (int)
+     *   - baru: medan => nama header berkas (string) — diketik manual oleh pengguna
+     */
+    function impor_ambil_kolom(array $baris, array $pemetaan, string $medan, array $header = []): string
     {
         if (!isset($pemetaan[$medan])) {
             return '';
         }
-        $i = (int) $pemetaan[$medan];
-        return isset($baris[$i]) ? trim((string) $baris[$i]) : '';
+        $val = $pemetaan[$medan];
+        $i = -1;
+        if (is_int($val) || (is_string($val) && ctype_digit($val))) {
+            $i = (int) $val;
+        } elseif (is_string($val) && $val !== '') {
+            $valNorm = mb_strtolower(trim($val));
+            foreach ($header as $j => $h) {
+                if (mb_strtolower(trim((string) $h)) === $valNorm) {
+                    $i = $j;
+                    break;
+                }
+            }
+        }
+        if ($i < 0 || !isset($baris[$i])) {
+            return '';
+        }
+        return trim((string) $baris[$i]);
     }
 }
 
@@ -903,8 +924,41 @@ if (!function_exists('impor_validasi')) {
      * @param array{status_bawaan?:string,kondisi_bawaan?:string} $opsi
      * @return array{ok: bool, galat: list<string>, ringkas: array<string,int>, baris: list<array<string,mixed>>}
      */
-    function impor_validasi(array $baris, array $pemetaan, string $jenis, array $petaPengguna, array $opsi = []): array
+    /**
+     * Normalisasi pemetaan: ubah nama header menjadi indeks bila masih berbentuk string.
+     * @param array<string,int|string> $pemetaan
+     * @param list<string> $header
+     * @return array<string,int>
+     */
+    function impor_normalisasi_pemetaan(array $pemetaan, array $header): array
     {
+        $out = [];
+        foreach ($pemetaan as $medan => $val) {
+            if ($val === '' || $val === null) {
+                continue;
+            }
+            if (is_int($val) || (is_string($val) && ctype_digit($val))) {
+                $out[$medan] = (int) $val;
+                continue;
+            }
+            $valNorm = mb_strtolower(trim((string) $val));
+            if ($valNorm === '') {
+                continue;
+            }
+            foreach ($header as $j => $h) {
+                if (mb_strtolower(trim((string) $h)) === $valNorm) {
+                    $out[$medan] = $j;
+                    break;
+                }
+            }
+        }
+        return $out;
+    }
+
+    function impor_validasi(array $baris, array $pemetaan, string $jenis, array $petaPengguna, array $opsi = [], array $header = []): array
+    {
+        // Kompatibel: jika pemetaan berisi nama header, konversi ke indeks.
+        $pemetaan = impor_normalisasi_pemetaan($pemetaan, $header);
         $field = impor_field($jenis);
         $galat = [];
 
@@ -942,7 +996,7 @@ if (!function_exists('impor_validasi')) {
                 // Karyawan: paksa pemilik data ke akun yang sedang masuk.
                 $data['user_id'] = $paksaUser;
             } else {
-                $nilaiUser = impor_ambil_kolom($r, $pemetaan, 'pengguna');
+                $nilaiUser = impor_ambil_kolom($r, $pemetaan, 'pengguna', $header);
                 $userId = impor_cari_pengguna($petaPengguna, $nilaiUser);
                 if ($nilaiUser === '') {
                     $pesan[] = 'Kolom pengguna kosong.';
@@ -952,7 +1006,7 @@ if (!function_exists('impor_validasi')) {
                 $data['user_id'] = $userId;
             }
 
-            $tanggal = impor_norm_tanggal(impor_ambil_kolom($r, $pemetaan, 'tanggal'));
+            $tanggal = impor_norm_tanggal(impor_ambil_kolom($r, $pemetaan, 'tanggal', $header));
             if ($tanggal === null) {
                 $pesan[] = 'Tanggal tidak sah.';
             } else {
@@ -960,41 +1014,41 @@ if (!function_exists('impor_validasi')) {
             }
 
             if ($jenis === 'absensi') {
-                $data['jam_masuk'] = impor_norm_jam(impor_ambil_kolom($r, $pemetaan, 'jam_masuk'));
-                $data['jam_pulang'] = impor_norm_jam(impor_ambil_kolom($r, $pemetaan, 'jam_pulang'));
-                $status = impor_norm_status_absensi(impor_ambil_kolom($r, $pemetaan, 'status'));
+                $data['jam_masuk'] = impor_norm_jam(impor_ambil_kolom($r, $pemetaan, 'jam_masuk', $header));
+                $data['jam_pulang'] = impor_norm_jam(impor_ambil_kolom($r, $pemetaan, 'jam_pulang', $header));
+                $status = impor_norm_status_absensi(impor_ambil_kolom($r, $pemetaan, 'status', $header));
                 $data['status'] = $status ?? (string) ($opsi['status_bawaan'] ?? 'hadir');
-                $data['keterangan'] = impor_ambil_kolom($r, $pemetaan, 'keterangan');
-                $data['kegiatan_hari_ini'] = impor_ambil_kolom($r, $pemetaan, 'kegiatan_hari_ini');
-                $kondisi = impor_norm_kondisi_kesehatan(impor_ambil_kolom($r, $pemetaan, 'kondisi_kesehatan'));
+                $data['keterangan'] = impor_ambil_kolom($r, $pemetaan, 'keterangan', $header);
+                $data['kegiatan_hari_ini'] = impor_ambil_kolom($r, $pemetaan, 'kegiatan_hari_ini', $header);
+                $kondisi = impor_norm_kondisi_kesehatan(impor_ambil_kolom($r, $pemetaan, 'kondisi_kesehatan', $header));
                 $data['kondisi_kesehatan'] = $kondisi ?? (string) ($opsi['kondisi_bawaan'] ?? 'sehat');
-                $lokasi = trim((string) impor_ambil_kolom($r, $pemetaan, 'lokasi_teks'));
+                $lokasi = trim((string) impor_ambil_kolom($r, $pemetaan, 'lokasi_teks', $header));
                 $data['lokasi_teks'] = $lokasi !== '' ? mb_substr($lokasi, 0, 191) : '';
             } else {
-                $data['jam_mulai'] = impor_norm_jam(impor_ambil_kolom($r, $pemetaan, 'jam_mulai'));
-                $data['jam_selesai'] = impor_norm_jam(impor_ambil_kolom($r, $pemetaan, 'jam_selesai'));
-                $kegiatan = impor_ambil_kolom($r, $pemetaan, 'kegiatan');
+                $data['jam_mulai'] = impor_norm_jam(impor_ambil_kolom($r, $pemetaan, 'jam_mulai', $header));
+                $data['jam_selesai'] = impor_norm_jam(impor_ambil_kolom($r, $pemetaan, 'jam_selesai', $header));
+                $kegiatan = impor_ambil_kolom($r, $pemetaan, 'kegiatan', $header);
                 if ($kegiatan === '') {
                     $pesan[] = 'Kolom kegiatan kosong.';
                 } elseif (mb_strlen($kegiatan) > 255) {
                     $pesan[] = 'Judul kegiatan melebihi 255 karakter.';
                 }
                 $data['kegiatan'] = $kegiatan;
-                $deskripsi = impor_ambil_kolom($r, $pemetaan, 'deskripsi');
+                $deskripsi = impor_ambil_kolom($r, $pemetaan, 'deskripsi', $header);
                 $data['deskripsi'] = $deskripsi !== '' ? $deskripsi : $kegiatan;
-                $data['hasil'] = impor_ambil_kolom($r, $pemetaan, 'hasil');
-                $data['kendala'] = impor_ambil_kolom($r, $pemetaan, 'kendala');
-                $data['rencana_berikutnya'] = impor_ambil_kolom($r, $pemetaan, 'rencana_berikutnya');
+                $data['hasil'] = impor_ambil_kolom($r, $pemetaan, 'hasil', $header);
+                $data['kendala'] = impor_ambil_kolom($r, $pemetaan, 'kendala', $header);
+                $data['rencana_berikutnya'] = impor_ambil_kolom($r, $pemetaan, 'rencana_berikutnya', $header);
                 $data['status'] = in_array($statusBawaan, impor_status_laporan(), true) ? $statusBawaan : 'diperiksa';
-                $lokasi = trim((string) impor_ambil_kolom($r, $pemetaan, 'lokasi_teks'));
+                $lokasi = trim((string) impor_ambil_kolom($r, $pemetaan, 'lokasi_teks', $header));
                 $data['lokasi_teks'] = $lokasi !== '' ? mb_substr($lokasi, 0, 191) : '';
             }
 
             // Koordinat asli dari berkas (bila ada). Bila salah satu tidak sah,
             // keduanya diabaikan dan resolusi dilakukan dari teks lokasi.
             $koord = impor_norm_koordinat(
-                impor_ambil_kolom($r, $pemetaan, 'garis_lintang'),
-                impor_ambil_kolom($r, $pemetaan, 'garis_bujur')
+                impor_ambil_kolom($r, $pemetaan, 'garis_lintang', $header),
+                impor_ambil_kolom($r, $pemetaan, 'garis_bujur', $header)
             );
             $data['garis_lintang'] = $koord['lat'];
             $data['garis_bujur'] = $koord['lng'];

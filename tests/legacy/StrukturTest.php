@@ -87,6 +87,13 @@ final class StrukturTest extends TestCase
             'routes/web.php',
             'app/Http/Controllers/Controller.php',
             'app/Models/User.php',
+            // Fitur "dataset generik" (visualisasi data apa pun yang diimpor).
+            'includes/impor_dataset.php',
+            'impor_dataset.php',
+            'analisis_dataset.php',
+            'assets/js/grafik-render.js',
+            'public/assets/js/grafik-render.js',
+            'database/migrations/2026_10_21_000001_create_dataset_tables.php',
         ] as $berkas) {
             $this->assertFileExists(
                 $this->root . '/' . $berkas,
@@ -246,6 +253,82 @@ final class StrukturTest extends TestCase
             'catat_audit',
             $isi,
             'pengguna.php harus mencatat perubahan peran/status ke audit_log.'
+        );
+    }
+
+    /**
+     * analisis_dataset.php memakai nama kolom sebagai nama alur JSON
+     * (JSON_EXTRACT). Penjaga ini memastikan halaman SELALU memvalidasi kunci
+     * sebelum dipakai, sehingga nama kolom dari berkas pengguna tidak pernah
+     * masuk SQL secara bebas (celah injeksi).
+     */
+    public function testAnalisisDatasetMemvalidasiKunciKolomSebelumSql(): void
+    {
+        $berkas = $this->root . '/analisis_dataset.php';
+        $this->assertFileExists($berkas, 'analisis_dataset.php seharusnya ada.');
+
+        $isi = (string) file_get_contents($berkas);
+
+        $this->assertStringContainsString(
+            'dataset_kunci_sah($kunci)',
+            $isi,
+            'analisis_dataset.php wajib memvalidasi kunci kolom dengan dataset_kunci_sah().'
+        );
+        $this->assertStringContainsString(
+            'wajib_login()',
+            $isi,
+            'analisis_dataset.php wajib memerlukan login.'
+        );
+        // Kunci yang gagal validasi harus DIABAIKAN (di-skip), bukan diteruskan.
+        $this->assertStringContainsString(
+            'JSON_EXTRACT(data_json',
+            $isi,
+            'analisis_dataset.php memakai JSON_EXTRACT untuk mengambil nilai kolom.'
+        );
+    }
+
+    /**
+     * impor_dataset.php harus mencatat audit, memverifikasi CSRF, dan
+     * membatasi impor ke peran admin/mentor.
+     */
+    public function testImporDatasetTerbatasDanAman(): void
+    {
+        $isi = (string) file_get_contents($this->root . '/impor_dataset.php');
+
+        $this->assertStringContainsString(
+            "in_array(\$role, ['admin', 'mentor'], true)",
+            $isi,
+            'impor_dataset.php harus membatasi impor ke admin & mentor.'
+        );
+        $this->assertStringContainsString(
+            'csrf_cek_atau_matikan',
+            $isi,
+            'impor_dataset.php harus memverifikasi token CSRF pada aksi tulis.'
+        );
+        $this->assertStringContainsString(
+            'catat_audit',
+            $isi,
+            'impor_dataset.php harus mencatat aksi ke audit_log.'
+        );
+    }
+
+    /**
+     * Kunci kolom dari berkas pengguna harus selalu dinormalisasi ke bentuk
+     * aman ^[a-z0-9_]+$ (dipakai sebagai nama alur JSON, bukan SQL literal).
+     */
+    public function testImporDatasetMenormalisasiKunciKolom(): void
+    {
+        $isi = (string) file_get_contents($this->root . '/includes/impor_dataset.php');
+
+        $this->assertStringContainsString(
+            "preg_replace('/[^a-z0-9]+/u', '_'",
+            $isi,
+            'impor_dataset.php harus menormalisasi kunci kolom ke [a-z0-9_].'
+        );
+        $this->assertStringContainsString(
+            "preg_match('/^[a-z0-9_]{1,64}\$/'",
+            $isi,
+            'impor_dataset.php harus memvalidasi kunci kolom dengan pola aman.'
         );
     }
 }

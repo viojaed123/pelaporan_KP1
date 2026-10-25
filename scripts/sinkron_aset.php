@@ -33,6 +33,7 @@ $periksaSaja = in_array('--periksa', $argv, true);
 /** Berkas yang wajib identik: kanonik => daftar tujuan. */
 $petaIdentik = [
     'assets/js/grafik.js'               => ['public/assets/js/grafik.js'],
+    'assets/js/grafik-render.js'        => ['public/assets/js/grafik-render.js'],
     'assets/js/toggle.js'               => ['public/assets/js/toggle.js'],
     'assets/js/vendor/chart.umd.min.js' => ['public/assets/vendor/chart.umd.min.js'],
     'assets/img/favicon.png'            => ['public/assets/img/favicon.png'],

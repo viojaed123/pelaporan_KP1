@@ -63,6 +63,7 @@ Route::prefix('v1')->group(function () {
             ->whereNumber('id');
 
         Route::get('/notifikasi', [NotifikasiController::class, 'daftar']);
+        Route::get('/notifikasi/jumlah', [NotifikasiController::class, 'jumlah']);
         Route::post('/notifikasi/{id}/dibaca', [NotifikasiController::class, 'tandaiDibaca'])
             ->whereNumber('id');
         Route::post('/notifikasi/dibaca-semua', [NotifikasiController::class, 'tandaiSemuaDibaca']);

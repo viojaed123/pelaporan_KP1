@@ -56,6 +56,11 @@ ai-service/hermes/
 .DS_Store
 Thumbs.db
 
+# === Berkas kunci sementara Microsoft Office ===
+# Word membuat ~$nama.docx saat dokumen dibuka; jangan pernah di-commit.
+docs/~$*.docx
+~$*
+
 # === Cadangan sementara migrasi (dihapus setelah fase selesai) ===
 legacy-backup/
 

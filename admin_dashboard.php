@@ -707,6 +707,38 @@ mulai_halaman([
     </div>
 </section>
 
+<!-- ================= SOROTAN CEPAT ================= -->
+<section class="sorotan-ringkas" style="margin-top:16px">
+    <a class="s-chip" href="pengguna.php">
+        <span class="s-ikon">&#128101;</span>
+        <span class="s-teks">
+            <span class="s-judul">Kelola Pengguna</span>
+            <span class="s-ket"><?= (int) $jumlahPengguna['total'] ?> akun terdaftar</span>
+        </span>
+    </a>
+    <a class="s-chip" href="mentor_dashboard.php?status=dikirim">
+        <span class="s-ikon">&#9203;</span>
+        <span class="s-teks">
+            <span class="s-judul">Perlu Ditinjau</span>
+            <span class="s-ket"><?= (int) $statLaporan['dikirim'] ?> laporan menunggu</span>
+        </span>
+    </a>
+    <a class="s-chip" href="riwayat_audit.php">
+        <span class="s-ikon">&#128203;</span>
+        <span class="s-teks">
+            <span class="s-judul">Jejak Audit</span>
+            <span class="s-ket"><?= (int) $jumlahAktivitasHariIni ?> aktivitas hari ini</span>
+        </span>
+    </a>
+    <a class="s-chip" href="impor_laporan.php">
+        <span class="s-ikon">&#128228;</span>
+        <span class="s-teks">
+            <span class="s-judul">Impor Data</span>
+            <span class="s-ket">Excel &amp; dataset baru</span>
+        </span>
+    </a>
+</section>
+
 <!-- ================= GRAFIK ================= -->
 <h2 class="bagian-judul">Analitik Visual</h2>
 
