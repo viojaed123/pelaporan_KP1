@@ -71,12 +71,9 @@
     --sidebar-w-mini: 78px;
     --topbar-h: 66px;
 
-    --font: "Instrument Sans", "Segoe UI", -apple-system, BlinkMacSystemFont,
-            Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-judul: "Schibsted Grotesk", "Instrument Sans", "Segoe UI",
-            -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-    --font-mono: "DM Mono", "SFMono-Regular", Consolas, "Liberation Mono",
-            Menlo, monospace;
+    --font: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
+            "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 
     --transisi: 120ms ease;
 }
@@ -2317,11 +2314,10 @@ body {
     font-size: 15px;
     line-height: 1.62;
     letter-spacing: -.003em;
-    font-synthesis-weight: none;
 }
 
 h1, h2, h3, h4, h5 {
-    font-family: var(--font-judul);
+    font-family: var(--font);
     font-weight: 600;
     letter-spacing: -.022em;
     color: var(--teks);
@@ -2337,7 +2333,7 @@ h4 { font-size: 1rem; }
 .modal-kepala h3,
 .judul-auth,
 .merek-auth .nama {
-    font-family: var(--font-judul);
+    font-family: var(--font);
     font-weight: 600;
     letter-spacing: -.02em;
 }
@@ -2407,7 +2403,7 @@ h4 { font-size: 1rem; }
 }
 .stat .nilai,
 .kartu-stat .nilai {
-    font-family: var(--font-judul);
+    font-family: var(--font);
     font-size: 31px;
     font-weight: 600;
     line-height: 1.05;
@@ -3735,7 +3731,7 @@ circle.titik-kelip {
 
 /* --- Penyelarasan SPA dengan lapisan tampilan (Dose) --- */
 .kartu-stat .angka {
-    font-family: var(--font-judul);
+    font-family: var(--font);
     font-size: 31px;
     font-weight: 600;
     line-height: 1.05;
