@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\AbsensiController;
 use App\Http\Controllers\Api\AnalitikController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CostAvoidanceController;
 use App\Http\Controllers\Api\EksporController;
 use App\Http\Controllers\Api\KasusController;
 use App\Http\Controllers\Api\LaporanController;
@@ -61,6 +62,21 @@ Route::prefix('v1')->group(function () {
             ->whereNumber('id');
         Route::put('/kasus/{id}', [KasusController::class, 'perbarui'])
             ->whereNumber('id');
+
+        Route::get('/cost-avoidance/ringkasan', [CostAvoidanceController::class, 'ringkasan']);
+        Route::get('/cost-avoidance', [CostAvoidanceController::class, 'daftar']);
+        Route::post('/cost-avoidance', [CostAvoidanceController::class, 'simpan']);
+        Route::get('/cost-avoidance/{id}', [CostAvoidanceController::class, 'detail'])
+            ->whereNumber('id');
+        Route::put('/cost-avoidance/{id}', [CostAvoidanceController::class, 'perbarui'])
+            ->whereNumber('id');
+        Route::delete('/cost-avoidance/{id}', [CostAvoidanceController::class, 'hapus'])
+            ->whereNumber('id');
+        Route::post('/cost-avoidance/{id}/ajukan', [CostAvoidanceController::class, 'ajukan'])
+            ->whereNumber('id');
+        Route::post('/cost-avoidance/{id}/verifikasi', [CostAvoidanceController::class, 'verifikasi'])
+            ->whereNumber('id')
+            ->middleware('role:mentor,admin');
 
         Route::get('/notifikasi', [NotifikasiController::class, 'daftar']);
         Route::get('/notifikasi/jumlah', [NotifikasiController::class, 'jumlah']);

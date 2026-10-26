@@ -53,6 +53,10 @@ $diperiksa     = hitungLaporan($conn, $user_id, 'diperiksa');
 $perlu_revisi  = hitungLaporan($conn, $user_id, 'perlu_revisi');
 $draft         = hitungLaporan($conn, $user_id, 'draft');
 
+$ca_ringkas = cost_avoidance_ringkas($conn, ['pemilik' => $user_id]);
+$ca_nilai   = (float) ($ca_ringkas['total_disetujui'] ?? 0);
+$ca_jumlah  = (array) ($ca_ringkas['jumlah'] ?? []);
+
 $persentase_progres = $total_laporan > 0
     ? (int) round(($diperiksa / $total_laporan) * 100)
     : 0;
@@ -367,6 +371,18 @@ mulai_halaman($opsi);
             <div class="tambahan">Pesan yang belum dibaca</div>
         </div>
     </div>
+</section>
+
+<section class="ca-strip">
+    <div class="ca-strip-utama">
+        <p class="ca-eyebrow">Cost avoidance disetujui</p>
+        <p class="ca-strip-angka"><?= e(cost_avoidance_rupiah($ca_nilai)) ?></p>
+        <p class="ca-meta">
+            <?= (int) ($ca_jumlah['disetujui'] ?? 0) ?> entri disetujui
+            &middot; <?= (int) ($ca_jumlah['diajukan'] ?? 0) ?> menunggu verifikasi
+        </p>
+    </div>
+    <a class="ca-tombol" href="cost_avoidance.php">Lihat rincian</a>
 </section>
 
 <!-- ================= AKSI CEPAT ================= -->

@@ -17,6 +17,7 @@ import RekapAbsensi from './pages/RekapAbsensi';
 import RekapKasus from './pages/RekapKasus';
 import RingkasanKegiatan from './pages/RingkasanKegiatan';
 import KalenderAktivitas from './pages/KalenderAktivitas';
+import CostAvoidance from './pages/CostAvoidance';
 
 /* Penjaga rute: tanpa token → halaman masuk. */
 function Jaga({ children }) {
@@ -75,6 +76,7 @@ export default function App() {
                         />
                         <Route path="/ringkasan" element={<RingkasanKegiatan />} />
                         <Route path="/kalender" element={<KalenderAktivitas />} />
+                        <Route path="/cost-avoidance" element={<CostAvoidance />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>
                 </Routes>

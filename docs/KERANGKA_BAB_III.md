@@ -198,7 +198,7 @@ dijaga hak aksesnya menjadi **39**.
 
 Diturunkan dari `menu_tersedia()` (`includes/layout.php`), `peta_akses()`
 (`includes/auth.php`), dan pemeriksaan `wajib_role()` pada halaman yang tidak
-tampil di sidebar (baris 34–39).
+tampil di sidebar (baris 34–40).
 
 ### Tabel 3.4 — Ketersediaan Modul per Peran
 
@@ -243,6 +243,7 @@ tampil di sidebar (baris 34–39).
 | 37 | Keputusan Massal Laporan | — | ✔ | ✔ | `wajib_role(['mentor','admin'])`; tiap laporan tetap lewat `laporan_putuskan()` |
 | 38 | Proses Keputusan Tunggal | — | ✔ | ✔ | `wajib_role(['mentor','admin'])` + CSRF per aksi |
 | 39 | Bukti Gambar (`lihat_foto.php`) | ✔ (milik sendiri) | ✔ | ✔ | `wajib_login()`; izin = pemilik **atau** mentor/admin; MIME diperiksa `finfo` |
+| 40 | Cost Avoidance | ✔ (milik sendiri) | ✔ (semua) | ✔ (semua) | Menu per peran; verifikasi `wajib_role(['mentor','admin'])`; mentor tidak memverifikasi entri sendiri (admin dikecualikan) |
 
 > **Catatan analisis (bahan diskusi Bab IV):** `peta_akses()` mendefinisikan
 > kemampuan `impor.data` → `['mentor','admin']`, namun pada halaman
@@ -259,7 +260,7 @@ menurunkan modul tersebut menjadi berkas kode yang menjalankannya, agar setiap
 klaim pada Bab IV dapat ditelusuri ke satu berkas konkret. Pemetaan ini juga
 menjadi bukti bahwa ruang lingkup penelitian tidak melompati lapisan legacy.
 
-### Tabel 3.4A — Modul Inti Lapisan Legacy (`includes/`, 27 berkas)
+### Tabel 3.4A — Modul Inti Lapisan Legacy (`includes/`, 28 berkas)
 
 | No. | Berkas | Fungsi utama (ekspor) | Peran dalam arsitektur |
 |---|---|---|---|
@@ -290,8 +291,9 @@ menjadi bukti bahwa ruang lingkup penelitian tidak melompati lapisan legacy.
 | 25 | `helpers.php` | `e()`, `flash_*()`, `label_status()`, `tanggal_id()`, `ip_klien()` | Utilitas tampilan, pelabelan status, dan metadata klien |
 | 26 | `config_lokal.example.php` | — (contoh) | Templat rahasia: kredensial DB, SMTP, gateway WA |
 | 27 | `config_lokal.php` | — (rahasia) | Berkas nyata; diabaikan Git dan dilindungi `.htaccess` |
+| 28 | `cost_avoidance.php` | `cost_avoidance_kategori_daftar()`, `cost_avoidance_validasi()`, `cost_avoidance_ringkas()`, `cost_avoidance_verifikasi()` | Cost avoidance: validasi + rupiah, CRUD, alur `draft → diajukan → disetujui/ditolak` |
 
-### Tabel 3.4B — Halaman Legacy di Akar (61 berkas) menurut Domain
+### Tabel 3.4B — Halaman Legacy di Akar (62 berkas) menurut Domain
 
 | No. | Kelompok | Berkas | Jumlah |
 |---|---|---|---|
@@ -311,7 +313,8 @@ menjadi bukti bahwa ruang lingkup penelitian tidak melompati lapisan legacy.
 | 14 | Administrasi | `pengguna.php`, `riwayat_audit.php`, `backup.php`, `status.php`, `powerbi_ekspor.php`, `panduan_powerbi.php` | 6 |
 | 15 | Akun | `profil.php` | 1 |
 | 16 | Internal | `koneksi.php` | 1 |
-| | **Total** | | **61** |
+| 17 | Cost avoidance | `cost_avoidance.php` | 1 |
+| | **Total** | | **62** |
 
 > `analisis_sosial.php` dan `panduan_powerbi.php` sengaja **tidak** muncul di
 > sidebar: keduanya halaman berdiri sendiri yang ditautkan dari halaman lain
@@ -342,9 +345,10 @@ menjadi bukti bahwa ruang lingkup penelitian tidak melompati lapisan legacy.
 | 19 | `Api\TugasController` | API | `GET /tugas`, `PATCH /tugas/{id}/status` | `Tugas` |
 | 20 | `Api\KasusController` | API | `GET/POST /kasus`, `GET/PUT /kasus/{id}` | `Kasus`, `KasusPenugasan`, `KasusStatusLog`, `Notifikasi` |
 | 21 | `Api\NotifikasiController` | API | `GET /notifikasi`, `POST /notifikasi/{id}/dibaca`, `/dibaca-semua` | `Notifikasi` |
-| 22 | `Api\RingkasanController` | API | `GET /ringkasan` | `LaporanHarian`, `Absensi` |
+| 22 | `Api\RingkasanController` | API | `GET /ringkasan` | `LaporanHarian`, `Absensi`, `Tugas`, `CostAvoidance` |
 | 23 | `Api\AnalitikController` | API | `GET /dasbor`, `/rekap/*`, `/ringkasan-kegiatan`, `/kalender`, `/analitik/srm`, `/analitik/cid` | `LaporanHarian`, `SrmKegiatan`, `CidProgram` |
 | 24 | `Api\EksporController` | API | `GET /ekspor/laporan`, `/ekspor/absensi`, `/ekspor/kasus` | `LaporanHarian`, `Absensi`, `Kasus` + PhpSpreadsheet |
+| 25 | `Api\CostAvoidanceController` | API | `GET/POST /cost-avoidance`, `GET/PUT/DELETE /cost-avoidance/{id}`, `GET /cost-avoidance/ringkasan`, `POST /cost-avoidance/{id}/ajukan`, `/verifikasi` | `CostAvoidance`, `AuditLogger` |
 
 Dua hal yang perlu dicatat dari pemetaan ini dan dibahas pada Bab IV:
 
@@ -405,8 +409,8 @@ Tiga diagram (satu per peran) — **Tabel 3.5**.
 | Klien Android | Kotlin + Compose | 11 layar |
 | Microservice AI | Python + FastAPI | Gateway LLM, 21 alat, antrean job |
 | Model LLM | Gemini / Ollama | Inferensi primer & cadangan |
-| Basis Data | MariaDB 10.4 | 47 tabel bersama |
-| Lapisan Analitik | 22 VIEW + `bi_reader` | Power BI (mode Import, read-only) |
+| Basis Data | MariaDB 10.4 | 48 tabel bersama |
+| Lapisan Analitik | 23 VIEW + `bi_reader` | Power BI (mode Import, read-only) |
 | Antrian | Tabel `ai_jobs` | Job asinkron, worker penjadwal |
 
 ## 3.4.5 ERD
@@ -414,9 +418,9 @@ Tiga diagram (satu per peran) — **Tabel 3.5**.
 - **Gambar 3.13 — ERD ringkas (isi laporan):** `users`, `laporan_harian`,
   `absensi`, `kasus`, `kasus_penugasan`, `kasus_status_log`, `tugas`,
   `notifikasi`, `audit_log`, `jadwal`.
-- **Lampiran A — ERD lengkap:** seluruh **47 tabel** (37 tabel pada
-  `database/schema/legacy/` + 11 tabel yang dibuat oleh 10 migrasi Laravel),
-  beserta kamus data.
+- **Lampiran A — ERD lengkap:** seluruh **48 tabel** (37 tabel warisan pada
+  `database/schema/legacy/` + 12 tabel dari 11 migrasi Laravel;
+  `cost_avoidance` tersedia di kedua jalur), beserta kamus data.
 
 ## 3.4.6 Diagram Arsitektur Microservice
 
@@ -426,9 +430,9 @@ ulang di Subbab 4.3.1.
 ```
 ┌───────────────┐  HTTP + Bearer   ┌──────────────┐
 │  SPA React    │───────────────► │              │      ┌──────────────┐
-│  16 halaman   │                   │   Laravel    │      │  MariaDB     │
-└───────────────┘                   │   12         │─────►│  47 tabel    │
-┌───────────────┐  HTTP + Bearer   │   37 API     │      │  (shared)    │
+│  17 halaman   │                   │   Laravel    │      │  MariaDB     │
+└───────────────┘                   │   12         │─────►│  48 tabel    │
+┌───────────────┐  HTTP + Bearer   │   45 API     │      │  (shared)    │
 │  APK Android  │───────────────► │              │      └──────┬───────┘
 │  11 layar     │                   └──────┬───────┘             │
 └───────────────┘                          │                     │
@@ -447,7 +451,7 @@ ulang di Subbab 4.3.1.
                           └──────────────┘  └───────────┘        │
                                                               ▼
                                             ┌───────────────────────────┐
-                                            │  22 VIEW (SQL SECURITY    │
+                                            │  23 VIEW (SQL SECURITY    │
                                             │  DEFINER) + akun bi_reader│
                                             │        → Power BI        │
                                             └───────────────────────────┘
@@ -766,8 +770,8 @@ dilaporkan agar prosedur operasional pada Bab IV dapat direproduksi.
 
 | No. | Jenis Uji | Level | Metode | Instrumen | Volume | Kriteria Lulus |
 |---|---|---|---|---|---|---|
-| 1 | Fungsional API & modul | Feature | Black-box | PHPUnit 11 (Laravel) | 166 uji | Semua assertions lulus |
-| 2 | Fungsional legacy | Feature | Black-box | PHPUnit-legacy | 148 uji | Semua assertions lulus |
+| 1 | Fungsional API & modul | Feature | Black-box | PHPUnit 11 (Laravel) | 182 uji | Semua assertions lulus |
+| 2 | Fungsional legacy | Feature | Black-box | PHPUnit-legacy | 163 uji | Semua assertions lulus |
 | 3 | Microservice AI | Unit + integration (mock LLM) | White-box | pytest 8 | 78 uji | Semua lulus tanpa model hidup |
 | 4 | Struktur & validasi HTML | Static | Analisis berkas | PHPUnit legacy `StrukturTest` | ‹n› | 0 ketidaksesuaian struktur |
 | 5 | Keamanan | Manual | Checklist OWASP 10 butir | Form review | 10 butir | Tidak ada temuan kritis/tinggi |

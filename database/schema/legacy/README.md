@@ -9,6 +9,7 @@
 | `003_audit_log.sql` | `audit_log`, `laporan_terkirim`, `pengingat` | Selalu |
 | `004_ai_service.sql` | `chat_sessions`, `chat_messages`, `ai_jobs`, `backup_riwayat` | Selalu |
 | `010_user_db.sql` | Akun `pelaporan_app` + `bi_reader` | Selalu (ubah sandi dulu!) |
+| `026_cost_avoidance.sql` | Tabel `cost_avoidance` (modul Cost Avoidance) | Setelah 001–004 |
 | `../../powerbi/sql/02_views.sql` | VIEW untuk Power BI | Setelah 001–004 |
 
 ## Cara menjalankan

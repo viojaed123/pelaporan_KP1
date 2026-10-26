@@ -48,6 +48,7 @@ require_once __DIR__ . '/jadwal.php';
 require_once __DIR__ . '/srm_cid.php';
 require_once __DIR__ . '/wilayah.php';
 require_once __DIR__ . '/kasus.php';
+require_once __DIR__ . '/cost_avoidance.php';
 
 // Layout terakhir (membutuhkan seluruh helper di atas).
 // require_once mencegah ulang-muat bila layout memanggil bootstrap.

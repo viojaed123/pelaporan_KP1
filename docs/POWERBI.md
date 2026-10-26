@@ -56,7 +56,7 @@ File dihasilkan via `PhpOffice\PhpSpreadsheet` (`streamDownload`), format rapi (
 
 ## 4) Daftar View untuk Power BI
 
-Berdasarkan star-schema yang ada di DB `pelaporan` (22 view), berikut rekomendasi pemakaian:
+Berdasarkan star-schema yang ada di DB `pelaporan` (23 view), berikut rekomendasi pemakaian:
 
 | View | Peran | Keterangan |
 |---|---|---|
@@ -65,6 +65,7 @@ Berdasarkan star-schema yang ada di DB `pelaporan` (22 view), berikut rekomendas
 | `vw_fakta_laporan_harian` | Fakta | Laporan harian teragregasi per baris (tanggal, user_id, status, durasi dll). |
 | `vw_fakta_absensi` | Fakta | Absensi harian (user_id, tanggal, status, jam masuk/pulang). |
 | `vw_fakta_kasus` | Fakta | Kasus (kode, status, urgensi, kategori, PIC, target, progres). |
+| `vw_cost_avoidance` | Fakta | Cost avoidance (estimasi, realisasi, nilai dihindari, status verifikasi, pembuat). |
 | `vw_fakta_tugas` | Fakta | Tugas (penugasan, tenggat, status, penyelesaian). |
 | `vw_kepatuhan_harian` | Ukur | Indikator kepatuhan per tanggal/pengguna. |
 

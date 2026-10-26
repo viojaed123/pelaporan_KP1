@@ -42,7 +42,7 @@
 | Middleware Laravel | **2** | `app/Http/Middleware/` |
 | Halaman PHP legacy di akar | **61** | `/*.php` |
 | Peran pengguna | **3** (karyawan, mentor, admin) | `includes/auth.php`, `includes/layout.php` |
-| Uji otomatis | **392** (166 Laravel + 148 legacy + 78 pytest) | `tests/`, `ai-service/tests/` |
+| Uji otomatis | **423** (182 Laravel + 163 legacy + 78 pytest) | `tests/`, `ai-service/tests/` |
 | Halaman legacy dengan penjaga peran | **21** (`wajib_role()`) | `includes/auth.php` + halaman akar |
 
 ---
@@ -145,7 +145,7 @@ permasalahan, misalnya:
 3. Membangun microservice AI berbasis LLM dengan 21 alat function calling dan rantai model cadangan.
 4. Menerapkan RBAC tiga peran, jejak audit, 2FA/OTP, dan batas sesi lintas platform.
 5. Membangun aplikasi Android untuk petugas lapangan dengan autentikasi paritas.
-6. Menyediakan lapisan analitik *read-only* (22 VIEW) untuk Power BI.
+6. Menyediakan lapisan analitik *read-only* (23 VIEW) untuk Power BI.
 7. Menguji efektivitas sistem dan fungsi AI melalui pengujian otomatis dan UAT.
 
 ## 1.4 Manfaat
@@ -337,7 +337,7 @@ Delivery*).
 | Basis data | MariaDB / MySQL | 10.4+ | Shared database, kompatibel XAMPP |
 | Dokumen | dompdf / PhpSpreadsheet / PHPMailer | 3.1 / 5.10 / 6.10 | Ekspor PDF/XLSX & surel OTP |
 | Analitik | Power BI + 22 SQL VIEW | — | Lapisan baca-saja, risiko rendah |
-| Pengujian | PHPUnit / PHPUnit-legacy / pytest | 11.5 / — / 8.3 | 392 uji otomatis |
+| Pengujian | PHPUnit / PHPUnit-legacy / pytest | 11.5 / — / 8.3 | 423 uji otomatis |
 
 ---
 
@@ -367,12 +367,12 @@ Delivery*).
 
 - **3.3.1 Kebutuhan fungsional** → 18 use case (lihat `KERANGKA_BAB_III.md` §3.3.1).
 - **3.3.2 Kebutuhan non-fungsional** → 15 kebutuhan non-fungsional dalam 6 kategori (lihat `KERANGKA_BAB_III.md` §3.3.2).
-- **3.3.3 Matriks modul dan peran** → **39 modul** (33 tampil di menu + 6
+- **3.3.3 Matriks modul dan peran** → **40 modul** (34 tampil di menu + 6
   halaman yang dijaga `wajib_role()` tanpa entri sidebar), diturunkan dari
   `menu_tersedia()` (`includes/layout.php`) dan `peta_akses()`
   (`includes/auth.php`).
-- **3.3.4 Rincian modul inti dan pemetaan kode** → 27 berkas `includes/`,
-  61 halaman legacy di akar (16 kelompok domain), dan 24 controller Laravel
+- **3.3.4 Rincian modul inti dan pemetaan kode** → 28 berkas `includes/`,
+  62 halaman legacy di akar (16 kelompok domain), dan 25 controller Laravel
   yang dipetakan ke endpoint serta model (Tabel 3.4A, 3.4B, 3.4C).
 
 ## 3.4 Perancangan Sistem
@@ -415,8 +415,8 @@ Hardware, sistem operasi, perangkat lunak, dan alat bantu → `KERANGKA_BAB_III.
 
 | Jenis | Metode | Instrumen | Volume/Target |
 |---|---|---|---|
-| Fungsional (Laravel) | Black-box | PHPUnit 11 | 166 uji |
-| Fungsional (legacy) | Black-box | PHPUnit-legacy | 148 uji |
+| Fungsional (Laravel) | Black-box | PHPUnit 11 | 182 uji |
+| Fungsional (legacy) | Black-box | PHPUnit-legacy | 163 uji |
 | Microservice AI | Unit + mock LLM | pytest 8 | 78 uji |
 | Keamanan | Manual + OWASP checklist | Form review | 10 butir |
 | Performa | Beban ringan | Apache Bench / k6 | ‹50 rps› |
@@ -474,15 +474,15 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
   laporan oleh AI, tetap membalas struktur sama saat layanan mati), dan
   `api_notifikasi_jumlah.php` (lencana notifikasi). Rincian di Tabel 3.10A.
 
-- **4.2.3 Lapisan Laravel 12 + React 19 SPA.** 16 halaman React, 37 endpoint
-  `/api/v1`, **24 controller** (14 web + 10 API) yang memetakan endpoint ke
-  model, 37 model Eloquent, 7 service domain (`AuditLogger`, `KeamananLogin`,
+- **4.2.3 Lapisan Laravel 12 + React 19 SPA.** 17 halaman React, 45 endpoint
+  `/api/v1`, **25 controller** (14 web + 11 API) yang memetakan endpoint ke
+  model, 38 model Eloquent, 7 service domain (`AuditLogger`, `KeamananLogin`,
   `Otp`, `KodeCadangan`, `PendaftaranSesi`, `RiwayatSandi`, `CocokPengguna`),
   Sanctum, middleware `BatasSesi` (idle 30 mnt / maks 8 jam) dan
   `CekPeran` (`role:mentor,admin`), Vite + Tailwind 4, mode gelap, Chart.js 4.
   **Tabel 3.4C** memetakan setiap controller ke endpoint dan modelnya.
-- **4.2.4 Lapisan analitik read-only.** 22 VIEW `SQL SECURITY DEFINER`,
-  akun `bi_reader` hanya `SELECT`. Tabel 4.2 — daftar 22 view dan fungsi
+- **4.2.4 Lapisan analitik read-only.** 23 VIEW `SQL SECURITY DEFINER`,
+  akun `bi_reader` hanya `SELECT`. Tabel 4.2 — daftar 23 view dan fungsi
   analitiknya.
 
 ## 4.3 Microservice AI (RM-2, RM-3)
@@ -551,7 +551,7 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
   > pada Subbab 5.2: (a) keluarkan berkas dari `.gitignore` sebagai contoh
   > (`hermes.config.example.yaml`), atau (b) tambahkan `pytest.skip` bila
   > berkas tidak ada, atau (c) hapus uji tersebut karena komponennya opsional.
-  > Temuan ini ditulis apa adanya agar klaim "392 uji lulus" dapat
+  > Temuan ini ditulis apa adanya agar klaim "423 uji lulus" dapat
   > dipertanggungjawabkan beserta syarat lingkungannya.
 
 
@@ -603,7 +603,7 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
   `dataset.kolom_json` (kunci, tipe, jumlah kosong).
 - Empat permukaan visualisasi: `analisis_dataset.php` (dataset generik),
   `analisis_sosial.php` (4 tab: SRM, CID, laporan, absensi), dasbor per peran,
-  dan **22 view Power BI**. Nilai kolom kosong dikelompokkan sebagai
+  dan **23 view Power BI**. Nilai kolom kosong dikelompokkan sebagai
   "Belum diisi" agar grafik tetap tergambar pada data belum lengkap.
 - Chart.js 4: batang, garis, donat; konsisten pada mode terang dan gelap.
 - Screenshot grafik + tabel ringkas.
@@ -621,10 +621,10 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
 
 | Suite | Framework | Jumlah | Status |
 |---|---|---|---|
-| Laravel Feature/Unit | PHPUnit 11 | 166 | Lulus |
-| Legacy | PHPUnit-legacy | 148 | Lulus |
+| Laravel Feature/Unit | PHPUnit 11 | 182 | Lulus |
+| Legacy | PHPUnit-legacy | 163 | Lulus |
 | ai-service | pytest 8 | 78 | Lulus |
-| **Total** | | **392** | |
+| **Total** | | **423** | |
 
 **Tabel 4.9** — uji fungsional manual per modul (ID | skenario | expected | actual | status).
 **Tabel 4.10** — uji keamanan checklist OWASP 10 butir + screenshot.
@@ -680,7 +680,7 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
 | RM-3 | Seluruh tindakan berisiko berpintu persetujuan (*approval-gated*) | Tabel 4.5 | 4.3.5 |
 | RM-4 | RBAC, audit, 2FA, batas sesi aktif lintas platform | Tabel 4.7 | 4.5 |
 | RM-5 | Ketepatan ‹…›%, p95 ‹…› s, fallback 100% skenario | Tabel 4.13 | 4.8 |
-| RM-6 | 392 uji otomatis lulus + UAT ‹n› responden | Tabel 4.8, 4.14 | 4.7, 4.9 |
+| RM-6 | 423 uji otomatis lulus + UAT ‹n› responden | Tabel 4.8, 4.14 | 4.7, 4.9 |
 
 ## 4.11 Analisis Keseluruhan
 
@@ -698,12 +698,13 @@ Tulis 5–7 butir; masing-masing **dimulai dari kalimat yang menjawab satu
 rumusan masalah**, lalu diberi angka. Contoh:
 
 1. Arsitektur integrasi lima subsistem berhasil dibangun pada satu basis data
-   MariaDB dengan pendekatan strangler fig, memuat 16 halaman React, 37 endpoint
-   API, 11 layar Android, dan 22 view analitik read-only.
+   MariaDB dengan pendekatan strangler fig, memuat 17 halaman React, 45 endpoint
+   API, 11 layar Android, dan 23 view analitik read-only.
 2. Microservice AI berhasil berfungsi sebagai gateway tunggal dengan 21 alat
    berbasis function calling, rantai cadangan Gemini → Ollama, dan 100%
    tindakan berisiko berpintu persetujuan (*approval-gated*).
-3. Pengujian otomatis mencapai 392 uji yang lulus seluruhnya, dan UAT terhadap
+3. Pengujian otomatis mencapai 423 uji yang lulus seluruhnya (182 PHPUnit
+   Laravel + 163 PHPUnit legacy + 78 pytest AI), dan UAT terhadap
    ‹n› responden rerata ‹…› pada skala 1–5.
 4. Efektivitas fungsi AI terukur: ketepatan ‹…›% pada ‹…› skenario, waktu
    respons p95 ‹…› detik, dan fallback berhasil pada 100% skenario gangguan.
@@ -748,7 +749,7 @@ rumusan masalah**, lalu diberi angka. Contoh:
 6. Evaluasi akurasi AI berbasis rubrik manual, belum benchmark otomatis.
 7. **Reproduksibilitas uji belum sepenuhnya terjaga**: `ai-service/hermes/`
    tidak dilacak Git, sedangkan `test_packaging.py` membacanya tanpa penjaga,
-   sehingga klon bersih akan gagal pada satu uji. Seluruh angka "392 uji lulus"
+   sehingga klon bersih akan gagal pada satu uji. Seluruh angka "423 uji lulus"
    berlaku pada mesin pengembang yang memiliki berkas tersebut (lihat 4.3.9).
 8. Konvensi penjagaan hak akses belum seragam: `peta_akses()` dipakai untuk
    `srm.hapus`/`cid.hapus`, sedangkan impor dijaga `impor_jenis_untuk_role()`
@@ -787,18 +788,18 @@ rumusan masalah**, lalu diberi angka. Contoh:
 
 | Lampiran | Isi |
 |---|---|
-| A | ERD lengkap (**47 tabel**: 37 legacy + 11 dari 10 migrasi Laravel) + kamus data |
+| A | ERD lengkap (**48 tabel**: 37 legacy + 12 dari 11 migrasi Laravel) + kamus data |
 | B | Listing kode inti: `ai-service/app/llm.py`, `ai-service/app/tools/registry.py`, `ai-service/app/prompts/`, `includes/ai_client.php`, `includes/keputusan_laporan.php`, `app/Http/Middleware/BatasSesi.php`, `app/Http/Middleware/CekPeran.php`, `includes/auth.php` (`peta_akses()`) |
 | C | DDL hak akses SQL (`bi_reader`, `SQL SECURITY DEFINER`) |
 | D | Kontrak API lengkap (OpenAPI/Swagger dari `/docs`) |
 | E | Instrumen UAT + data mentah + rekap hasil (rujukan: `docs/UJI_COBA.md`) |
 | F | Tabel hasil uji AI lengkap (30 skenario) |
 | G | Screenshot seluruh alur: login → 2FA → dasbor → buat laporan → persetujuan mentor → admin → asisten AI → dataset → Power BI → APK |
-| H | Daftar 22 view Power BI beserta deskripsi kolom |
-| I | Daftar tabel dan 22 view + relasi |
+| H | Daftar 23 view Power BI beserta deskripsi kolom |
+| I | Daftar tabel dan 23 view + relasi |
 | J | Dokumentasi skill AI (`ai-service/skills/`) dan 5 templat prompt (`ai-service/app/prompts/`) |
-| K | Daftar 27 berkas `includes/` beserta fungsi ekspornya |
-| L | Daftar 24 controller + 37 model + 7 service Laravel |
+| K | Daftar 28 berkas `includes/` beserta fungsi ekspornya |
+| L | Daftar 25 controller + 38 model + 7 service Laravel |
 | M | Perkakas operasional: `scripts/` dan `tools/` (penjadwal, backup, pemeliharaan, geokode, sinkron aset) |
 | N | Konfigurasi agen eksternal Hermes (`ai-service/hermes/hermes.config.yaml`) — komponen opsional |
 

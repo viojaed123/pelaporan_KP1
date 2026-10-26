@@ -57,6 +57,7 @@ function menu_tersedia(): array
             ['key' => 'ringkasan',   'ikon' => 'kegiatan', 'label' => 'Ringkasan',    'url' => 'ringkasan.php'],
             ['key' => 'kalender',    'ikon' => 'kalender', 'label' => 'Kalender Aktivitas', 'url' => 'kalender.php'],
             ['key' => 'jadwal',      'ikon' => 'dokumen', 'label' => 'Jadwal & Pengingat', 'url' => 'jadwal.php'],
+            ['key' => 'cost-avoidance', 'ikon' => 'buku-besar', 'label' => 'Cost Avoidance', 'url' => 'cost_avoidance.php'],
 
             ['grup' => 'Data Sosial'],
             ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM', 'url' => 'srm.php'],
@@ -83,6 +84,7 @@ function menu_tersedia(): array
             ['key' => 'distribusi',  'ikon' => 'unggah', 'label' => 'Pengiriman Laporan', 'url' => 'distribusi_laporan.php'],
             ['key' => 'impor',       'ikon' => 'unggah',  'label' => 'Impor Data',   'url' => 'impor_laporan.php'],
             ['key' => 'dataset',     'ikon' => 'grafik', 'label' => 'Dataset',      'url' => 'analisis_dataset.php'],
+            ['key' => 'cost-avoidance', 'ikon' => 'buku-besar', 'label' => 'Cost Avoidance', 'url' => 'cost_avoidance.php'],
 
             ['grup' => 'Data Sosial'],
             ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM', 'url' => 'srm.php'],
@@ -110,6 +112,7 @@ function menu_tersedia(): array
             ['key' => 'distribusi',  'ikon' => 'unggah', 'label' => 'Pengiriman Laporan', 'url' => 'distribusi_laporan.php'],
             ['key' => 'impor',       'ikon' => 'unggah',  'label' => 'Impor Data',   'url' => 'impor_laporan.php'],
             ['key' => 'dataset',     'ikon' => 'grafik', 'label' => 'Dataset',      'url' => 'analisis_dataset.php'],
+            ['key' => 'cost-avoidance', 'ikon' => 'buku-besar', 'label' => 'Cost Avoidance', 'url' => 'cost_avoidance.php'],
 
             ['grup' => 'Data Sosial'],
             ['key' => 'srm',         'ikon' => 'pengguna', 'label' => 'SRM', 'url' => 'srm.php'],
@@ -167,6 +170,7 @@ function menu_aktif_otomatis(): string
         'ringkasan.php'                         => 'ringkasan',
         'kalender.php'                          => 'kalender',
         'jadwal.php'                            => 'jadwal',
+        'cost_avoidance.php'                    => 'cost-avoidance',
         'srm.php'                               => 'srm',
         'cid.php'                               => 'cid',
         'peta.php'                              => 'peta',
@@ -284,6 +288,9 @@ function mulai_halaman(array $opsi = []): void
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= e(csrf_token('global')) ?>">
     <title><?= e($judulPenuh) ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Instrument+Sans:wght@400;500;600&amp;family=Schibsted+Grotesk:wght@400;500;600;700&amp;display=swap">
     <link rel="stylesheet" href="assets/css/app.css">
     <link rel="icon" href="assets/img/favicon.png" type="image/png">
     <!-- Tema gelap dimuat di <head> supaya preferensi tersimpan langsung

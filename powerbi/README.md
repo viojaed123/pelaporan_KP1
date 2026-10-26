@@ -38,7 +38,7 @@ Power BI Desktop  ──(Import)──►  MySQL/MariaDB : pelaporan
 C:\xampp\mysql\bin\mysql.exe -uroot --default-character-set=utf8mb4 pelaporan < powerbi\sql\02_views.sql
 ```
 
-Perintah di atas membuat 22 view dan memberikan `SELECT` ke `bi_reader`
+Perintah di atas membuat 23 view dan memberikan `SELECT` ke `bi_reader`
 per nama view (MariaDB menolak pola `vw_*` pada `GRANT`).
 
 Uji cepat:
@@ -99,6 +99,7 @@ memasang MySQL Connector/NET.
    - `vw_laporan_harian` — fakta laporan
    - `vw_absensi` — fakta absensi (termasuk `kegiatan_hari_ini`, `kondisi_kesehatan`)
    - `vw_kasus` — fakta kasus
+   - `vw_cost_avoidance` — fakta cost avoidance (estimasi, realisasi, nilai dihindari, status verifikasi)
    - `vw_jadwal` — fakta agenda/jadwal (status, durasi, pengingat)
    - `vw_komentar` — fakta diskusi/komentar per laporan
    - `vw_pengingat` — fakta pengingat (status kirim)
@@ -118,6 +119,8 @@ memasang MySQL Connector/NET.
    | `vw_absensi[pengguna_id]` | `vw_dim_pengguna[pengguna_id]` | banyak ke satu |
    | `vw_absensi[tanggal]` | `vw_dim_tanggal[tanggal]` | banyak ke satu |
    | `vw_kasus[tanggal_dibuat]` | `vw_dim_tanggal[tanggal]` | banyak ke satu |
+   | `vw_cost_avoidance[periode]` | `vw_dim_tanggal[tanggal]` | banyak ke satu |
+   | `vw_cost_avoidance[dibuat_oleh]` | `vw_dim_pengguna[pengguna_id]` | banyak ke satu |
    | `vw_srm[tanggal]` | `vw_dim_tanggal[tanggal]` | banyak ke satu |
 
    Tandai `vw_dim_tanggal` sebagai **Date table** (kolom `tanggal`).
@@ -164,6 +167,18 @@ CALCULATE ( COUNTROWS ( vw_kasus ), vw_kasus[flag_selesai] = 0 )
 Kasus Perlu Perhatian = SUM ( vw_kasus[flag_perlu_perhatian] )
 
 Rata Progres Kasus = AVERAGE ( vw_kasus[progres] )
+
+-- tabel vw_cost_avoidance
+Total Nilai Avoidance =
+CALCULATE ( SUM ( vw_cost_avoidance[nilai_avoidance] ), vw_cost_avoidance[status] = "disetujui" )
+
+Jumlah Entri Disetujui =
+CALCULATE ( COUNTROWS ( vw_cost_avoidance ), vw_cost_avoidance[status] = "disetujui" )
+
+Rata Nilai per Entri = DIVIDE ( [Total Nilai Avoidance], [Jumlah Entri Disetujui] )
+
+Rasio Realisasi =
+DIVIDE ( SUM ( vw_cost_avoidance[realisasi] ), SUM ( vw_cost_avoidance[estimasi] ) )
 
 -- perbandingan periode (butuh tabel tanggal bertanda)
 Jumlah Laporan LM =
@@ -241,7 +256,7 @@ secara manual:
 
 | Berkas | Isi |
 |---|---|
-| `sql/02_views.sql` | Pembuatan 22 view + hak akses `bi_reader` |
+| `sql/02_views.sql` | Pembuatan 23 view + hak akses `bi_reader` |
 | `pelaporan-odbc.pbids` | Pintasan koneksi Power BI Desktop lewat **ODBC** (disarankan) |
 | `pelaporan.pbids` | Pintasan koneksi Power BI Desktop lewat konektor MySQL |
 | `README.md` | Dokumen ini |

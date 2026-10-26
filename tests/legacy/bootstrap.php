@@ -27,4 +27,5 @@ require_once $root . '/includes/jadwal.php';
 require_once $root . '/includes/srm_cid.php';
 require_once $root . '/includes/wilayah.php';
 require_once $root . '/includes/kasus.php';
+require_once $root . '/includes/cost_avoidance.php';
 require_once $root . '/includes/impor_dataset.php';

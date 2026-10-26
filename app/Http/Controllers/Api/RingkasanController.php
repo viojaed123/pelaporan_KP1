@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\CostAvoidance;
 use App\Models\LaporanHarian;
 use App\Models\Tugas;
 use Illuminate\Http\JsonResponse;
@@ -42,6 +43,24 @@ class RingkasanController extends Controller
             ->whereDate('tenggat', '<', $hariIni)
             ->count();
 
+        $costAvoidance = ['total_disetujui' => 0.0, 'diajukan' => 0, 'disetujui' => 0];
+
+        try {
+            $costAvoidance = [
+                'total_disetujui' => (float) CostAvoidance::where('dibuat_oleh', $user->id)
+                    ->where('status', 'disetujui')
+                    ->sum('nilai_avoidance'),
+                'diajukan' => CostAvoidance::where('dibuat_oleh', $user->id)
+                    ->where('status', 'diajukan')
+                    ->count(),
+                'disetujui' => CostAvoidance::where('dibuat_oleh', $user->id)
+                    ->where('status', 'disetujui')
+                    ->count(),
+            ];
+        } catch (\Throwable $e) {
+            $costAvoidance = ['total_disetujui' => 0.0, 'diajukan' => 0, 'disetujui' => 0];
+        }
+
         return response()->json([
             'sukses' => true,
             'ringkasan' => [
@@ -56,6 +75,7 @@ class RingkasanController extends Controller
                     ],
                 'tugas_aktif'         => $tugasAktif,
                 'tugas_terlambat'     => $tugasTerlambat,
+                'cost_avoidance'      => $costAvoidance,
             ],
         ]);
     }

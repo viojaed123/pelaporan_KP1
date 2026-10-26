@@ -310,3 +310,62 @@ dipasang berdampingan (`192.168.56.1` / `pelaporan.local`) tanpa
 >    (pelanggaran integritas) dan namanya hilang diam-diam. Uji PHPUnit tidak
 >    melihatnya karena skema uji memakai `user_id` nullable.
 
+## 18. Cost avoidance: pencatatan, persetujuan dua langkah & view Power BI (Oktober 2026)
+
+### Skema & aturan data
+- [x] Tabel `cost_avoidance`: `kode` unik (`CA-<tahun>-<urut>`), `judul`, `kategori`
+      (varchar + daftar tetap 9 pilihan, pola sama dengan `kasus`), `periode`
+      (bulan), `estimasi`, `realisasi`, `nilai_avoidance` (dihitung aplikasi:
+      `estimasi - realisasi`), `status`, `catatan_verifikasi`, `dibuat_oleh`,
+      `diverifikasi_oleh`, cap waktu pengajuan/verifikasi.
+- [x] Dua jalur DDL ekuivalen: migrasi Laravel
+      `2026_10_26_000001_create_cost_avoidance_table` dan
+      `database/schema/legacy/026_cost_avoidance.sql` (idempoten).
+- [x] `realisasi > estimasi` ditolak; kategori di luar daftar ditolak; periode
+      dinormalkan ke hari pertama bulan berjalan.
+
+### Alur persetujuan
+- [x] `draft -> diajukan -> disetujui/ditolak`; hanya `disetujui` dihitung pada
+      total. Penolakan wajib `catatan_verifikasi`.
+- [x] Mentor tidak dapat memverifikasi entri miliknya sendiri (admin dikecualikan);
+      karyawan tidak memiliki akses verifikasi (403).
+- [x] Menyunting entri `ditolak` mengembalikan status ke `draft` dan menghapus
+      jejak verifikasi; entri `disetujui` terkunci (ubah/hapus 403).
+
+### Antarmuka
+- [x] Legacy `cost_avoidance.php`: formulir (tambah/ubah), penyaring
+      status/kategori/periode/pencarian, paginasi 25 baris, dialog konfirmasi
+      hapus, formulir tolak di `<details>`; PRG + CSRF per aksi + jejak audit.
+- [x] SPA `/app/cost-avoidance` (`resources/js/react/pages/CostAvoidance.jsx`)
+      dengan rute, menu per peran, dan ikon `koin`.
+- [x] Kartu ringkas `.ca-strip` di dasbor legacy dan SPA (total disetujui +
+      jumlah menunggu verifikasi).
+
+### Power BI
+- [x] View `vw_cost_avoidance` (view ke-23) + `GRANT SELECT` untuk
+      `bi_reader@localhost` dan `bi_reader@%`.
+- [x] `powerbi/README.md`: view baru, relasi ke `vw_dim_tanggal` /
+      `vw_dim_pengguna`, dan ukuran DAX (`Total Nilai Avoidance`, dst.).
+
+### Verifikasi
+- [x] `vendor\bin\phpunit`: **182 uji** lulus, termasuk
+      `ApiCostAvoidanceTest` (16 uji: kode berurutan, validasi, batas
+      kepemilikan, alur ajukan/setujui/tolak, larangan verifikasi sendiri,
+      kunci setelah disetujui, ringkasan dasbor).
+- [x] `composer test:legacy`: **163 uji** lulus, termasuk
+      `tests/legacy/CostAvoidanceTest.php` (18 uji helper: parsing angka
+      Indonesia, format rupiah, normalisasi periode, aturan validasi, hak
+      ubah/verifikasi, label status).
+- [x] `php -l` bersih pada seluruh berkas PHP baru/berubah; `npm run build`
+      sukses.
+- [x] DDL `026_cost_avoidance.sql` dijalankan dua kali pada basis data uji
+      (idempoten) dan `vw_cost_avoidance` diuji dengan data contoh
+      (nilai, label status, nama pembuat, divisi tampil benar).
+- [x] Asap uji legacy pada basis data nyata: simpan -> ajukan -> setujui
+      (admin) -> ringkasan -> daftar -> hapus, lalu baris uji dibersihkan.
+
+> **Catatan penerapan:** tabel dibuat di basis data pengembangan dengan
+> `php artisan migrate --path=database/migrations/2026_10_26_000001_create_cost_avoidance_table.php --force`
+> agar tercatat di tabel `migrations` (migrasi lain yang tertunda tidak ikut
+> dijalankan).
+

@@ -58,7 +58,7 @@ mysql -u root pelaporan < database\schema\legacy\011_hak_akses_app.sql
 mysql -u root pelaporan < database\schema\legacy\019_akses_baca_ai.sql
 ```
 
-Lapisan analitik Power BI (22 view) juga dibuat dengan akun `root`:
+Lapisan analitik Power BI (23 view) juga dibuat dengan akun `root`:
 
 ```bat
 mysql -u root --default-character-set=utf8mb4 pelaporan < powerbi\sql\02_views.sql
@@ -223,6 +223,7 @@ Alamat server dapat diubah langsung di layar masuk APK.
 - **Data sosial SRM & CID** (`srm.php`, `cid.php`, semua peran): tampilan ringkasan + penyaring + tabel berhalaman untuk kegiatan *Social Relations Management* dan program *Community Involvement/Development* (TJSL). Impor dari Excel lewat `impor_srm_cid.php` (admin). Data juga diekspos sebagai view Power BI.
 - **Peta lokasi** (`peta.php`, semua peran): peta Leaflet gabungan seluruh data (laporan, absensi, jadwal, kasus, SRM, CID) dengan penyaring tahun/kabupaten/pencarian; formulir laporan & absensi dapat menandai titik (GPS/klik peta) atau mengetik alamat yang otomatis dicocokkan ke master wilayah. Data yang baru diunggah **disorot** (cincin berdenyut + banner) dan panel **Chart.js** menampilkan ringkasan sebaran & tren. Setiap baris punya tautan **Cek Lokasi** ke Google Maps.
 - **Ekspor dataset Power BI** (`powerbi_ekspor.php`, admin): unduh lapisan view sebagai CSV per view, workbook `.xlsx` multi-lembar, arsip ZIP, atau `.pbids` (MySQL maupun **ODBC**). Panduan langkah-langkah ada di `panduan_powerbi.php` dan `powerbi\README.md`. Daftarkan DSN dengan `scripts\buat_dsn_powerbi.ps1`.
+- **Cost avoidance** (`cost_avoidance.php`, semua peran): pencatatan biaya yang berhasil dihindari (estimasi, realisasi, selisih otomatis) dengan kategori tetap, penyaring status/kategori/periode, dan alur persetujuan dua langkah `draft -> diajukan -> disetujui/ditolak`. Hanya entri **disetujui** yang masuk total; mentor tidak dapat memverifikasi entri sendiri (admin dikecualikan). Tersedia juga di SPA (`/app/cost-avoidance`), kartu ringkas di dasbor, dan view `vw_cost_avoidance` untuk Power BI.
 - **Alat AI baru**: `web_search` (SearXNG + cadangan DuckDuckGo) dan `daftar_jadwal`/`buat_jadwal`/`ubah_jadwal`/`hapus_jadwal`/`ingatkan_jadwal` (approval-gated).
 - **Antarmuka & dasbor**: gaya terkonsolidasi di `assets/css/app.css` (alias digabung ke aturan asli, kode mati dibuang, `:focus-visible` + `prefers-reduced-motion` ditambahkan) tanpa mengubah warna korporat. Ikon memakai **SVG garis monokrom** (`ikon_sp()`) menggantikan emoji berwarna di **seluruh halaman** (dasbor, kerja harian, halaman masuk/OTP, sampai tautan "Cek Lokasi") agar tampilan lebih bersih; simbol geometris UI (`&#9776;` menu, `&#9662;` chevron, panah, centang) dipertahankan. Halaman pembuka `index.php` kini satu halaman informatif: hero dengan efek logo, ringkasan fitur, **Cara Kerja**, **Tanya Jawab**, dan **Kontak** (surel & telepon). Dasbor karyawan memakai kartu `.stat` terpadu + **Aksi Cepat** (bagian absensi menampilkan kolom **Sakit/Izin/Alpha**); dasbor mentor kini berpaginasi (25/hal.) dengan kepala tabel lengket, tampilan kartu di layar kecil, dan chip filter cepat; admin memilki dasbor sendiri `admin_dashboard.php`. Sidebar mendukung **mode mini**, **grup terlipat**, **pencarian menu**, skip-link, dan preferensi tersimpan di `localStorage`.
 

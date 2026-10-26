@@ -604,6 +604,45 @@ SELECT
 FROM `wilayah`
 WHERE `garis_lintang` IS NOT NULL AND `garis_bujur` IS NOT NULL;
 
+-- ------------------------------------------------------------
+-- 24. FAKTA: Cost avoidance (nilai biaya yang berhasil dihindari)
+-- ------------------------------------------------------------
+CREATE OR REPLACE SQL SECURITY DEFINER VIEW `vw_cost_avoidance` AS
+SELECT
+    c.`id`                          AS `cost_avoidance_id`,
+    c.`kode`,
+    c.`judul`,
+    c.`kategori`,
+    c.`unit`,
+    u.`nama`                        AS `nama_pembuat`,
+    COALESCE(u.`divisi`, '(tanpa divisi)') AS `divisi`,
+    c.`periode`,
+    YEAR(c.`periode`)               AS `tahun`,
+    MONTH(c.`periode`)              AS `bulan`,
+    DATE_FORMAT(c.`periode`, '%Y-%m') AS `bulan_label`,
+    c.`estimasi`,
+    c.`realisasi`,
+    c.`nilai_avoidance`,
+    c.`status`,
+    CASE c.`status`
+        WHEN 'draft'     THEN 'Draft'
+        WHEN 'diajukan'  THEN 'Menunggu Verifikasi'
+        WHEN 'disetujui' THEN 'Disetujui'
+        WHEN 'ditolak'   THEN 'Ditolak'
+        ELSE c.`status`
+    END                             AS `label_status`,
+    c.`catatan_verifikasi`,
+    c.`dibuat_oleh`,
+    c.`diverifikasi_oleh`,
+    v.`nama`                        AS `nama_verifikator`,
+    c.`diajukan_pada`,
+    c.`diverifikasi_pada`,
+    c.`dibuat_pada`,
+    c.`diperbarui_pada`
+FROM `cost_avoidance` c
+LEFT JOIN `users` u ON u.`id` = c.`dibuat_oleh`
+LEFT JOIN `users` v ON v.`id` = c.`diverifikasi_oleh`;
+
 -- ============================================================
 -- HAK AKSES `bi_reader`
 -- ------------------------------------------------------------
@@ -634,6 +673,7 @@ GRANT SELECT ON `pelaporan`.`vw_srm_per_stakeholder`    TO 'bi_reader'@'localhos
 GRANT SELECT ON `pelaporan`.`vw_cid_per_pilar`          TO 'bi_reader'@'localhost';
 GRANT SELECT ON `pelaporan`.`vw_cid_per_wilayah`        TO 'bi_reader'@'localhost';
 GRANT SELECT ON `pelaporan`.`vw_wilayah`                TO 'bi_reader'@'localhost';
+GRANT SELECT ON `pelaporan`.`vw_cost_avoidance`        TO 'bi_reader'@'localhost';
 
 -- Akun wildcard (untuk koneksi Power BI dari host lain / TCP).
 GRANT SELECT ON `pelaporan`.`vw_dim_pengguna`          TO 'bi_reader'@'%';
@@ -658,5 +698,6 @@ GRANT SELECT ON `pelaporan`.`vw_srm_per_stakeholder`    TO 'bi_reader'@'%';
 GRANT SELECT ON `pelaporan`.`vw_cid_per_pilar`          TO 'bi_reader'@'%';
 GRANT SELECT ON `pelaporan`.`vw_cid_per_wilayah`        TO 'bi_reader'@'%';
 GRANT SELECT ON `pelaporan`.`vw_wilayah`                TO 'bi_reader'@'%';
+GRANT SELECT ON `pelaporan`.`vw_cost_avoidance`        TO 'bi_reader'@'%';
 
 FLUSH PRIVILEGES;

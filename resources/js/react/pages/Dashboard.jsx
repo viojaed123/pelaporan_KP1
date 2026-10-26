@@ -56,6 +56,21 @@ export default function Dashboard() {
                 ))}
             </div>
 
+            {ringkasan?.cost_avoidance && (
+                <Link className="ca-strip" to="/cost-avoidance">
+                    <div className="ca-strip-utama">
+                        <p className="ca-eyebrow">Cost avoidance disetujui</p>
+                        <p className="ca-strip-angka">{rupiah(ringkasan.cost_avoidance.total_disetujui)}</p>
+                        <p className="ca-meta">
+                            {ringkasan.cost_avoidance.disetujui ?? 0} entri disetujui
+                            {' · '}
+                            {ringkasan.cost_avoidance.diajukan ?? 0} menunggu verifikasi
+                        </p>
+                    </div>
+                    <span className="ca-tombol">Lihat rincian</span>
+                </Link>
+            )}
+
             <div className="sorotan-ringkas" style={{ marginTop: 16 }}>
                 <Link className="s-chip" to="/laporan/buat">
                     <span className="s-ikon">&#9998;</span>
@@ -122,4 +137,8 @@ function badgeStatus(status) {
     if (status === 'selesai') return 'hijau';
     if (status === 'dikerjakan') return 'kuning';
     return 'biru';
+}
+
+function rupiah(nilai) {
+    return 'Rp ' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(Number(nilai) || 0);
 }
