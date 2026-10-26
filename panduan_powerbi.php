@@ -45,13 +45,15 @@ mulai_halaman([
             </li>
             <li>
                 Saat diminta kredensial, pilih jenis <strong>Database</strong> dan isikan:
-                <table class="tabel" style="margin-top:8px">
-                    <tbody>
-                        <tr><th style="width:180px">Pengguna</th><td class="text-mono">bi_reader</td></tr>
-                        <tr><th>Kata sandi</th><td>lihat <span class="text-mono">AI_DB_READONLY_PASSWORD</span> pada <span class="text-mono">ai-service/.env</span></td></tr>
-                        <tr><th>Mode</th><td>Import (disarankan)</td></tr>
-                    </tbody>
-                </table>
+                <div class="bungkus-tabel" style="margin-top:8px">
+                    <table class="tabel">
+                        <tbody>
+                            <tr><th style="width:180px">Pengguna</th><td class="text-mono">bi_reader</td></tr>
+                            <tr><th>Kata sandi</th><td>lihat <span class="text-mono">AI_DB_READONLY_PASSWORD</span> pada <span class="text-mono">ai-service/.env</span></td></tr>
+                            <tr><th>Mode</th><td>Import (disarankan)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </li>
             <li>Pilih VIEW yang diinginkan (mis. <span class="text-mono">vw_srm</span>, <span class="text-mono">vw_cid</span>, <span class="text-mono">vw_kasus</span>, <span class="text-mono">vw_laporan_harian</span>, <span class="text-mono">vw_absensi</span>) lalu klik <strong>Load</strong>.</li>
         </ol>

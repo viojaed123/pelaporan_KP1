@@ -158,7 +158,10 @@ export default function AppLayout() {
                     >
                         <Ikon nama="buku-besar" />
                     </button>
-                    <h1 className="judul-halaman">Sistem Pelaporan Kegiatan Harian</h1>
+                    <h1 className="judul-halaman">
+                        <span className="sembunyi-mobile">Sistem Pelaporan Kegiatan Harian</span>
+                        <span className="tampil-mobile">Pelaporan Harian</span>
+                    </h1>
                     <div className="topbar-kanan">
                         <button
                             type="button"

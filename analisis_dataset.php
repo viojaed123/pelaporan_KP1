@@ -536,7 +536,7 @@ mulai_halaman([
 ?>
 
 <style>
-.grid-grafik { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; margin-top:14px; }
+.grid-grafik { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr)); gap:14px; margin-top:14px; }
 .card { background:#fff; border:1px solid var(--abu-200); border-radius:12px; overflow:hidden; }
 .card-h { padding:11px 14px; font-size:13px; font-weight:700; color:var(--phr-biru-tua);
     border-bottom:1px solid var(--abu-200); background:var(--biru-50); }

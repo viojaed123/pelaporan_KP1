@@ -378,7 +378,7 @@ function mulai_halaman(array $opsi = []): void
             </h1>
 
             <div class="topbar-kanan">
-                <?= $opsi['aksi'] ?>
+                <div class="topbar-aksi"><?= $opsi['aksi'] ?></div>
 
                 <button type="button" id="tombolTema" class="tombol-lonceng" aria-label="Ganti tema" title="Ganti tema terang/gelap" style="border:0;background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:6px;">🌙</button>
 

@@ -352,22 +352,24 @@ mulai_halaman([
 <div class="kartu">
     <div class="kartu-kepala"><h2>Peringkat kegiatan karyawan</h2></div>
     <div class="kartu-badan padat">
-        <table class="tabel">
-            <thead>
-                <tr><th>#</th><th>Karyawan</th><th>Divisi</th><th class="text-kanan">Laporan</th><th class="text-kanan">Hari aktif</th></tr>
-            </thead>
-            <tbody>
-            <?php foreach ($peringkat as $i => $p): ?>
-                <tr>
-                    <td><?= (int) ($i + 1) ?></td>
-                    <td><?= e((string) $p['nama']) ?></td>
-                    <td><?= e((string) ($p['divisi'] ?? '-')) ?></td>
-                    <td class="text-kanan"><strong><?= (int) $p['jml'] ?></strong></td>
-                    <td class="text-kanan"><?= (int) $p['hari'] ?></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
+        <div class="bungkus-tabel">
+            <table class="tabel">
+                <thead>
+                    <tr><th>#</th><th>Karyawan</th><th>Divisi</th><th class="text-kanan">Laporan</th><th class="text-kanan">Hari aktif</th></tr>
+                </thead>
+                <tbody>
+                <?php foreach ($peringkat as $i => $p): ?>
+                    <tr>
+                        <td><?= (int) ($i + 1) ?></td>
+                        <td><?= e((string) $p['nama']) ?></td>
+                        <td><?= e((string) ($p['divisi'] ?? '-')) ?></td>
+                        <td class="text-kanan"><strong><?= (int) $p['jml'] ?></strong></td>
+                        <td class="text-kanan"><?= (int) $p['hari'] ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 <?php endif; ?>
@@ -378,24 +380,26 @@ mulai_halaman([
         <?php if ($rincian === []): ?>
             <div class="tabel-kosong">Belum ada laporan pada periode ini.</div>
         <?php else: ?>
-            <table class="tabel">
-                <thead>
-                    <tr><th>Tanggal</th><th>Hari</th><th class="text-kanan">Laporan</th><th class="text-kanan">Durasi</th></tr>
-                </thead>
-                <tbody>
-                <?php foreach ($rincian as $r): ?>
-                    <tr>
-                        <td><?= e(tanggal_id((string) $r['tanggal'])) ?></td>
-                        <td><?= e([
-                            1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis',
-                            5 => 'Jumat', 6 => 'Sabtu', 7 => 'Minggu',
-                        ][(int) date('N', (int) strtotime((string) $r['tanggal']))] ?? '') ?></td>
-                        <td class="text-kanan"><?= (int) $r['jml'] ?></td>
-                        <td class="text-kanan"><?= (int) $r['menit'] > 0 ? e((string) round(((int) $r['menit']) / 60, 1)) . ' jam' : '—' ?></td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+            <div class="bungkus-tabel">
+                <table class="tabel">
+                    <thead>
+                        <tr><th>Tanggal</th><th>Hari</th><th class="text-kanan">Laporan</th><th class="text-kanan">Durasi</th></tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($rincian as $r): ?>
+                        <tr>
+                            <td><?= e(tanggal_id((string) $r['tanggal'])) ?></td>
+                            <td><?= e([
+                                1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis',
+                                5 => 'Jumat', 6 => 'Sabtu', 7 => 'Minggu',
+                            ][(int) date('N', (int) strtotime((string) $r['tanggal']))] ?? '') ?></td>
+                            <td class="text-kanan"><?= (int) $r['jml'] ?></td>
+                            <td class="text-kanan"><?= (int) $r['menit'] > 0 ? e((string) round(((int) $r['menit']) / 60, 1)) . ' jam' : '—' ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         <?php endif; ?>
     </div>
 </div>

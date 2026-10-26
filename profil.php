@@ -871,7 +871,7 @@ mulai_halaman([
                             Kode hanya ditampilkan sekali. Gunakan bila surel tidak dapat diakses.
                         </span>
                     </div>
-                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px;margin-bottom:16px">
                         <?php foreach ($kodeCadanganBaru as $kc): ?>
                             <code class="text-mono"
                                   style="background:var(--abu-100);padding:8px 10px;border-radius:6px;text-align:center;letter-spacing:1px">

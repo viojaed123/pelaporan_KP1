@@ -278,7 +278,7 @@ mulai_halaman([
                 &middot; <?= count($cek) ?> pemeriksaan
             </span>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2" style="flex-wrap:wrap">
             <span class="badge badge-hijau badge-tanpa-titik">Normal: <?= count($cek) - $jmlGagal - $jmlPeringatan ?></span>
             <span class="badge badge-kuning badge-tanpa-titik">Perhatian: <?= $jmlPeringatan ?></span>
             <span class="badge badge-merah badge-tanpa-titik">Bermasalah: <?= $jmlGagal ?></span>

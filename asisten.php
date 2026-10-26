@@ -101,7 +101,7 @@ mulai_halaman([
 ]);
 ?>
 
-<div class="grid" style="grid-template-columns:minmax(0,2fr) minmax(280px,1fr);align-items:start;gap:18px">
+<div class="grid grid-asisten" style="grid-template-columns:minmax(0,2fr) minmax(280px,1fr);align-items:start;gap:18px">
 
     <!-- ============ Ruang percakapan ============ -->
     <section class="kartu" style="display:flex;flex-direction:column">

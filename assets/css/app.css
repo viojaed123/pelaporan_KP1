@@ -823,7 +823,10 @@ p { margin: 0 0 1em; }
 
 .text-redup { color: var(--teks-redup); }
 .text-kecil { font-size: 13px; }
-.text-mono { font-family: var(--font-mono); }
+.text-mono {
+    font-family: var(--font-mono);
+    overflow-wrap: anywhere;
+}
 .text-tebal { font-weight: 700; }
 .text-biru { color: var(--phr-biru); }
 .text-merah { color: var(--phr-merah); }
@@ -1102,6 +1105,8 @@ p { margin: 0 0 1em; }
     font-weight: 700;
     color: var(--navy-600);
     margin: 0;
+    min-width: 0;
+    flex: 1 1 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1113,7 +1118,17 @@ p { margin: 0 0 1em; }
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
 }
+
+.topbar-aksi {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.topbar-aksi:empty { display: none; }
 
 /* --- Isi --- */
 .isi {
@@ -1168,6 +1183,7 @@ p { margin: 0 0 1em; }
 
 /* --- Grid --- */
 .grid { display: grid; gap: 20px; }
+.grid > * { min-width: 0; }
 .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -1494,6 +1510,8 @@ input[type=text], input[type=email], input[type=password], input[type=date],
 input[type=time], input[type=number], input[type=search], input[type=tel],
 input[type=url], input[type=datetime-local], select, textarea {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding: 10px 13px;
     border: 1px solid var(--abu-300);
     border-radius: var(--radius-sm);
@@ -1709,7 +1727,7 @@ table.tabel td.text-tengah, table.tabel th.text-tengah { text-align: center; }
     box-shadow: var(--bayangan-sm);
 }
 .filter-bar .grup-form { margin-bottom: 0; min-width: 160px; flex: 1 1 170px; }
-.filter-bar .aksi-filter { display: flex; gap: 8px; }
+.filter-bar .aksi-filter { display: flex; gap: 8px; flex-wrap: wrap; min-width: 0; }
 
 /* --- Paginasi --- */
 .paginasi {
@@ -2612,10 +2630,28 @@ table.tabel td .angka {
         box-shadow: var(--bayangan-lg);
     }
     .sidebar.tampil { transform: translateX(0); }
+    .topbar {
+        height: auto;
+        min-height: var(--topbar-h);
+        flex-wrap: wrap;
+        align-items: center;
+        row-gap: 2px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+    .topbar-kanan { display: contents; }
+    .topbar-aksi {
+        order: 10;
+        flex: 1 0 100%;
+        justify-content: flex-start;
+        padding-bottom: 2px;
+    }
+    .topbar-aksi form { max-width: 100%; }
     .topbar .tombol-burger { display: grid; place-items: center; min-width: 44px; min-height: 44px; }
     .topbar-lonceng, .tombol-lonceng { min-width: 44px; min-height: 44px; }
     .isi { padding: 16px; }
     .baris-form, .baris-form-3 { grid-template-columns: 1fr; }
+    .grid-asisten { grid-template-columns: 1fr !important; }
     .rincian .baris { grid-template-columns: 1fr; gap: 3px; }
     .sembunyi-mobile { display: none !important; }
     .grid-2 { grid-template-columns: 1fr; }
@@ -2648,13 +2684,28 @@ table.tabel td .angka {
     .kartu-badan { padding: 14px; }
     .kartu-kepala { padding: 14px; }
     .kartu-header { padding: 14px; }
-    .judul-halaman { font-size: 15px; }
+    .judul-halaman {
+        font-size: 15px;
+        line-height: 1.25;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+    }
+    .judul-halaman .crumb { display: none; }
     .filter-bar { padding: 12px; }
     .filter-bar .grup-form { flex: 1 1 100%; }
+    .filter-bar .aksi-filter { width: 100%; }
+    .filter-bar .aksi-filter .tombol { flex: 1 1 140px; }
+    .tombol { white-space: normal; max-width: 100%; text-align: center; }
     .kartu-auth { padding: 24px 18px; }
-    .topbar { padding: 0 12px; gap: 8px; }
+    .topbar { padding: 6px 12px; gap: 2px 4px; }
+    .topbar-aksi { gap: 6px; }
+    .topbar-aksi .kalender-filter { width: 100%; }
+    .topbar-aksi .kalender-filter select,
+    .topbar-aksi .kalender-filter input { flex: 1 1 120px; min-width: 0; }
     .isi { padding: 12px; }
     .tabel { font-size: 12.5px; min-width: 480px; }
+    table.tabel select { min-width: 104px; }
     .tabel thead th, .tabel tbody td { padding: 8px 10px; }
     .modal { max-height: 95vh; }
     .modal-badan { padding: 16px; }
@@ -4605,5 +4656,26 @@ html[data-tema="gelap"] .kartu-stat[data-tilt]::before {
     .stat[data-tilt]::before,
     .kartu-stat[data-tilt]::before {
         display: none;
+    }
+}
+
+/* --- Penyesuaian akhir untuk layar kecil --- */
+.tampil-mobile { display: none; }
+
+@media (max-width: 900px) {
+    .grup-form-dua,
+    .grup-form-tiga { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .tampil-mobile { display: inline; }
+}
+
+@media (max-width: 380px) {
+    .pembuka-atas { flex-wrap: wrap; }
+    .pembuka-atas .aksi-masuk {
+        flex: 1 0 100%;
+        margin-left: 0;
+        justify-content: flex-end;
     }
 }

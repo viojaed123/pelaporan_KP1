@@ -450,7 +450,7 @@ mulai_halaman([
 .tabs{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
 .tab{padding:8px 14px;border:1px solid var(--abu-200);border-radius:999px;text-decoration:none;color:#334155;background:#fff}
 .tab.active{background:var(--phr-biru-tua);color:#fff;border-color:var(--phr-biru-tua)}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
 .card{background:#fff;border:1px solid var(--abu-200);border-radius:10px}
 .card-h{padding:10px 14px;border-bottom:1px solid var(--abu-200);font-weight:600}
 .card-b{padding:12px 14px}

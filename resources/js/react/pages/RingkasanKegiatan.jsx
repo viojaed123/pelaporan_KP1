@@ -95,17 +95,19 @@ export default function RingkasanKegiatan() {
                 <div className="kartu">
                     <div className="kartu-kepala">Perbandingan dengan periode sebelumnya</div>
                     <div className="kartu-tubuh">
-                        <table className="tabel">
-                            <thead>
-                                <tr><th>Ukuran</th><th>Periode ini</th><th>Sebelumnya</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>Jumlah laporan</td><td>{hasil.stat.jml}</td><td>{hasil.stat_sebelum.jml}</td></tr>
-                                <tr><td>Hari aktif</td><td>{hasil.stat.hari}</td><td>{hasil.stat_sebelum.hari}</td></tr>
-                                <tr><td>Total durasi</td><td>{jamMenit(hasil.stat.menit)}</td><td>{jamMenit(hasil.stat_sebelum.menit)}</td></tr>
-                                <tr><td>Ada kendala</td><td>{hasil.stat.kendala}</td><td>{hasil.stat_sebelum.kendala}</td></tr>
-                            </tbody>
-                        </table>
+                        <div className="bungkus-tabel">
+                            <table className="tabel">
+                                <thead>
+                                    <tr><th>Ukuran</th><th>Periode ini</th><th>Sebelumnya</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Jumlah laporan</td><td>{hasil.stat.jml}</td><td>{hasil.stat_sebelum.jml}</td></tr>
+                                    <tr><td>Hari aktif</td><td>{hasil.stat.hari}</td><td>{hasil.stat_sebelum.hari}</td></tr>
+                                    <tr><td>Total durasi</td><td>{jamMenit(hasil.stat.menit)}</td><td>{jamMenit(hasil.stat_sebelum.menit)}</td></tr>
+                                    <tr><td>Ada kendala</td><td>{hasil.stat.kendala}</td><td>{hasil.stat_sebelum.kendala}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}
