@@ -58,22 +58,27 @@
     --teks-redup: #475569;
     --garis: #E5E5E5;
 
-    --radius-sm: 6px;
-    --radius: 10px;
-    --radius-lg: 16px;
-    --radius-xl: 22px;
+    --radius-sm: 2px;
+    --radius: 4px;
+    --radius-lg: 6px;
+    --radius-xl: 8px;
 
-    --bayangan-sm: 0 1px 2px rgba(15, 23, 42, .06);
-    --bayangan: 0 4px 14px rgba(15, 23, 42, .07);
-    --bayangan-lg: 0 14px 38px rgba(15, 23, 42, .12);
+    --bayangan-sm: none;
+    --bayangan: 0 1px 0 rgba(15, 23, 42, .04);
+    --bayangan-lg: 0 24px 48px -24px rgba(15, 23, 42, .28);
 
     --sidebar-w: 264px;
     --sidebar-w-mini: 78px;
     --topbar-h: 66px;
 
-    --font: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
-            "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --font: "Instrument Sans", "Segoe UI", -apple-system, BlinkMacSystemFont,
+            Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-judul: "Schibsted Grotesk", "Instrument Sans", "Segoe UI",
+            -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    --font-mono: "DM Mono", "SFMono-Regular", Consolas, "Liberation Mono",
+            Menlo, monospace;
+
+    --transisi: 120ms ease;
 }
 
 /* ---------- 1b. Tema Gelap ---------------------------------------- */
@@ -2302,6 +2307,299 @@ html[data-tema="gelap"] .aksi-cepat a:hover {
     min-width: 600px;
 }
 
+/* ---------- 12b. Lapisan tampilan (acuan Dose) -------------------
+   Menyetel ulang tampilan tanpa mengubah markup maupun perilaku:
+   satu aksen (biru PHR), garis rambut, angka tabular, ritme 8px,
+   dan gerak yang tertahan. Tema gelap tetap diatur blok di atas.
+   ------------------------------------------------------------------ */
+body {
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.62;
+    letter-spacing: -.003em;
+    font-synthesis-weight: none;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: var(--font-judul);
+    font-weight: 600;
+    letter-spacing: -.022em;
+    color: var(--teks);
+}
+h1 { font-size: 1.95rem; line-height: 1.16; }
+h2 { font-size: 1.4rem; line-height: 1.22; }
+h3 { font-size: 1.12rem; }
+h4 { font-size: 1rem; }
+
+.judul-halaman,
+.kartu-kepala h2, .kartu-kepala h3,
+.kartu-header h2, .kartu-header h3,
+.modal-kepala h3,
+.judul-auth,
+.merek-auth .nama {
+    font-family: var(--font-judul);
+    font-weight: 600;
+    letter-spacing: -.02em;
+}
+.judul-halaman {
+    font-size: 16.5px;
+    color: var(--teks);
+}
+.judul-halaman .crumb {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+::selection { background: rgba(0, 94, 184, .16); }
+
+:focus-visible {
+    outline: 2px solid var(--phr-biru);
+    outline-offset: 2px;
+}
+
+/* --- Permukaan --- */
+.kartu {
+    border-radius: var(--radius);
+    box-shadow: none;
+}
+.kartu:hover {
+    box-shadow: none;
+    transform: none;
+    border-color: var(--garis);
+}
+.kartu-kepala,
+.kartu-header {
+    background: transparent;
+    border-bottom: 1px solid var(--garis);
+    padding: 20px 24px 14px;
+}
+.kartu-badan,
+.kartu-tubuh { padding: 22px 24px 24px; }
+.kartu-kaki {
+    background: transparent;
+    border-top: 1px solid var(--garis);
+    padding: 14px 24px;
+}
+
+.isi { padding: 24px 24px 40px; }
+
+/* --- Kartu statistik --- */
+.stat,
+.kartu-stat {
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    gap: 14px;
+}
+.stat:hover,
+.kartu-stat:hover { transform: none; box-shadow: none; }
+.stat::after,
+.kartu-stat::after { height: 2px; }
+.stat .ikon,
+.kartu-stat .ikon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 2px;
+    font-size: 17px;
+}
+.stat .nilai,
+.kartu-stat .nilai {
+    font-family: var(--font-judul);
+    font-size: 31px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--teks);
+}
+.stat .keterangan,
+.kartu-stat .keterangan {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .13em;
+    color: var(--teks-redup);
+}
+.stat .tambahan,
+.kartu-stat .tambahan { font-variant-numeric: tabular-nums; }
+
+/* --- Navigasi --- */
+.sidebar { background: var(--navy-600); }
+.sidebar-brand { padding: 20px 20px 16px; }
+.sidebar-brand .logo { border-radius: 2px; }
+.nav-judul {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #8fa6c0;
+    padding: 22px 12px 8px;
+}
+.nav-item {
+    border-radius: 2px;
+    padding: 9px 12px;
+}
+.nav-item.aktif { box-shadow: none; }
+.nav-badge {
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+}
+.pencarian-menu input { border-radius: 2px; }
+.topbar { box-shadow: none; }
+
+/* --- Tombol --- */
+.tombol {
+    border-radius: 2px;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+.tombol:hover {
+    transform: none;
+    box-shadow: none;
+}
+.aksi-cepat a:hover {
+    transform: none;
+    box-shadow: none;
+    background: var(--biru-50);
+}
+.chip {
+    border-radius: 2px;
+    box-shadow: none;
+}
+.chip:hover { transform: none; }
+.paginasi a,
+.paginasi span { border-radius: 2px; }
+
+/* --- Form --- */
+input[type=text], input[type=email], input[type=password], input[type=date],
+input[type=time], input[type=number], input[type=search], input[type=tel],
+input[type=url], input[type=datetime-local], select, textarea {
+    border-radius: 2px;
+    border-color: var(--garis);
+    padding: 10px 12px;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: var(--phr-biru);
+    box-shadow: 0 0 0 1px var(--phr-biru);
+}
+.grup-form > label,
+.form-grup > label,
+label.label-form {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+.opsi label { border-radius: 2px; }
+.area-unggah {
+    border-width: 1px;
+    border-radius: 2px;
+}
+fieldset { border-radius: var(--radius); }
+legend {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    color: var(--teks-redup);
+}
+
+/* --- Tabel --- */
+table.tabel thead th {
+    background: transparent;
+    border-top: 1px solid var(--garis);
+    border-bottom: 1px solid var(--garis);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    color: var(--teks-redup);
+    padding: 11px 14px;
+}
+table.tabel tbody td {
+    border-bottom: 1px solid var(--garis);
+    padding: 12px 14px;
+}
+table.tabel tbody tr:hover { background: var(--abu-50); }
+table.tabel td.text-kanan,
+table.tabel th.text-kanan,
+table.tabel td .angka {
+    font-variant-numeric: tabular-nums;
+}
+.filter-bar {
+    border-radius: var(--radius);
+    box-shadow: none;
+    padding: 16px 20px;
+}
+
+/* --- Status / badge --- */
+.badge {
+    border-radius: 2px;
+    box-shadow: none;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+}
+.badge::before { display: none; }
+
+/* --- Lain-lain --- */
+.alert { border-radius: var(--radius); }
+.rincian .baris { border-bottom: 1px solid var(--garis); }
+.rincian .kunci {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+.kotak-catatan {
+    border-radius: 2px;
+    border-left-width: 2px;
+}
+.galeri-foto a {
+    border-radius: 2px;
+    box-shadow: none;
+}
+.galeri-foto a:hover img { transform: scale(1.03); }
+.progres,
+.progres > span { border-radius: 2px; }
+.progres > span { background: var(--phr-biru); }
+.progres.hijau > span { background: var(--phr-hijau); }
+.progres.merah > span { background: var(--phr-merah); }
+.lewati-ke-konten { border-radius: 0 0 2px 0; }
+
+/* --- Halaman masuk --- */
+.panel-kiri-auth {
+    background: linear-gradient(160deg, var(--navy-700) 0%, var(--navy-600) 100%);
+}
+.panel-kiri-auth::before,
+.panel-kiri-auth::after { display: none; }
+.merek-auth .logo { border-radius: 2px; }
+.judul-auth {
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: -.025em;
+}
+.kartu-auth {
+    border-radius: var(--radius-lg);
+    box-shadow: none;
+}
+.kartu-auth h1 { font-size: 26px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .kartu, .stat, .kartu-stat, .tombol, .chip, .aksi-cepat a,
+    .galeri-foto img, .dropdown-menu.tampil, .modal {
+        transition: none;
+        animation: none;
+    }
+}
+
 /* ---------- 13. Responsif --------------------------------------- */
 @media (max-width: 1100px) {
     .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2519,8 +2817,6 @@ html[data-tema="gelap"] .aksi-cepat a:hover {
 
 :root {
     --bayangan-md: 0 10px 30px -12px rgba(0,61,125,.25);
-    --radius-xl: 14px;
-    --transisi: all .15s ease-in-out;
 }
 
 .baris {
@@ -3435,6 +3731,45 @@ circle.titik-kelip {
     line-height: 18px;
     text-align: center;
     font-weight: 600;
+}
+
+/* --- Penyelarasan SPA dengan lapisan tampilan (Dose) --- */
+.kartu-stat .angka {
+    font-family: var(--font-judul);
+    font-size: 31px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--teks);
+}
+.kartu-stat .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .13em;
+}
+.btn { border-radius: 2px; }
+.btn:hover { transform: none; box-shadow: none; }
+.halaman-auth .judul-auth { font-size: 30px; }
+
+:root[data-tema="gelap"] .btn {
+    background: rgba(30, 41, 59, .7);
+    color: var(--teks);
+    border-color: var(--garis);
+}
+:root[data-tema="gelap"] .btn:hover {
+    background: rgba(148, 163, 184, .18);
+    color: var(--teks);
+}
+:root[data-tema="gelap"] .btn-utama {
+    background: var(--phr-biru);
+    border-color: var(--phr-biru);
+    color: #fff;
+}
+:root[data-tema="gelap"] .btn-utama:hover {
+    background: var(--biru-600);
+    border-color: var(--biru-600);
 }
 
 /* --- Scrollbar ramping (sentuhan visual seragam) --- */
