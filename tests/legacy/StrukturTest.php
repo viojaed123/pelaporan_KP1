@@ -331,4 +331,19 @@ final class StrukturTest extends TestCase
             'impor_dataset.php harus memvalidasi kunci kolom dengan pola aman.'
         );
     }
+
+    public function testHalamanPembukaMemakaiAdegan3d(): void
+    {
+        $isi = (string) file_get_contents($this->root . '/index.php');
+
+        $this->assertStringContainsString('data-adegan', $isi);
+        $this->assertStringContainsString('data-panggung', $isi);
+        $this->assertStringContainsString('assets/js/gerak-3d.js', $isi);
+        $this->assertFileExists($this->root . '/assets/js/gerak-3d.js');
+
+        $js = (string) file_get_contents($this->root . '/assets/js/gerak-3d.js');
+        $this->assertStringContainsString('prefers-reduced-motion: reduce', $js);
+        $this->assertStringContainsString('pointermove', $js);
+        $this->assertStringContainsString('IntersectionObserver', $js);
+    }
 }

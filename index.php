@@ -21,6 +21,7 @@ if (sudah_masuk()) {
     <title><?= e(APP_NAMA) ?></title>
     <link rel="stylesheet" href="assets/css/app.css">
     <link rel="icon" href="assets/img/favicon.png" type="image/png">
+    <script src="assets/js/gerak-3d.js" defer></script>
 </head>
 <body>
 <div class="pembuka">
@@ -37,11 +38,44 @@ if (sudah_masuk()) {
     </header>
 
     <section class="hero">
-        <div class="hero-visual">
-            <div class="logo-bingkai">
-                <span class="hero-cincin"></span>
-                <span class="hero-cincin hero-cincin-2"></span>
-                <img src="assets/img/logo-phr.png" alt="<?= e(APP_ORGANISASI) ?>">
+        <div class="hero-visual adegan-3d" data-adegan>
+            <div class="panggung-3d" data-panggung>
+                <span class="pendar-3d" aria-hidden="true"></span>
+                <span class="orbit-3d" aria-hidden="true"></span>
+
+                <div class="logo-3d">
+                    <div class="logo-bingkai">
+                        <span class="hero-cincin"></span>
+                        <span class="hero-cincin hero-cincin-2"></span>
+                        <img src="assets/img/logo-phr.png" alt="<?= e(APP_ORGANISASI) ?>">
+                    </div>
+                </div>
+
+                <div class="kartu-3d kartu-3d-kiri" aria-hidden="true">
+                    <span class="kartu-3d-ikon"><?= ikon_sp('dokumen') ?></span>
+                    <span class="kartu-3d-teks">
+                        <strong>Laporan harian</strong>
+                        <small>Catat &amp; lampirkan bukti</small>
+                    </span>
+                </div>
+
+                <div class="kartu-3d kartu-3d-kanan" aria-hidden="true">
+                    <span class="kartu-3d-ikon"><?= ikon_sp('centang') ?></span>
+                    <span class="kartu-3d-teks">
+                        <strong>Diperiksa mentor</strong>
+                        <small>Status jelas &amp; transparan</small>
+                    </span>
+                </div>
+
+                <div class="kartu-3d kartu-3d-bawah" aria-hidden="true">
+                    <span class="kartu-3d-ikon"><?= ikon_sp('grafik') ?></span>
+                    <span class="kartu-3d-teks">
+                        <strong>Rekap otomatis</strong>
+                        <small>Siap ekspor &amp; Power BI</small>
+                    </span>
+                </div>
+
+                <span class="lantai-3d" aria-hidden="true"></span>
             </div>
         </div>
         <span class="hero-bunga"><span class="hero-titik"></span>Platform Pelaporan Migas Terintegrasi</span>

@@ -4258,3 +4258,286 @@ a.ca-strip:hover { border-left-color: var(--phr-biru-tua); }
 .ca-strip .ca-tombol { flex: none; }
 
 html[data-tema="gelap"] a.ca-strip:hover { border-left-color: #93c5fd; }
+
+/* ---------- Adegan 3D halaman pembuka (index.php) ---------------- */
+.pembuka-atas .logo.logo-gambar {
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+}
+
+.adegan-3d {
+    --rx: 0deg;
+    --ry: 0deg;
+    --gulir: 0px;
+    max-width: 660px;
+    height: clamp(300px, 36vw, 380px);
+    margin: 0 auto 30px;
+    perspective: 1200px;
+    perspective-origin: 50% 44%;
+    animation: naik-muncul .8s cubic-bezier(.22,.61,.36,1) both;
+}
+
+.panggung-3d {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transform: translateY(var(--gulir)) rotateX(var(--rx)) rotateY(var(--ry));
+    transition: transform .4s cubic-bezier(.22,.61,.36,1);
+    will-change: transform;
+}
+
+.adegan-3d.sedang-menunjuk .panggung-3d { transition-duration: .09s; }
+
+.pendar-3d {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: min(78%, 440px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%) translateZ(-90px);
+    background: radial-gradient(circle, rgba(0, 94, 184, .2), rgba(0, 94, 184, 0) 68%);
+    filter: blur(2px);
+    pointer-events: none;
+}
+
+.orbit-3d {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    width: min(88%, 480px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%) rotateX(74deg);
+    border: 1px solid rgba(0, 94, 184, .2);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .45);
+    pointer-events: none;
+}
+
+.orbit-3d::before,
+.orbit-3d::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    margin-top: -4.5px;
+    border-radius: 50%;
+    background: var(--phr-biru);
+    box-shadow: 0 0 0 5px rgba(0, 94, 184, .12);
+}
+
+.orbit-3d::before { left: -5px; }
+.orbit-3d::after {
+    right: -5px;
+    background: var(--phr-merah);
+    box-shadow: 0 0 0 5px rgba(235, 28, 36, .12);
+}
+
+.logo-3d {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -52%) translateZ(72px);
+    transform-style: preserve-3d;
+}
+
+.logo-3d .logo-bingkai { margin: 0; }
+
+.logo-bingkai::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background: linear-gradient(140deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 44%);
+    opacity: .45;
+    pointer-events: none;
+}
+
+.kartu-3d {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, .94);
+    border: 1px solid var(--garis);
+    border-radius: 12px;
+    box-shadow: 0 20px 44px -26px rgba(0, 61, 125, .55);
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+    animation: mengapung-3d 8s ease-in-out infinite;
+}
+
+.kartu-3d-kiri {
+    left: 0;
+    top: 27%;
+    transform: translateZ(46px) rotateY(9deg);
+}
+
+.kartu-3d-kanan {
+    right: 0;
+    top: 17%;
+    transform: translateZ(58px) rotateY(-9deg);
+    animation-delay: -2.7s;
+}
+
+.kartu-3d-bawah {
+    left: 50%;
+    bottom: 1%;
+    transform: translateX(-50%) translateZ(36px);
+    animation-delay: -4.3s;
+}
+
+.kartu-3d-ikon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--biru-50);
+    color: var(--phr-biru);
+}
+
+.kartu-3d-ikon .sp-ikon { width: 18px; height: 18px; }
+
+.kartu-3d-teks {
+    display: grid;
+    gap: 1px;
+    text-align: left;
+    line-height: 1.25;
+}
+
+.kartu-3d-teks strong {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--navy-600);
+    white-space: nowrap;
+}
+
+.kartu-3d-teks small {
+    font-size: 11px;
+    color: var(--teks-redup);
+    white-space: nowrap;
+}
+
+.lantai-3d {
+    position: absolute;
+    left: 50%;
+    bottom: -8%;
+    width: min(94%, 520px);
+    height: 54%;
+    transform: translateX(-50%) rotateX(76deg);
+    background-image:
+        linear-gradient(rgba(0, 94, 184, .13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 94, 184, .13) 1px, transparent 1px);
+    background-size: 34px 34px;
+    -webkit-mask-image: radial-gradient(closest-side, #000 12%, transparent 76%);
+    mask-image: radial-gradient(closest-side, #000 12%, transparent 76%);
+    opacity: .6;
+    pointer-events: none;
+}
+
+@keyframes mengapung-3d {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -9px; }
+}
+
+@keyframes naik-muncul {
+    from { opacity: 0; translate: 0 18px; }
+    to { opacity: 1; translate: 0 0; }
+}
+
+.hero-bunga,
+.hero h1,
+.hero > p,
+.hero .aksi,
+.papan-plang {
+    animation: naik-muncul .7s cubic-bezier(.22,.61,.36,1) both;
+}
+
+.hero h1 { animation-delay: .08s; }
+.hero > p { animation-delay: .16s; }
+.hero .aksi { animation-delay: .24s; }
+.papan-plang { animation-delay: .32s; }
+
+.gerak-siap {
+    opacity: 0;
+    translate: 0 18px;
+    transition:
+        opacity .6s ease,
+        translate .7s cubic-bezier(.22,.61,.36,1);
+    transition-delay: var(--jeda, 0ms);
+}
+
+.gerak-siap.tampil {
+    opacity: 1;
+    translate: 0 0;
+}
+
+@media (max-width: 900px) {
+    .adegan-3d { height: clamp(280px, 46vw, 330px); }
+    .kartu-3d-kiri { left: -1%; }
+    .kartu-3d-kanan { right: -1%; }
+}
+
+@media (max-width: 680px) {
+    .adegan-3d {
+        height: 280px;
+        perspective: 900px;
+    }
+
+    .logo-3d .logo-bingkai {
+        width: 142px;
+        height: 142px;
+        border-radius: 28px;
+    }
+
+    .logo-3d .logo-bingkai img { width: 88px; height: 88px; }
+    .logo-3d .hero-cincin { border-radius: 28px; }
+    .logo-3d .hero-cincin-2 { border-radius: 36px; }
+
+    .kartu-3d-kiri,
+    .kartu-3d-kanan { display: none; }
+
+    .kartu-3d-bawah {
+        bottom: 2%;
+        padding: 9px 11px;
+    }
+
+    .kartu-3d-teks strong { font-size: 12px; }
+    .kartu-3d-teks small { font-size: 10.5px; }
+
+    .orbit-3d { width: min(80%, 330px); }
+    .lantai-3d { height: 48%; background-size: 28px 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .adegan-3d,
+    .hero-bunga,
+    .hero h1,
+    .hero > p,
+    .hero .aksi,
+    .papan-plang,
+    .kartu-3d,
+    .logo-bingkai,
+    .logo-bingkai::after,
+    .hero-titik {
+        animation: none !important;
+    }
+
+    .panggung-3d {
+        transform: none;
+        transition: none;
+    }
+
+    .gerak-siap {
+        opacity: 1;
+        translate: none;
+        transition: none;
+    }
+}
