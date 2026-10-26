@@ -5,6 +5,7 @@ use App\Http\Middleware\CekPeran;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,6 +15,25 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        /*
+         |------------------------------------------------------------------
+         | Proksi lokal (Cloudflare Tunnel / Nginx)
+         |------------------------------------------------------------------
+         |
+         | Saat aplikasi berada di balik Cloudflare Tunnel atau reverse proxy
+         | di mesin yang sama, permintaan datang dari 127.0.0.1. Percayai
+         | header X-Forwarded-* agar skema HTTPS, host, dan IP klien terbaca
+         | benar (aset Vite tidak menjadi http:// di halaman https).
+         |
+         */
+        $middleware->trustProxies(
+            at: ['127.0.0.1', '::1'],
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO
+        );
+
         /*
          |------------------------------------------------------------------
          | Grup web: sesi dikeraskan + batas waktu sesi
