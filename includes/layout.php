@@ -288,9 +288,6 @@ function mulai_halaman(array $opsi = []): void
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= e(csrf_token('global')) ?>">
     <title><?= e($judulPenuh) ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Instrument+Sans:wght@400;500;600&amp;family=Schibsted+Grotesk:wght@400;500;600;700&amp;display=swap">
     <link rel="stylesheet" href="assets/css/app.css">
     <link rel="icon" href="assets/img/favicon.png" type="image/png">
     <!-- Tema gelap dimuat di <head> supaya preferensi tersimpan langsung

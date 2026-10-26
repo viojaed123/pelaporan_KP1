@@ -204,6 +204,12 @@ $tautanHal = static function (int $n) use ($statusSaring, $kategoriSaring, $bula
     return 'cost_avoidance.php?' . http_build_query($q);
 };
 
+$parameterEkspor = http_build_query([
+    'status'   => $statusSaring,
+    'kategori' => $kategoriSaring,
+    'bulan'    => $bulanSaring,
+]);
+
 mulai_halaman([
     'judul'     => 'Cost Avoidance',
     'crumb'     => 'Cost Avoidance',
@@ -346,7 +352,13 @@ mulai_halaman([
     <div class="ca-panel">
         <div class="ca-panel-kepala">
             <h3>Daftar pengajuan</h3>
-            <span class="ca-meta"><?= (int) $total ?> entri</span>
+            <div class="ca-kepala-aksi">
+                <span class="ca-meta"><?= (int) $total ?> entri</span>
+                <a class="ca-tombol ca-tombol-kecil"
+                   href="export_cost_avoidance.php?format=xlsx&amp;<?= e($parameterEkspor) ?>">Excel</a>
+                <a class="ca-tombol ca-tombol-kecil"
+                   href="export_cost_avoidance.php?format=pdf&amp;<?= e($parameterEkspor) ?>">PDF</a>
+            </div>
         </div>
 
         <form class="ca-filter" method="get" action="cost_avoidance.php">

@@ -43,22 +43,29 @@ class RingkasanController extends Controller
             ->whereDate('tenggat', '<', $hariIni)
             ->count();
 
-        $costAvoidance = ['total_disetujui' => 0.0, 'diajukan' => 0, 'disetujui' => 0];
+        $costAvoidance = ['total_disetujui' => 0.0, 'diajukan' => 0, 'disetujui' => 0, 'cakupan' => 'sendiri'];
+        $peranPenuh = in_array($user->role, ['mentor', 'admin'], true);
 
         try {
+            $q = CostAvoidance::query();
+            if (! $peranPenuh) {
+                $q->where('dibuat_oleh', $user->id);
+            }
+
             $costAvoidance = [
-                'total_disetujui' => (float) CostAvoidance::where('dibuat_oleh', $user->id)
+                'total_disetujui' => (float) (clone $q)
                     ->where('status', 'disetujui')
                     ->sum('nilai_avoidance'),
-                'diajukan' => CostAvoidance::where('dibuat_oleh', $user->id)
+                'diajukan' => (clone $q)
                     ->where('status', 'diajukan')
                     ->count(),
-                'disetujui' => CostAvoidance::where('dibuat_oleh', $user->id)
+                'disetujui' => (clone $q)
                     ->where('status', 'disetujui')
                     ->count(),
+                'cakupan' => $peranPenuh ? 'semua' : 'sendiri',
             ];
         } catch (\Throwable $e) {
-            $costAvoidance = ['total_disetujui' => 0.0, 'diajukan' => 0, 'disetujui' => 0];
+            $costAvoidance = ['total_disetujui' => 0.0, 'diajukan' => 0, 'disetujui' => 0, 'cakupan' => 'sendiri'];
         }
 
         return response()->json([

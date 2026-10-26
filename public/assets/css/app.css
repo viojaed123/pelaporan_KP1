@@ -3779,10 +3779,8 @@ circle.titik-kelip {
 /* ---------- Cost Avoidance (acuan Dose, palet PHR) --------------- */
 .ca-halaman,
 .ca-strip {
-    --ca-font-teks: "Schibsted Grotesk", "Instrument Sans", system-ui,
-        -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    --ca-font-angka: "DM Mono", ui-monospace, "Consolas", "Liberation Mono",
-        Menlo, monospace;
+    --ca-font-teks: var(--font);
+    --ca-font-angka: var(--font-mono);
 }
 
 .ca-halaman { display: grid; gap: 16px; font-family: var(--ca-font-teks); }

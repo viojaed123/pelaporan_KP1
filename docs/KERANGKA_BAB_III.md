@@ -293,7 +293,7 @@ menjadi bukti bahwa ruang lingkup penelitian tidak melompati lapisan legacy.
 | 27 | `config_lokal.php` | — (rahasia) | Berkas nyata; diabaikan Git dan dilindungi `.htaccess` |
 | 28 | `cost_avoidance.php` | `cost_avoidance_kategori_daftar()`, `cost_avoidance_validasi()`, `cost_avoidance_ringkas()`, `cost_avoidance_verifikasi()` | Cost avoidance: validasi + rupiah, CRUD, alur `draft → diajukan → disetujui/ditolak` |
 
-### Tabel 3.4B — Halaman Legacy di Akar (62 berkas) menurut Domain
+### Tabel 3.4B — Halaman Legacy di Akar (63 berkas) menurut Domain
 
 | No. | Kelompok | Berkas | Jumlah |
 |---|---|---|---|
@@ -302,7 +302,7 @@ menjadi bukti bahwa ruang lingkup penelitian tidak melompati lapisan legacy.
 | 3 | Laporan harian | `buat_laporan.php`, `riwayat.php`, `detail_laporan.php`, `edit_riwayat.php`, `edit_revisi.php`, `komentar_proses.php`, `lihat_foto.php`, `hapus_riwayat.php`, `export_pdf.php` | 9 |
 | 4 | Persetujuan & rekap laporan | `mentor_detail.php`, `mentor_proses.php`, `mentor_bulk.php`, `distribusi_laporan.php`, `rekap_laporan.php` | 5 |
 | 5 | Absensi | `absensi.php`, `mentor_absensi.php`, `rekap_absensi.php` | 3 |
-| 6 | Ekspor dokumen | `export_excel.php`, `export_word.php` | 2 |
+| 6 | Ekspor dokumen | `export_excel.php`, `export_word.php`, `export_cost_avoidance.php` | 3 |
 | 7 | Impor & visualisasi data | `impor_laporan.php`, `impor_srm_cid.php`, `impor_dataset.php`, `analisis_dataset.php`, `analisis_sosial.php` | 5 |
 | 8 | SRM & CID | `srm.php`, `cid.php` | 2 |
 | 9 | Kasus | `dashboard_kasus.php`, `buat_kasus.php`, `detail_kasus.php`, `edit_kasus.php`, `hapus_kasus.php` | 5 |
@@ -314,7 +314,7 @@ menjadi bukti bahwa ruang lingkup penelitian tidak melompati lapisan legacy.
 | 15 | Akun | `profil.php` | 1 |
 | 16 | Internal | `koneksi.php` | 1 |
 | 17 | Cost avoidance | `cost_avoidance.php` | 1 |
-| | **Total** | | **62** |
+| | **Total** | | **63** |
 
 > `analisis_sosial.php` dan `panduan_powerbi.php` sengaja **tidak** muncul di
 > sidebar: keduanya halaman berdiri sendiri yang ditautkan dari halaman lain
@@ -347,7 +347,7 @@ menjadi bukti bahwa ruang lingkup penelitian tidak melompati lapisan legacy.
 | 21 | `Api\NotifikasiController` | API | `GET /notifikasi`, `POST /notifikasi/{id}/dibaca`, `/dibaca-semua` | `Notifikasi` |
 | 22 | `Api\RingkasanController` | API | `GET /ringkasan` | `LaporanHarian`, `Absensi`, `Tugas`, `CostAvoidance` |
 | 23 | `Api\AnalitikController` | API | `GET /dasbor`, `/rekap/*`, `/ringkasan-kegiatan`, `/kalender`, `/analitik/srm`, `/analitik/cid` | `LaporanHarian`, `SrmKegiatan`, `CidProgram` |
-| 24 | `Api\EksporController` | API | `GET /ekspor/laporan`, `/ekspor/absensi`, `/ekspor/kasus` | `LaporanHarian`, `Absensi`, `Kasus` + PhpSpreadsheet |
+| 24 | `Api\EksporController` | API | `GET /ekspor/laporan`, `/ekspor/absensi`, `/ekspor/kasus`, `/ekspor/cost-avoidance` | `LaporanHarian`, `Absensi`, `Kasus`, `CostAvoidance` + PhpSpreadsheet/Dompdf |
 | 25 | `Api\CostAvoidanceController` | API | `GET/POST /cost-avoidance`, `GET/PUT/DELETE /cost-avoidance/{id}`, `GET /cost-avoidance/ringkasan`, `POST /cost-avoidance/{id}/ajukan`, `/verifikasi` | `CostAvoidance`, `AuditLogger` |
 
 Dua hal yang perlu dicatat dari pemetaan ini dan dibahas pada Bab IV:
@@ -432,7 +432,7 @@ ulang di Subbab 4.3.1.
 │  SPA React    │───────────────► │              │      ┌──────────────┐
 │  17 halaman   │                   │   Laravel    │      │  MariaDB     │
 └───────────────┘                   │   12         │─────►│  48 tabel    │
-┌───────────────┐  HTTP + Bearer   │   45 API     │      │  (shared)    │
+┌───────────────┐  HTTP + Bearer   │   47 API     │      │  (shared)    │
 │  APK Android  │───────────────► │              │      └──────┬───────┘
 │  11 layar     │                   └──────┬───────┘             │
 └───────────────┘                          │                     │
@@ -537,6 +537,7 @@ header `X-Service-Key` untuk klien layanan (PHP → ai-service).
 | GET | `/api/v1/ekspor/laporan` | Bearer | **Mentor, Admin** | Ekspor `.xlsx` (PhpSpreadsheet) |
 | GET | `/api/v1/ekspor/absensi` | Bearer | **Mentor, Admin** | Ekspor `.xlsx` |
 | GET | `/api/v1/ekspor/kasus` | Bearer | **Mentor, Admin** | Ekspor `.xlsx` |
+| GET | `/api/v1/ekspor/cost-avoidance` | Bearer | Semua (diskalakan) | Ekspor `.xlsx`/`.pdf` |
 | GET | `/api/v1/ringkasan-kegiatan` | Bearer | Semua (diskalakan) | Ringkasan kegiatan |
 | GET | `/api/v1/kalender` | Bearer | Semua (diskalakan) | Kalender aktivitas |
 | GET | `/api/v1/analitik/srm` | Bearer | Semua | Analitik SRM |
@@ -770,7 +771,7 @@ dilaporkan agar prosedur operasional pada Bab IV dapat direproduksi.
 
 | No. | Jenis Uji | Level | Metode | Instrumen | Volume | Kriteria Lulus |
 |---|---|---|---|---|---|---|
-| 1 | Fungsional API & modul | Feature | Black-box | PHPUnit 11 (Laravel) | 182 uji | Semua assertions lulus |
+| 1 | Fungsional API & modul | Feature | Black-box | PHPUnit 11 (Laravel) | 184 uji | Semua assertions lulus |
 | 2 | Fungsional legacy | Feature | Black-box | PHPUnit-legacy | 163 uji | Semua assertions lulus |
 | 3 | Microservice AI | Unit + integration (mock LLM) | White-box | pytest 8 | 78 uji | Semua lulus tanpa model hidup |
 | 4 | Struktur & validasi HTML | Static | Analisis berkas | PHPUnit legacy `StrukturTest` | ‹n› | 0 ketidaksesuaian struktur |

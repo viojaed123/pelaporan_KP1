@@ -8,6 +8,7 @@ use App\Models\CostAvoidance;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\Concerns\SkemaAuth;
 use Tests\TestCase;
 
@@ -412,7 +413,93 @@ class ApiCostAvoidanceTest extends TestCase
             ->assertOk()
             ->assertJsonPath('ringkasan.cost_avoidance.total_disetujui', 400000)
             ->assertJsonPath('ringkasan.cost_avoidance.disetujui', 1)
-            ->assertJsonPath('ringkasan.cost_avoidance.diajukan', 0);
+            ->assertJsonPath('ringkasan.cost_avoidance.diajukan', 0)
+            ->assertJsonPath('ringkasan.cost_avoidance.cakupan', 'sendiri');
+    }
+
+    public function test_dasbor_mentor_dan_admin_melihat_total_seluruh_pengguna(): void
+    {
+        $andi = $this->pengguna('karyawan', 'Andi');
+        $budi = $this->pengguna('karyawan', 'Budi');
+        $mentor = $this->pengguna('mentor', 'Mentor');
+        $admin = $this->pengguna('admin', 'Admin');
+
+        foreach ([
+            [$andi, 'CA-2026-0011', 'disetujui', 400000],
+            [$budi, 'CA-2026-0012', 'disetujui', 600000],
+            [$budi, 'CA-2026-0013', 'diajukan', 250000],
+        ] as [$pemilik, $kode, $status, $nilai]) {
+            CostAvoidance::create([
+                'kode' => $kode, 'judul' => 'Data ' . $kode, 'kategori' => 'Lainnya',
+                'periode' => '2026-08-01', 'estimasi' => $nilai, 'realisasi' => 0,
+                'nilai_avoidance' => $nilai, 'status' => $status, 'dibuat_oleh' => $pemilik->id,
+            ]);
+        }
+
+        foreach ([$mentor, $admin] as $pengguna) {
+            $this->getJson('/api/v1/ringkasan', $this->hdr($this->masuk($pengguna)))
+                ->assertOk()
+                ->assertJsonPath('ringkasan.cost_avoidance.total_disetujui', 1000000)
+                ->assertJsonPath('ringkasan.cost_avoidance.disetujui', 2)
+                ->assertJsonPath('ringkasan.cost_avoidance.diajukan', 1)
+                ->assertJsonPath('ringkasan.cost_avoidance.cakupan', 'semua');
+        }
+
+        $this->getJson('/api/v1/ringkasan', $this->hdr($this->masuk($andi)))
+            ->assertOk()
+            ->assertJsonPath('ringkasan.cost_avoidance.total_disetujui', 400000)
+            ->assertJsonPath('ringkasan.cost_avoidance.cakupan', 'sendiri');
+    }
+
+    public function test_ekspor_cost_avoidance_diskalakan_per_peran(): void
+    {
+        $andi = $this->pengguna('karyawan', 'Andi');
+        $budi = $this->pengguna('karyawan', 'Budi');
+        $mentor = $this->pengguna('mentor', 'Mentor');
+
+        foreach ([
+            [$andi, 'CA-2026-0021'],
+            [$budi, 'CA-2026-0022'],
+        ] as [$pemilik, $kode]) {
+            CostAvoidance::create([
+                'kode' => $kode, 'judul' => 'Data ' . $kode, 'kategori' => 'Lainnya',
+                'periode' => '2026-08-01', 'estimasi' => 300000, 'realisasi' => 0,
+                'nilai_avoidance' => 300000, 'status' => 'disetujui', 'dibuat_oleh' => $pemilik->id,
+            ]);
+        }
+
+        $res = $this->get('/api/v1/ekspor/cost-avoidance', $this->hdr($this->masuk($andi)))
+            ->assertOk();
+
+        $this->assertStringContainsString(
+            'spreadsheetml.sheet',
+            (string) $res->headers->get('Content-Type')
+        );
+        $this->assertSame(1, $this->barisDataXlsx($res->streamedContent()));
+
+        $resMentor = $this->get(
+            '/api/v1/ekspor/cost-avoidance?format=pdf',
+            $this->hdr($this->masuk($mentor))
+        )->assertOk();
+
+        $this->assertStringContainsString(
+            'application/pdf',
+            (string) $resMentor->headers->get('Content-Type')
+        );
+        $this->assertStringStartsWith('%PDF', $resMentor->getContent());
+    }
+
+    private function barisDataXlsx(string $isi): int
+    {
+        $berkas = tempnam(sys_get_temp_dir(), 'ca_') . '.xlsx';
+        file_put_contents($berkas, $isi);
+
+        $lembar = IOFactory::load($berkas)->getActiveSheet();
+        $terakhir = $lembar->getHighestDataRow();
+
+        @unlink($berkas);
+
+        return max(0, $terakhir - 3);
     }
 
     public function test_tanpa_login_ditolak(): void

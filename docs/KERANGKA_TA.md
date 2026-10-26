@@ -26,7 +26,7 @@
 
 | Aspek | Nilai | Sumber |
 |---|---|---|
-| Endpoint API (Laravel `/api/v1`) | **37** | `routes/api.php` |
+| Endpoint API (Laravel `/api/v1`) | **47** (`routes/api.php`) | `routes/api.php` |
 | Endpoint AI lapisan legacy (PHP) | **3** | `api_chat.php`, `api_validasi.php`, `api_notifikasi_jumlah.php` |
 | Halaman React SPA | **16** | `resources/js/react/pages/` |
 | Layar Android | **11** | `mobile/.../ui/layar/` |
@@ -37,12 +37,12 @@
 | Tabel basis data | **47** (37 tabel legacy + 10 migrasi Laravel yang membuat 11 tabel) | `database/schema/legacy/`, `database/migrations/` |
 | Berkas `includes/` (inti legacy) | **27** | `includes/` |
 | Controller Laravel | **24** (14 web + 10 API) | `app/Http/Controllers/` |
-| Model Eloquent | **37** | `app/Models/` |
+| Model Eloquent | **38** | `app/Models/` |
 | Service Laravel | **7** | `app/Services/` |
 | Middleware Laravel | **2** | `app/Http/Middleware/` |
-| Halaman PHP legacy di akar | **61** | `/*.php` |
+| Halaman PHP legacy di akar | **63** | `/*.php` |
 | Peran pengguna | **3** (karyawan, mentor, admin) | `includes/auth.php`, `includes/layout.php` |
-| Uji otomatis | **423** (182 Laravel + 163 legacy + 78 pytest) | `tests/`, `ai-service/tests/` |
+| Uji otomatis | **425** (184 Laravel + 163 legacy + 78 pytest) | `tests/`, `ai-service/tests/` |
 | Halaman legacy dengan penjaga peran | **21** (`wajib_role()`) | `includes/auth.php` + halaman akar |
 
 ---
@@ -337,7 +337,7 @@ Delivery*).
 | Basis data | MariaDB / MySQL | 10.4+ | Shared database, kompatibel XAMPP |
 | Dokumen | dompdf / PhpSpreadsheet / PHPMailer | 3.1 / 5.10 / 6.10 | Ekspor PDF/XLSX & surel OTP |
 | Analitik | Power BI + 22 SQL VIEW | — | Lapisan baca-saja, risiko rendah |
-| Pengujian | PHPUnit / PHPUnit-legacy / pytest | 11.5 / — / 8.3 | 423 uji otomatis |
+| Pengujian | PHPUnit / PHPUnit-legacy / pytest | 11.5 / - / 8.3 | 425 uji otomatis |
 
 ---
 
@@ -372,7 +372,7 @@ Delivery*).
   `menu_tersedia()` (`includes/layout.php`) dan `peta_akses()`
   (`includes/auth.php`).
 - **3.3.4 Rincian modul inti dan pemetaan kode** → 28 berkas `includes/`,
-  62 halaman legacy di akar (16 kelompok domain), dan 25 controller Laravel
+  63 halaman legacy di akar (16 kelompok domain), dan 25 controller Laravel
   yang dipetakan ke endpoint serta model (Tabel 3.4A, 3.4B, 3.4C).
 
 ## 3.4 Perancangan Sistem
@@ -390,7 +390,7 @@ Delivery*).
 
 ## 3.5 Rancangan Antarmuka API
 
-Tabel lengkap 37 endpoint Laravel (metode, path, autentikasi, peran, deskripsi)
+Tabel lengkap 47 endpoint Laravel (metode, path, autentikasi, peran, deskripsi)
 **plus 3 endpoint AI pada lapisan legacy PHP** → `KERANGKA_BAB_III.md` §3.5
 (Tabel 3.7–3.10 dan Tabel 3.10A).
 
@@ -415,7 +415,7 @@ Hardware, sistem operasi, perangkat lunak, dan alat bantu → `KERANGKA_BAB_III.
 
 | Jenis | Metode | Instrumen | Volume/Target |
 |---|---|---|---|
-| Fungsional (Laravel) | Black-box | PHPUnit 11 | 182 uji |
+| Fungsional (Laravel) | Black-box | PHPUnit 11 | 184 uji |
 | Fungsional (legacy) | Black-box | PHPUnit-legacy | 163 uji |
 | Microservice AI | Unit + mock LLM | pytest 8 | 78 uji |
 | Keamanan | Manual + OWASP checklist | Form review | 10 butir |
@@ -474,7 +474,7 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
   laporan oleh AI, tetap membalas struktur sama saat layanan mati), dan
   `api_notifikasi_jumlah.php` (lencana notifikasi). Rincian di Tabel 3.10A.
 
-- **4.2.3 Lapisan Laravel 12 + React 19 SPA.** 17 halaman React, 45 endpoint
+- **4.2.3 Lapisan Laravel 12 + React 19 SPA.** 17 halaman React, 47 endpoint
   `/api/v1`, **25 controller** (14 web + 11 API) yang memetakan endpoint ke
   model, 38 model Eloquent, 7 service domain (`AuditLogger`, `KeamananLogin`,
   `Otp`, `KodeCadangan`, `PendaftaranSesi`, `RiwayatSandi`, `CocokPengguna`),
@@ -551,7 +551,7 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
   > pada Subbab 5.2: (a) keluarkan berkas dari `.gitignore` sebagai contoh
   > (`hermes.config.example.yaml`), atau (b) tambahkan `pytest.skip` bila
   > berkas tidak ada, atau (c) hapus uji tersebut karena komponennya opsional.
-  > Temuan ini ditulis apa adanya agar klaim "423 uji lulus" dapat
+  > Temuan ini ditulis apa adanya agar klaim "425 uji lulus" dapat
   > dipertanggungjawabkan beserta syarat lingkungannya.
 
 
@@ -621,10 +621,10 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
 
 | Suite | Framework | Jumlah | Status |
 |---|---|---|---|
-| Laravel Feature/Unit | PHPUnit 11 | 182 | Lulus |
+| Laravel Feature/Unit | PHPUnit 11 | 184 | Lulus |
 | Legacy | PHPUnit-legacy | 163 | Lulus |
 | ai-service | pytest 8 | 78 | Lulus |
-| **Total** | | **423** | |
+| **Total** | | **425** | |
 
 **Tabel 4.9** — uji fungsional manual per modul (ID | skenario | expected | actual | status).
 **Tabel 4.10** — uji keamanan checklist OWASP 10 butir + screenshot.
@@ -680,7 +680,7 @@ Dua deviasi nyata yang sudah terverifikasi di kode dan wajib disebut:
 | RM-3 | Seluruh tindakan berisiko berpintu persetujuan (*approval-gated*) | Tabel 4.5 | 4.3.5 |
 | RM-4 | RBAC, audit, 2FA, batas sesi aktif lintas platform | Tabel 4.7 | 4.5 |
 | RM-5 | Ketepatan ‹…›%, p95 ‹…› s, fallback 100% skenario | Tabel 4.13 | 4.8 |
-| RM-6 | 423 uji otomatis lulus + UAT ‹n› responden | Tabel 4.8, 4.14 | 4.7, 4.9 |
+| RM-6 | 425 uji otomatis lulus + UAT ‹n› responden | Tabel 4.8, 4.14 | 4.7, 4.9 |
 
 ## 4.11 Analisis Keseluruhan
 
@@ -698,12 +698,12 @@ Tulis 5–7 butir; masing-masing **dimulai dari kalimat yang menjawab satu
 rumusan masalah**, lalu diberi angka. Contoh:
 
 1. Arsitektur integrasi lima subsistem berhasil dibangun pada satu basis data
-   MariaDB dengan pendekatan strangler fig, memuat 17 halaman React, 45 endpoint
+   MariaDB dengan pendekatan strangler fig, memuat 17 halaman React, 47 endpoint
    API, 11 layar Android, dan 23 view analitik read-only.
 2. Microservice AI berhasil berfungsi sebagai gateway tunggal dengan 21 alat
    berbasis function calling, rantai cadangan Gemini → Ollama, dan 100%
    tindakan berisiko berpintu persetujuan (*approval-gated*).
-3. Pengujian otomatis mencapai 423 uji yang lulus seluruhnya (182 PHPUnit
+3. Pengujian otomatis mencapai 425 uji yang lulus seluruhnya (184 PHPUnit
    Laravel + 163 PHPUnit legacy + 78 pytest AI), dan UAT terhadap
    ‹n› responden rerata ‹…› pada skala 1–5.
 4. Efektivitas fungsi AI terukur: ketepatan ‹…›% pada ‹…› skenario, waktu
@@ -749,7 +749,7 @@ rumusan masalah**, lalu diberi angka. Contoh:
 6. Evaluasi akurasi AI berbasis rubrik manual, belum benchmark otomatis.
 7. **Reproduksibilitas uji belum sepenuhnya terjaga**: `ai-service/hermes/`
    tidak dilacak Git, sedangkan `test_packaging.py` membacanya tanpa penjaga,
-   sehingga klon bersih akan gagal pada satu uji. Seluruh angka "423 uji lulus"
+   sehingga klon bersih akan gagal pada satu uji. Seluruh angka "425 uji lulus"
    berlaku pada mesin pengembang yang memiliki berkas tersebut (lihat 4.3.9).
 8. Konvensi penjagaan hak akses belum seragam: `peta_akses()` dipakai untuk
    `srm.hapus`/`cid.hapus`, sedangkan impor dijaga `impor_jenis_untuk_role()`

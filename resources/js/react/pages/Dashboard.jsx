@@ -59,7 +59,10 @@ export default function Dashboard() {
             {ringkasan?.cost_avoidance && (
                 <Link className="ca-strip" to="/cost-avoidance">
                     <div className="ca-strip-utama">
-                        <p className="ca-eyebrow">Cost avoidance disetujui</p>
+                        <p className="ca-eyebrow">
+                            Cost avoidance disetujui
+                            {ringkasan.cost_avoidance.cakupan === 'semua' ? ' · seluruh pengguna' : ''}
+                        </p>
                         <p className="ca-strip-angka">{rupiah(ringkasan.cost_avoidance.total_disetujui)}</p>
                         <p className="ca-meta">
                             {ringkasan.cost_avoidance.disetujui ?? 0} entri disetujui

@@ -78,6 +78,8 @@ Route::prefix('v1')->group(function () {
             ->whereNumber('id')
             ->middleware('role:mentor,admin');
 
+        Route::get('/ekspor/cost-avoidance', [EksporController::class, 'costAvoidance']);
+
         Route::get('/notifikasi', [NotifikasiController::class, 'daftar']);
         Route::get('/notifikasi/jumlah', [NotifikasiController::class, 'jumlah']);
         Route::post('/notifikasi/{id}/dibaca', [NotifikasiController::class, 'tandaiDibaca'])

@@ -189,6 +189,29 @@ export default function CostAvoidance() {
         });
     };
 
+    const unduh = async (format) => {
+        try {
+            setGalat('');
+            const p = { format };
+            if (filter.bulan) p.bulan = filter.bulan;
+            if (filter.status) p.status = filter.status;
+            if (filter.kategori) p.kategori = filter.kategori;
+
+            const res = await api.get('/ekspor/cost-avoidance', { params: p, responseType: 'blob' });
+            const url = URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            const ts = new Date().toISOString().slice(0, 10);
+            link.href = url;
+            link.download = `cost-avoidance-${ts}.${format}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            setGalat(e.response?.data?.pesan ?? 'Gagal mengunduh berkas.');
+        }
+    };
+
     const jumlah = ringkasan?.jumlah ?? {};
     const perKategori = ringkasan?.per_kategori ?? [];
     const maksKategori = perKategori.reduce((n, k) => Math.max(n, Number(k.nilai) || 0), 0);
@@ -204,6 +227,22 @@ export default function CostAvoidance() {
                     </p>
                 </div>
                 <div className="ca-kepala-aksi">
+                    <button
+                        type="button"
+                        className="ca-tombol"
+                        disabled={sibuk}
+                        onClick={() => unduh('xlsx')}
+                    >
+                        Excel
+                    </button>
+                    <button
+                        type="button"
+                        className="ca-tombol"
+                        disabled={sibuk}
+                        onClick={() => unduh('pdf')}
+                    >
+                        PDF
+                    </button>
                     <button
                         type="button"
                         className="ca-tombol ca-tombol-utama"
