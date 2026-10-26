@@ -346,4 +346,24 @@ final class StrukturTest extends TestCase
         $this->assertStringContainsString('pointermove', $js);
         $this->assertStringContainsString('IntersectionObserver', $js);
     }
+
+    public function testDasborMemakaiKartuStatistik3d(): void
+    {
+        $dasbor = ['dashboard.php', 'mentor_dashboard.php', 'admin_dashboard.php', 'dashboard_kasus.php'];
+        foreach ($dasbor as $berkas) {
+            $isi = (string) file_get_contents($this->root . '/' . $berkas);
+            $this->assertStringContainsString('data-tilt', $isi, $berkas . ' harus memakai kartu statistik 3D.');
+        }
+
+        $layout = (string) file_get_contents($this->root . '/includes/layout.php');
+        $this->assertStringContainsString('assets/js/gerak-kartu.js', $layout);
+        $this->assertFileExists($this->root . '/assets/js/gerak-kartu.js');
+
+        $spa = (string) file_get_contents($this->root . '/resources/js/react/pages/Dashboard.jsx');
+        $this->assertStringContainsString('data-tilt', $spa);
+
+        $js = (string) file_get_contents($this->root . '/assets/js/gerak-kartu.js');
+        $this->assertStringContainsString('prefers-reduced-motion: reduce', $js);
+        $this->assertStringContainsString('pointermove', $js);
+    }
 }

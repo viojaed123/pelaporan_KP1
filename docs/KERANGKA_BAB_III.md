@@ -772,7 +772,7 @@ dilaporkan agar prosedur operasional pada Bab IV dapat direproduksi.
 | No. | Jenis Uji | Level | Metode | Instrumen | Volume | Kriteria Lulus |
 |---|---|---|---|---|---|---|
 | 1 | Fungsional API & modul | Feature | Black-box | PHPUnit 11 (Laravel) | 184 uji | Semua assertions lulus |
-| 2 | Fungsional legacy | Feature | Black-box | PHPUnit-legacy | 164 uji | Semua assertions lulus |
+| 2 | Fungsional legacy | Feature | Black-box | PHPUnit-legacy | 165 uji | Semua assertions lulus |
 | 3 | Microservice AI | Unit + integration (mock LLM) | White-box | pytest 8 | 78 uji | Semua lulus tanpa model hidup |
 | 4 | Struktur & validasi HTML | Static | Analisis berkas | PHPUnit legacy `StrukturTest` | ‹n› | 0 ketidaksesuaian struktur |
 | 5 | Keamanan | Manual | Checklist OWASP 10 butir | Form review | 10 butir | Tidak ada temuan kritis/tinggi |

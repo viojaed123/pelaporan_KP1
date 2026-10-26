@@ -616,7 +616,7 @@ mulai_halaman($opsi);
 
 <!-- ================= KARTU RINGKASAN ================= -->
 <section class="grid grid-4">
-    <div class="stat biru">
+    <div class="stat biru" data-tilt>
         <span class="ikon">⚑</span>
         <div class="flex-1">
             <div class="nilai"><?= number_format($total_kasus, 0, ',', '.') ?></div>
@@ -625,7 +625,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat kuning">
+    <div class="stat kuning" data-tilt>
         <span class="ikon">◷</span>
         <div class="flex-1">
             <div class="nilai"><?= number_format($kasus_terbuka, 0, ',', '.') ?></div>
@@ -634,7 +634,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat merah">
+    <div class="stat merah" data-tilt>
         <span class="ikon">!</span>
         <div class="flex-1">
             <div class="nilai"><?= number_format($kasus_kritis, 0, ',', '.') ?></div>
@@ -643,7 +643,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat hijau">
+    <div class="stat hijau" data-tilt>
         <span class="ikon">▲</span>
         <div class="flex-1">
             <div class="nilai"><?= $rata_progres ?><span class="text-kecil">%</span></div>

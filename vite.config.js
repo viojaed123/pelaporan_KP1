@@ -10,6 +10,9 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    esbuild: {
+        jsx: 'automatic',
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

@@ -49,10 +49,7 @@ export default function Dashboard() {
 
             <div className="baris-kartu-stat">
                 {kartu.map((k) => (
-                    <Link className={`kartu-stat warna-${k.warna}`} to={k.ke} key={k.label}>
-                        <span className="angka">{k.nilai}</span>
-                        <span className="label">{k.label}</span>
-                    </Link>
+                    <KartuStat kartu={k} key={k.label} />
                 ))}
             </div>
 
@@ -140,6 +137,55 @@ function badgeStatus(status) {
     if (status === 'selesai') return 'hijau';
     if (status === 'dikerjakan') return 'kuning';
     return 'biru';
+}
+
+const bisaTilt = typeof window !== 'undefined'
+    && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function KartuStat({ kartu }) {
+    const atur = (e) => {
+        if (!bisaTilt || e.pointerType !== 'mouse') return;
+
+        const kotak = e.currentTarget.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (e.clientX - kotak.left) / kotak.width));
+        const y = Math.max(0, Math.min(1, (e.clientY - kotak.top) / kotak.height));
+
+        e.currentTarget.style.setProperty('--tilt-x', `${((0.5 - y) * 7).toFixed(2)}deg`);
+        e.currentTarget.style.setProperty('--tilt-y', `${((x - 0.5) * 8).toFixed(2)}deg`);
+        e.currentTarget.style.setProperty('--sorot-x', `${(x * 100).toFixed(1)}%`);
+        e.currentTarget.style.setProperty('--sorot-y', `${(y * 100).toFixed(1)}%`);
+    };
+
+    const masuk = (e) => {
+        if (bisaTilt && e.pointerType === 'mouse') {
+            e.currentTarget.classList.add('menunjuk');
+        }
+    };
+
+    const lepas = (e) => {
+        const el = e.currentTarget;
+        el.classList.remove('menunjuk');
+        el.style.setProperty('--tilt-x', '0deg');
+        el.style.setProperty('--tilt-y', '0deg');
+        el.style.setProperty('--sorot-x', '50%');
+        el.style.setProperty('--sorot-y', '50%');
+    };
+
+    return (
+        <Link
+            data-tilt="true"
+            className={`kartu-stat warna-${kartu.warna}`}
+            to={kartu.ke}
+            onPointerEnter={masuk}
+            onPointerMove={atur}
+            onPointerLeave={lepas}
+            onPointerCancel={lepas}
+        >
+            <span className="angka">{kartu.nilai}</span>
+            <span className="label">{kartu.label}</span>
+        </Link>
+    );
 }
 
 function rupiah(nilai) {

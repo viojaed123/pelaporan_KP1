@@ -634,7 +634,7 @@ mulai_halaman([
 </h2>
 
 <section class="grid grid-4">
-    <div class="stat navy">
+    <div class="stat navy" data-tilt>
         <span class="ikon"><?= ikon_sp('pengguna') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $jumlahPengguna['total'] ?></div>
@@ -643,7 +643,7 @@ mulai_halaman([
         </div>
     </div>
 
-    <div class="stat kuning">
+    <div class="stat kuning" data-tilt>
         <span class="ikon"><?= ikon_sp('jam') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $jumlahPengguna['menunggu'] ?></div>
@@ -652,7 +652,7 @@ mulai_halaman([
         </div>
     </div>
 
-    <div class="stat biru">
+    <div class="stat biru" data-tilt>
         <span class="ikon"><?= ikon_sp('dokumen') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $totalLaporan ?></div>
@@ -661,7 +661,7 @@ mulai_halaman([
         </div>
     </div>
 
-    <div class="stat kuning">
+    <div class="stat kuning" data-tilt>
         <span class="ikon"><?= ikon_sp('jam') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $statLaporan['dikirim'] ?></div>
@@ -670,7 +670,7 @@ mulai_halaman([
         </div>
     </div>
 
-    <div class="stat hijau">
+    <div class="stat hijau" data-tilt>
         <span class="ikon"><?= ikon_sp('centang') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $statLaporan['diperiksa'] ?></div>
@@ -679,7 +679,7 @@ mulai_halaman([
         </div>
     </div>
 
-    <div class="stat merah">
+    <div class="stat merah" data-tilt>
         <span class="ikon"><?= ikon_sp('silang') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $statLaporan['perlu_revisi'] ?></div>
@@ -688,7 +688,7 @@ mulai_halaman([
         </div>
     </div>
 
-    <div class="stat biru">
+    <div class="stat biru" data-tilt>
         <span class="ikon"><?= ikon_sp('kegiatan') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $jumlahSrm ?></div>
@@ -697,7 +697,7 @@ mulai_halaman([
         </div>
     </div>
 
-    <div class="stat hijau">
+    <div class="stat hijau" data-tilt>
         <span class="ikon"><?= ikon_sp('koin') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $jumlahCid ?></div>

@@ -4541,3 +4541,69 @@ html[data-tema="gelap"] a.ca-strip:hover { border-left-color: #93c5fd; }
         transition: none;
     }
 }
+
+/* ---------- Kartu statistik 3D (dasbor) ---------------------------- */
+.stat[data-tilt],
+.kartu-stat[data-tilt] {
+    --tilt-x: 0deg;
+    --tilt-y: 0deg;
+    --sorot-x: 50%;
+    --sorot-y: 50%;
+    transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+    transform-style: preserve-3d;
+    transition: transform .5s cubic-bezier(.22,.61,.36,1), box-shadow .5s ease;
+    will-change: transform;
+}
+
+.stat[data-tilt]::before,
+.kartu-stat[data-tilt]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background: radial-gradient(220px circle at var(--sorot-x) var(--sorot-y), rgba(0, 94, 184, .12), rgba(0, 94, 184, 0) 64%);
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+}
+
+html[data-tema="gelap"] .stat[data-tilt]::before,
+html[data-tema="gelap"] .kartu-stat[data-tilt]::before {
+    background: radial-gradient(220px circle at var(--sorot-x) var(--sorot-y), rgba(147, 197, 253, .18), rgba(147, 197, 253, 0) 64%);
+}
+
+.stat[data-tilt] > *,
+.kartu-stat[data-tilt] > * {
+    position: relative;
+    z-index: 1;
+}
+
+.stat[data-tilt]:hover,
+.kartu-stat[data-tilt]:hover {
+    transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(-2px);
+    box-shadow: var(--bayangan);
+}
+
+.stat[data-tilt].menunjuk,
+.kartu-stat[data-tilt].menunjuk {
+    transition-duration: .08s, .3s;
+}
+
+.stat[data-tilt].menunjuk::before,
+.kartu-stat[data-tilt].menunjuk::before {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stat[data-tilt],
+    .kartu-stat[data-tilt] {
+        transform: none;
+        transition: none;
+    }
+
+    .stat[data-tilt]::before,
+    .kartu-stat[data-tilt]::before {
+        display: none;
+    }
+}

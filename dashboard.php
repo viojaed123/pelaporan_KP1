@@ -336,7 +336,7 @@ mulai_halaman($opsi);
 <h2 class="bagian-judul">Ringkasan Laporan</h2>
 
 <section class="grid grid-4">
-    <div class="stat navy">
+    <div class="stat navy" data-tilt>
         <span class="ikon"><?= ikon_sp('dokumen') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $total_laporan ?></div>
@@ -345,7 +345,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat kuning">
+    <div class="stat kuning" data-tilt>
         <span class="ikon"><?= ikon_sp('jam') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $menunggu ?></div>
@@ -354,7 +354,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat hijau">
+    <div class="stat hijau" data-tilt>
         <span class="ikon"><?= ikon_sp('centang') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $diperiksa ?></div>
@@ -363,7 +363,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat biru">
+    <div class="stat biru" data-tilt>
         <span class="ikon"><?= ikon_sp('lonceng') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $jumlah_notifikasi ?></div>
@@ -643,21 +643,21 @@ mulai_halaman($opsi);
     </div>
     <div class="kartu-tubuh">
         <div class="grid grid-3">
-            <div class="stat biru">
+            <div class="stat biru" data-tilt>
                 <span class="ikon"><?= ikon_sp('kesehatan') ?></span>
                 <div class="flex-1">
                     <div class="nilai"><?= (int) $absensi_bulan['sakit'] ?></div>
                     <div class="keterangan">Sakit</div>
                 </div>
             </div>
-            <div class="stat kuning">
+            <div class="stat kuning" data-tilt>
                 <span class="ikon"><?= ikon_sp('tulis') ?></span>
                 <div class="flex-1">
                     <div class="nilai"><?= (int) $absensi_bulan['izin'] ?></div>
                     <div class="keterangan">Izin</div>
                 </div>
             </div>
-            <div class="stat merah">
+            <div class="stat merah" data-tilt>
                 <span class="ikon"><?= ikon_sp('silang') ?></span>
                 <div class="flex-1">
                     <div class="nilai"><?= (int) $absensi_bulan['alpa'] ?></div>

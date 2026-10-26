@@ -449,6 +449,7 @@ function akhiri_halaman(array $opsi = []): void
     }
     ?>
 <script src="assets/js/app.js" defer></script>
+<script src="assets/js/gerak-kartu.js" defer></script>
 <?php if (!$opsi['ringkas']): ?>
 <script>
     // Buka/tutup sidebar pada layar kecil

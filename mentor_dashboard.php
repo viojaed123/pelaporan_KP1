@@ -344,7 +344,7 @@ mulai_halaman($opsi);
 <h2 class="bagian-judul">Ringkasan Laporan</h2>
 
 <section class="grid grid-4">
-    <div class="stat biru">
+    <div class="stat biru" data-tilt>
         <span class="ikon"><?= ikon_sp('dokumen') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $totalLaporan ?></div>
@@ -353,7 +353,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat kuning">
+    <div class="stat kuning" data-tilt>
         <span class="ikon"><?= ikon_sp('jam') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $stat['dikirim'] ?></div>
@@ -362,7 +362,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat hijau">
+    <div class="stat hijau" data-tilt>
         <span class="ikon"><?= ikon_sp('centang') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $stat['diperiksa'] ?></div>
@@ -371,7 +371,7 @@ mulai_halaman($opsi);
         </div>
     </div>
 
-    <div class="stat merah">
+    <div class="stat merah" data-tilt>
         <span class="ikon"><?= ikon_sp('silang') ?></span>
         <div class="flex-1">
             <div class="nilai"><?= (int) $stat['perlu_revisi'] ?></div>

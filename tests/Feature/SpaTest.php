@@ -38,6 +38,9 @@ class SpaTest extends TestCase
          */
         $this->get('/app')->assertOk();
 
+        $konfigurasi = (string) file_get_contents(base_path('vite.config.js'));
+        $this->assertStringContainsString("jsx: 'automatic'", $konfigurasi);
+
         $manifest = public_path('build/manifest.json');
         if (! file_exists($manifest)) {
             $this->markTestSkipped('Bundle Vite belum dibangun (npm run build).');
