@@ -104,7 +104,7 @@ mulai_halaman([
 <div class="grid grid-asisten" style="grid-template-columns:minmax(0,2fr) minmax(280px,1fr);align-items:start;gap:18px">
 
     <!-- ============ Ruang percakapan ============ -->
-    <section class="kartu" style="display:flex;flex-direction:column">
+    <section class="kartu kartu-asisten" style="display:flex;flex-direction:column">
         <div class="kartu-kepala">
             <span class="avatar avatar-kecil" style="background:var(--biru-600);color:#fff">AI</span>
             <div class="flex-1">
@@ -114,7 +114,7 @@ mulai_halaman([
         </div>
 
         <div class="badan" id="asistenBadan" data-sesi="<?= $sesiId ?>"
-             style="height:min(58vh,560px);overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--abu-50)">
+             style="overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--abu-50)">
             <?php if ($riwayat === []): ?>
                 <div class="pesan-chat bot">
                     Halo <strong><?= e($nama) ?></strong>!<br><br>
@@ -128,7 +128,7 @@ mulai_halaman([
             <?php endforeach; endif; ?>
         </div>
 
-        <div class="saran-chat" id="asistenSaran" style="padding:12px 18px 0">
+        <div class="saran-chat" id="asistenSaran" style="padding:12px 18px 10px">
             <?php foreach ($saran as $s): ?>
                 <button type="button" data-saran="<?= e($s) ?>"><?= e($s) ?></button>
             <?php endforeach; ?>

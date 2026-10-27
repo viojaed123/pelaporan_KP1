@@ -387,7 +387,7 @@
         var saran = document.getElementById('asistenSaran');
 
         function gulirBawah() { badan.scrollTop = badan.scrollHeight; }
-        gulirBawah();
+        if (badan.children.length > 1) gulirBawah();
 
         function tambahPesan(peran, teks) {
             var d = document.createElement('div');

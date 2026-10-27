@@ -224,6 +224,55 @@
     /* ==========================================================
        CHATBOT ASISTEN
        ========================================================== */
+    /* ==========================================================
+       SESI PERCAKAPAN (bersama panel mengapung & halaman penuh)
+       Sesi dikirim ke api_chat.php agar AI punya ingatan
+       percakapan dan riwayat halaman tidak terpotong-potong.
+       ========================================================== */
+    var chatSesi = 0;
+
+    function sesiChat(el) {
+        if (chatSesi > 0) return chatSesi;
+        var d = el ? parseInt(el.getAttribute('data-sesi'), 10) : 0;
+        if (d > 0) {
+            chatSesi = d;
+        } else {
+            try { d = parseInt(sessionStorage.getItem('chat_sesi') || '0', 10); } catch (e) { d = 0; }
+            if (d > 0) chatSesi = d;
+        }
+        return chatSesi;
+    }
+
+    function simpanSesiChat(id, el) {
+        id = parseInt(id, 10);
+        if (!(id > 0)) return;
+        chatSesi = id;
+        if (el) el.setAttribute('data-sesi', String(id));
+        try { sessionStorage.setItem('chat_sesi', String(id)); } catch (e) {}
+    }
+
+    /* Tautan sumber jawaban (web search / catatan) di bawah balasan bot. */
+    function sumberChat(el, daftar) {
+        if (!Array.isArray(daftar)) return;
+        var tautan = daftar.filter(function (s) { return s && typeof s.tautan === 'string' && s.tautan; });
+        if (!tautan.length) return;
+        var d = document.createElement('div');
+        d.className = 'sumber-chat';
+        d.appendChild(document.createTextNode('Sumber: '));
+        tautan.forEach(function (s, i) {
+            if (i > 0) d.appendChild(document.createTextNode(' · '));
+            var a = document.createElement('a');
+            a.href = s.tautan;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = s.judul || s.tautan;
+            d.appendChild(a);
+        });
+        d.style.cssText = 'font-size:12px;color:#005EB8;padding:0 10px 10px;word-break:break-word;';
+        el.appendChild(d);
+        el.scrollTop = el.scrollHeight;
+    }
+
     function initChat() {
         var panel = document.getElementById('panelChat');
         if (!panel) return;
@@ -279,7 +328,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': META_CSRF },
                 credentials: 'same-origin',
-                body: JSON.stringify({ pesan: teks })
+                body: JSON.stringify({ pesan: teks, session_id: sesiChat(badan) })
             })
                 .then(function (r) {
                     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -287,8 +336,10 @@
                 })
                 .then(function (data) {
                     mengetik.remove();
+                    if (data && data.session) simpanSesiChat(data.session, badan);
                     if (data && data.balasan) {
                         tambahPesan('bot', data.balasan);
+                        sumberChat(badan, data.sumber);
                     } else {
                         tambahPesan('bot', 'Maaf, saya belum mendapat jawaban. Coba ulangi.');
                     }
@@ -336,7 +387,7 @@
         var saran = document.getElementById('asistenSaran');
 
         function gulirBawah() { badan.scrollTop = badan.scrollHeight; }
-        gulirBawah();
+        if (badan.children.length > 1) gulirBawah();
 
         function tambahPesan(peran, teks) {
             var d = document.createElement('div');
@@ -373,7 +424,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': META_CSRF },
                 credentials: 'same-origin',
-                body: JSON.stringify({ pesan: teks })
+                body: JSON.stringify({ pesan: teks, session_id: sesiChat(badan) })
             })
                 .then(function (r) {
                     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -381,8 +432,10 @@
                 })
                 .then(function (data) {
                     mengetik.remove();
+                    if (data && data.session) simpanSesiChat(data.session, badan);
                     if (data && data.balasan) {
                         tambahPesan('bot', data.balasan);
+                        sumberChat(badan, data.sumber);
                     } else {
                         tambahPesan('bot', 'Maaf, saya belum mendapat jawaban. Coba ulangi.');
                     }

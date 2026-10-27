@@ -2196,6 +2196,9 @@ table.tabel td.text-tengah, table.tabel th.text-tengah { text-align: center; }
 .panel-chat .kaki .kirim:hover { background: var(--biru-600); }
 .panel-chat .kaki .kirim:disabled { background: var(--abu-300); cursor: not-allowed; }
 
+/* Halaman Asisten AI penuh: tinggi ruang percakapan terpisah dari panel. */
+.kartu-asisten .badan { height: min(58vh, 560px); }
+
 /* ---------- 12. Utilitas ---------------------------------------- */
 .d-flex { display: flex; }
 .items-center { align-items: center; }
@@ -2652,6 +2655,40 @@ table.tabel td .angka {
     .isi { padding: 16px; }
     .baris-form, .baris-form-3 { grid-template-columns: 1fr; }
     .grid-asisten { grid-template-columns: 1fr !important; }
+
+    /* Halaman penuh: kartu percakapan mengisi layar, saran digeser
+       mendatar agar kolom input tetap terlihat tanpa perlu menggulir. */
+    .kartu-asisten {
+        height: calc(100vh - 109px);
+        height: calc(100dvh - 109px - env(safe-area-inset-bottom, 0px));
+        min-height: 340px;
+    }
+    .kartu-asisten .badan {
+        flex: 1 1 0;
+        height: auto;
+        min-height: 0;
+    }
+    .kartu-asisten .saran-chat,
+    .kartu-asisten .kaki,
+    .panel-chat .saran-chat,
+    .panel-chat .kaki { flex: 0 0 auto; }
+    .kartu-asisten .saran-chat,
+    .panel-chat .saran-chat {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .kartu-asisten .saran-chat::-webkit-scrollbar,
+    .panel-chat .saran-chat::-webkit-scrollbar { display: none; }
+    .kartu-asisten .saran-chat button,
+    .panel-chat .saran-chat button {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
     .rincian .baris { grid-template-columns: 1fr; gap: 3px; }
     .sembunyi-mobile { display: none !important; }
     .grid-2 { grid-template-columns: 1fr; }
