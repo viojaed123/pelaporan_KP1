@@ -94,6 +94,32 @@ if (sudah_masuk()) {
         </div>
     </section>
 
+    <!-- ================= PROFIL SINGKAT PHR ================= -->
+    <section class="bagian profil-phr" id="profil">
+        <div class="profil-phr-kartu">
+            <div class="profil-phr-lambang"><?= logo_phr() ?></div>
+            <div class="profil-phr-teks">
+                <span class="profil-phr-label">Profil Singkat</span>
+                <h2>Pertamina Hulu Rokan</h2>
+                <p>PHR mengelola operasi hulu migas di Wilayah Kerja Rokan, Riau, dengan komitmen pada operasi yang aman, andal, dan tata kelola yang baik.</p>
+            </div>
+            <dl class="profil-phr-fakta">
+                <div>
+                    <dt>Bidang</dt>
+                    <dd>Hulu migas</dd>
+                </div>
+                <div>
+                    <dt>Wilayah</dt>
+                    <dd>Rokan, Riau</dd>
+                </div>
+                <div>
+                    <dt>Fokus</dt>
+                    <dd>Operasi &amp; tata kelola</dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
     <!-- ================= SOROTAN FITUR ================= -->
     <section class="bagian" id="sorotan">
         <div class="sorotan-grid">
@@ -157,6 +183,7 @@ if (sudah_masuk()) {
             <h3>Keamanan Terjaga</h3>
             <p>CSRF, session aman, proteksi berkas, dan pencatatan audit untuk transparansi.</p>
         </article>
+        </div>
     </section>
 
     <section class="bagian" id="cara-kerja">
@@ -241,6 +268,7 @@ if (sudah_masuk()) {
 
     <footer class="pembuka-bawah">
         <div class="kaki-taut">
+            <a href="#profil">Profil</a>
             <a href="#fitur">Fitur</a>
             <a href="#cara-kerja">Cara Kerja</a>
             <a href="#faq">Tanya Jawab</a>
